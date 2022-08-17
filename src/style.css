@@ -1,0 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap");
+@import "sanitize.css";
+@import "sanitize.css/forms.css";
+@import "./hljs.css";
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #fff;
+  --bg-on: #ddd;
+  --fg: #222;
+  --fg-on: #000;
+  --pre: #222;
+  --pre-dim: #777;
+  --pre-val: #870;
+  --border: #ddd;
+  --shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  --highlight: #3ca877;
+
+  --mono: Noto Sans Mono, monospace;
+  --sans: Noto Sans, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --bg-on: #333;
+    --fg: #aaa;
+    --fg-on: #ddd;
+    --pre: #ccc;
+    --pre-dim: #999;
+    --pre-val: #cb8;
+    --border: #383838;
+    --shadow: none;
+    --highlight: #22863a;
+  }
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  line-height: 1.25;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  #app {
+    overflow: auto;
+  }
+}

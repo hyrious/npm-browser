@@ -1,0 +1,39 @@
+{
+  "name": "@hyrious/npm-browser",
+  "private": true,
+  "description": "Download and view npm package contents in the browser",
+  "repository": "hyrious/npm-browser",
+  "author": "hyrious <hyrious@outlook.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@highlightjs/cdn-assets": "^11.6.0",
+    "idb-keyval": "^6.2.0",
+    "js-untar": "^2.0.0",
+    "modern-normalize": "^1.1.0",
+    "pako": "^2.0.4",
+    "pinia": "^2.0.19",
+    "sanitize.css": "^13.0.0",
+    "vue": "^3.2.37",
+    "vue-i18n": "^9.2.2"
+  },
+  "devDependencies": {
+    "@iconify-json/mdi": "^1.1.30",
+    "@intlify/vite-plugin-vue-i18n": "^6.0.1",
+    "@types/node": "^18.7.6",
+    "@types/pako": "^2.0.0",
+    "@unocss/preset-icons": "^0.45.8",
+    "@vitejs/plugin-vue": "^3.0.3",
+    "highlight.js": "^11.6.0",
+    "sass": "^1.54.4",
+    "unocss": "^0.45.8",
+    "unplugin-auto-import": "^0.11.1",
+    "unplugin-vue-components": "^0.22.4",
+    "vite": "^3.0.8",
+    "vite-plugin-inspect": "^0.6.0"
+  }
+}
