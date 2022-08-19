@@ -7,6 +7,8 @@ import Components from "unplugin-vue-components/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: "",
+
   resolve: {
     alias: {
       "~/": `${path.resolve(__dirname, "src")}/`,
