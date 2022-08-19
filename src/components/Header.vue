@@ -46,6 +46,7 @@ watch(searchText, (name) => {
   }
   showHintOnce.value = false
   packageName.value = ''
+  packageVersion.value = ''
   versions.value = []
   debouncedSearch(name)
 })
@@ -118,6 +119,14 @@ async function loadVersions(name: string, setVersion = '') {
     throw e
   }
 }
+
+async function share() {
+  try {
+    let url = location.href
+    await navigator.clipboard?.writeText(url)
+    alert('Shareable URL has been copied to clipboard.')
+  } catch {}
+}
 </script>
 
 <template>
@@ -146,7 +155,7 @@ async function loadVersions(name: string, setVersion = '') {
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>
     </a>
-    <button title="share">
+    <button title="share" @click="share()">
       <i class="i-mdi-share-variant"></i>
     </button>
   </header>
