@@ -2,7 +2,7 @@
 import { storeToRefs } from "pinia"
 import { wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
-const { packageName, packageVersion } = storeToRefs(useApplicationStore())
+const { packageName, packageVersion, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
 const searchText = ref('')
@@ -11,11 +11,12 @@ const searchResult = ref<{ name: string, description: string }[]>([])
 const versions = ref<string[]>([])
 const highlighted = ref(false)
 
+const DEBOUNCE_SEARCH = 500
 let timer = 0
 function debouncedSearch(str: string) {
   clearTimeout(timer)
   if ((str = str.trim())) {
-    timer = setTimeout(search, 200, str)
+    timer = setTimeout(search, DEBOUNCE_SEARCH, str)
     searching.value = true
     searchResult.value = []
   } else {
@@ -50,6 +51,7 @@ watch(searchText, (name) => {
   packageName.value = ''
   packageVersion.value = ''
   versions.value = []
+  line.value = 0
   debouncedSearch(name)
 })
 
@@ -79,10 +81,11 @@ emitter.on("highlighted", value => {
   highlighted.value = value
 })
 
+const DEBOUNCE_VERSIONS = 500
 let timerVersions = 0
 function debouncedLoadVersions(name: string) {
   clearTimeout(timerVersions)
-  timerVersions = setTimeout(loadVersions, 200, name)
+  timerVersions = setTimeout(loadVersions, DEBOUNCE_VERSIONS, name)
 }
 
 interface NpmInstallData {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { wordwrap } from "../stores/code"
 import { emitter, update } from "../helpers/hljs"
+import { tick } from "@hyrious/utils";
 const app = useApplicationStore()
 
 const pre = ref()
@@ -25,7 +26,7 @@ const HLJS_MAX_LENGTH = 20480
 watchEffect(() => {
   if (code.value && pre.value) {
     if (code.value.length < HLJS_MAX_LENGTH) {
-      update(pre.value, code.value, lang.value)
+      update(pre.value, code.value, lang.value, true)
     } else {
       pre.value.textContent = code.value
       emitter.emit("highlighted", false)
@@ -36,6 +37,43 @@ watchEffect(() => {
 emitter.on('update', () => {
   if (code.value && pre.value) {
     update(pre.value, code.value, lang.value)
+  }
+})
+
+emitter.on("highlighted", highlighted => {
+  if (highlighted && pre.value) {
+    activateLineNumbers(pre.value)
+  }
+})
+
+const activeLine = ref<HTMLElement | null>(null)
+
+function activateLineNumbers(el: HTMLPreElement) {
+  el.querySelectorAll('[data-lineno]').forEach((td_, index) => {
+    const td = td_ as HTMLElement
+    const line = index + 1
+    if (line === app.line) {
+      const tr = td.parentElement as HTMLElement
+      activeLine.value = tr
+      tr.classList.add("active")
+      tick().then(() => {
+        tr.scrollIntoView({ block: "center" })
+      })
+    }
+    td.onclick = function setLineNumber() {
+      const line = parseInt(td.dataset.lineno!)
+      app.line = app.line === line ? 0 : line
+    }
+  })
+}
+
+watchEffect(() => {
+  if (activeLine.value) {
+    activeLine.value.classList.remove("active")
+  }
+  activeLine.value = document.querySelector(`[data-line="${app.line}"]`)
+  if (activeLine.value) {
+    activeLine.value.classList.add("active")
   }
 })
 </script>

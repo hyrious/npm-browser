@@ -62,6 +62,10 @@ label {
   text-overflow: ellipsis;
 }
 
+.selected>label {
+  color: var(--fg-on);
+}
+
 i {
   display: inline-block;
   width: 16px;

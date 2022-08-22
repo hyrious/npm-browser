@@ -18,7 +18,7 @@ const Tasks = new Map<number, (value: string) => void>();
 
 let id = 1;
 
-hljs.addEventListener("message", (ev) => {
+hljs.addEventListener("message", (ev: MessageEvent<Result>) => {
   const { id, value } = ev.data;
   if (Tasks.has(id)) {
     Tasks.get(id)!(value);
@@ -28,14 +28,31 @@ hljs.addEventListener("message", (ev) => {
 
 function noop() {}
 
-export function highlight(code: string, lang?: string) {
+export function highlight(code: string, lang: string, lineno?: boolean) {
   if (!hljs) return new Promise<string>(noop);
   let resolve!: (value: string) => void;
   const task = new Promise<string>((r) => (resolve = r));
   Tasks.set(id, resolve);
   hljs.postMessage(<Payload>{ id, code, lang });
   id++;
-  return task;
+  return lineno ? task.then(applyLineNumbers) : task;
+}
+
+const COMMENT_RE = /<span class="hljs-comment">(.|\n)*?<\/span>/g;
+
+// https://gist.github.com/hackjutsu/0a6338d66f4fd7d338fd0c04f3454394
+function applyLineNumbers(html: string) {
+  html = html.replace(COMMENT_RE, (data) => data.replace(/\r?\n/g, () => `\n<span class="hljs-comment">`));
+  html = html
+    .split(/\r?\n/)
+    .map(
+      (line, index) =>
+        `<tr data-line="${index + 1}">` +
+        `<td class="hljs-line-number" data-lineno="${index + 1}"></td><td>${line}</td>` +
+        `</tr>`
+    )
+    .join("");
+  return `<table class="hljs-code-table">${html}</table>`;
 }
 
 class ActionTask {
@@ -44,8 +61,8 @@ class ActionTask {
   replaceInnerHTML = (html: string) => {
     clearTimeout(this.token);
     if (!this.cancelled) {
-      emitter.emit("highlighted", true);
       this.node.innerHTML = html;
+      emitter.emit("highlighted", true);
     }
   };
   cancel() {
@@ -55,7 +72,7 @@ class ActionTask {
 }
 
 let last: ActionTask | null = null;
-export function update(pre: HTMLPreElement, code: string, lang: string) {
+export function update(pre: HTMLPreElement, code: string, lang: string, lineno?: boolean) {
   emitter.emit("highlighted", false);
   if (last) {
     last.cancel();
@@ -68,7 +85,7 @@ export function update(pre: HTMLPreElement, code: string, lang: string) {
         pre.innerText = code;
       }, 50)
     );
-    highlight(code, lang).then(last.replaceInnerHTML);
+    highlight(code, lang, lineno).then(last.replaceInnerHTML);
   } else {
     pre.innerText = code;
   }

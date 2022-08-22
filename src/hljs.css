@@ -159,3 +159,28 @@
     background-color: #67060c;
   }
 }
+
+/* https://gist.github.com/hackjutsu/0a6338d66f4fd7d338fd0c04f3454394 */
+.hljs-line-number {
+  text-align: right;
+  padding-right: 8px;
+  color: var(--pre-dim);
+  width: 32px;
+  font-size: 12px;
+  font-family: var(--mono);
+  cursor: pointer;
+}
+.hljs-line-number:hover {
+  color: var(--fg-on);
+}
+
+[data-lineno]::before {
+  content: attr(data-lineno);
+}
+
+.hljs-code-table .active {
+  background-color: var(--bg-on);
+}
+.hljs-code-table .active .hljs-line-number {
+  color: var(--fg-on);
+}
