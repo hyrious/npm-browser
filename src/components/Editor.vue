@@ -34,9 +34,9 @@ watchEffect(() => {
   }
 })
 
-emitter.on('update', () => {
+emitter.on('update', (lineno) => {
   if (code.value && pre.value) {
-    update(pre.value, code.value, lang.value)
+    update(pre.value, code.value, lang.value, lineno)
   }
 })
 
