@@ -139,7 +139,7 @@ async function share() {
 
 <template>
   <header>
-    <label for="q">npm i</label>
+    <label for="q">npm&nbsp;i</label>
     <input v-model="searchText" type="text" id="q" placeholder="vue" autocomplete="off" autofocus spellcheck="false"
       :style="{ width: searchText.length + '.25ch' }" />
     <transition name="fade">

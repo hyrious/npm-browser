@@ -78,4 +78,10 @@ ul {
   margin: 0;
   padding: 0 0 0 16px;
 }
+
+@media (max-width: 720px) {
+  li {
+    line-height: 32px;
+  }
+}
 </style>

@@ -12,6 +12,8 @@ const boundSplit = computed(() => {
   return split < 20 ? 20 : split > 80 ? 80 : split;
 })
 
+const showRight = ref(false)
+
 let startPosition = 0
 let startSplit = 0
 
@@ -36,8 +38,8 @@ function dragEnd() {
 </script>
 
 <template>
-  <div ref="container" class="split-pane" :class="{ dragging: state.dragging }" @pointermove="dragMove"
-    @pointerup="dragEnd" @pointerleave="dragEnd">
+  <div ref="container" class="split-pane" :class="{ dragging: state.dragging, 'show-right': showRight }"
+    @pointermove="dragMove" @pointerup="dragEnd" @pointerleave="dragEnd">
     <div class="left" :style="{ width: boundSplit + '%' }">
       <slot name="left"></slot>
       <div class="dragger" @pointerdown.prevent="dragStart"></div>
@@ -45,6 +47,11 @@ function dragEnd() {
     <div class="right" :style="{ width: 100 - boundSplit + '%' }">
       <slot name="right"></slot>
     </div>
+    <button class="toggler" @click="showRight = !showRight">
+      <i class="i-mdi-chevron-left" :class="{ active: showRight }"></i>
+      {{ showRight ? 'Explorer' : 'Code' }}
+      <i class="i-mdi-chevron-right" :class="{ active: !showRight }"></i>
+    </button>
   </div>
 </template>
 
@@ -88,17 +95,40 @@ function dragEnd() {
   cursor: ew-resize;
 }
 
+.toggler {
+  display: none;
+}
+
 @media (max-width: 720px) {
 
   .split-pane {
-    flex-direction: column;
-    height: auto;
+    display: block;
   }
 
   .left,
   .right {
     width: 100% !important;
     height: 100% !important;
+    padding-bottom: 36px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .left {
+    display: block;
+  }
+
+  .right {
+    display: none;
+  }
+
+  .show-right .left {
+    display: none;
+  }
+
+  .show-right .right {
+    display: block;
   }
 
   .left {
@@ -107,6 +137,31 @@ function dragEnd() {
 
   .dragger {
     display: none;
+  }
+
+  .toggler {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 36px;
+    z-index: 200;
+
+    i {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      color: var(--fg);
+      visibility: hidden;
+
+      &.active {
+        visibility: visible;
+      }
+    }
   }
 }
 </style>

@@ -90,12 +90,6 @@ ul {
   padding: 0 16px 40px;
   list-style-type: none;
   overflow-y: auto;
-}
-
-
-@media (max-width: 720px) {
-  ul {
-    padding-bottom: 0;
-  }
+  height: 100%;
 }
 </style>

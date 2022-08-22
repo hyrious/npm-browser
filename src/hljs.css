@@ -165,7 +165,8 @@
   text-align: right;
   padding-right: 8px;
   color: var(--pre-dim);
-  width: 32px;
+  width: 1%; /* this hack makes the table full width, don't know why */
+  min-width: 32px;
   font-size: 12px;
   font-family: var(--mono);
   cursor: pointer;
