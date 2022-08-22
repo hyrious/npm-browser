@@ -112,7 +112,6 @@ async function loadVersions(name: string, setVersion = '') {
     } else {
       packageVersion.value = info.latest
     }
-    path.value = '/package/package.json'
   } catch (e) {
     if (e.name === 'AbortError') return
     statusMessage(e.message)
@@ -226,6 +225,8 @@ header {
 }
 
 .controls {
+  padding-right: 8px;
+
   button {
     padding: 4px 8px;
     border-radius: 4px;

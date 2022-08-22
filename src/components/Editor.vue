@@ -31,7 +31,7 @@ watchEffect(() => {
 
 <template>
   <div class="editor-container">
-    <pre ref="pre" class="hljs" :class="{ wordwrap }">{{ code }}</pre>
+    <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
   </div>
 </template>
 

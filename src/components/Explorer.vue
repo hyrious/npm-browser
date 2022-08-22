@@ -51,6 +51,10 @@ async function fetchPackage(name: string, version: string) {
     files.value = nodes;
     statusMessage('')
     root.value = (construct(nodes.map(e => e.name), path.value).children || [])[0]
+    const selected = path.value.slice(1)
+    if (!nodes.some(e => e.name === selected)) {
+      path.value = '/packages/package.json'
+    }
   } catch (e) {
     if (e.name === "AbortError") return
     statusMessage(e.message)
