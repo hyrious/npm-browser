@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@highlightjs/cdn-assets': ^11.6.0
+  '@hyrious/utils': ^0.0.5
   '@iconify-json/mdi': ^1.1.30
   '@intlify/vite-plugin-vue-i18n': ^6.0.1
   '@types/node': ^18.7.6
@@ -36,6 +37,7 @@ dependencies:
   vue-i18n: 9.2.2_vue@3.2.37
 
 devDependencies:
+  '@hyrious/utils': 0.0.5
   '@iconify-json/mdi': 1.1.30
   '@intlify/vite-plugin-vue-i18n': 6.0.1_vite@3.0.8+vue-i18n@9.2.2
   '@types/node': 18.7.6
@@ -107,6 +109,10 @@ packages:
     resolution: {integrity: sha512-Mod+0LGTetSd0JbLGOHesCP3FLz8T/BOuDitF6stBNmHSLDmds1i4hT02T98Xlj3bGgPCbRsiF2D7i0Nraa+sQ==}
     engines: {node: '>=12.0.0'}
     dev: false
+
+  /@hyrious/utils/0.0.5:
+    resolution: {integrity: sha512-emCWh0JsCfh17qu8Vu92o6Iz142qBUybz56o/AWCPJ9JTbOdUODIhIVBE+kEYmcAigyWqijEti0vYhhkniIXow==}
+    dev: true
 
   /@iconify-json/mdi/1.1.30:
     resolution: {integrity: sha512-mNhZT/14mReJRNDd//cs3oJ2RQq3nBkYj1fcDFr8sgYce4k8Br3CsOC61SIPsdw5rfNBMsXEpfJ4AOry36i0XQ==}

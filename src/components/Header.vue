@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia"
 import { wordwrap } from "../stores/code"
-const { packageName, packageVersion, path } = storeToRefs(useApplicationStore())
+import { emitter } from "../helpers/hljs"
+const { packageName, packageVersion } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
 const searchText = ref('')
 const searching = ref(false)
 const searchResult = ref<{ name: string, description: string }[]>([])
 const versions = ref<string[]>([])
+const highlighted = ref(false)
 
 let timer = 0
 function debouncedSearch(str: string) {
@@ -71,6 +73,10 @@ onMounted(() => {
     searchText.value = packageName.value
     loadVersions(packageName.value, packageVersion.value)
   }
+})
+
+emitter.on("highlighted", value => {
+  highlighted.value = value
 })
 
 let timerVersions = 0
@@ -150,6 +156,7 @@ async function share() {
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
+      <button :class="{ active: highlighted }" @click="emitter.emit('update')">highlight-it</button>
     </div>
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>
@@ -225,7 +232,9 @@ header {
 }
 
 .controls {
-  padding-right: 8px;
+  padding-right: 4px;
+  display: inline-flex;
+  gap: 8px;
 
   button {
     padding: 4px 8px;

@@ -1,4 +1,5 @@
 import HljsWorker from "./hljs.worker?worker";
+import { observable } from "@hyrious/utils";
 
 const hljs = new HljsWorker();
 
@@ -43,6 +44,7 @@ class ActionTask {
   replaceInnerHTML = (html: string) => {
     clearTimeout(this.token);
     if (!this.cancelled) {
+      emitter.emit("highlighted", true);
       this.node.innerHTML = html;
     }
   };
@@ -54,6 +56,7 @@ class ActionTask {
 
 let last: ActionTask | null = null;
 export function update(pre: HTMLPreElement, code: string, lang: string) {
+  emitter.emit("highlighted", false);
   if (last) {
     last.cancel();
     last = null;
@@ -70,3 +73,5 @@ export function update(pre: HTMLPreElement, code: string, lang: string) {
     pre.innerText = code;
   }
 }
+
+export const emitter = observable({ update: void 0, highlighted: true });

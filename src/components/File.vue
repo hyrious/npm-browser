@@ -29,7 +29,7 @@ function select() {
 <template>
   <li :class="{ folder, file: !folder, collapsed }">
     <div @click="select()" :class="{ selected }">
-      <i v-if="folder" class="i-mdi-chevron-right"></i>
+      <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <i v-else class="i-mdi-file"></i>
       <label>{{ name }}</label>
     </div>

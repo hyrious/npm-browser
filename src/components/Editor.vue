@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { wordwrap } from "../stores/code"
-import { update } from "../helpers/hljs"
+import { emitter, update } from "../helpers/hljs"
 const app = useApplicationStore()
 
 const pre = ref()
@@ -23,7 +23,18 @@ const lang = computed(() => {
 const HLJS_MAX_LENGTH = 20480
 
 watchEffect(() => {
-  if (code.value && pre.value && code.value.length < HLJS_MAX_LENGTH) {
+  if (code.value && pre.value) {
+    if (code.value.length < HLJS_MAX_LENGTH) {
+      update(pre.value, code.value, lang.value)
+    } else {
+      pre.value.textContent = code.value
+      emitter.emit("highlighted", false)
+    }
+  }
+})
+
+emitter.on('update', () => {
+  if (code.value && pre.value) {
     update(pre.value, code.value, lang.value)
   }
 })
