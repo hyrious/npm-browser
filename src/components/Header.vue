@@ -2,7 +2,7 @@
 import { storeToRefs } from "pinia"
 import { wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
-const { packageName, packageVersion, line } = storeToRefs(useApplicationStore())
+const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
 const searchText = ref('')
@@ -10,6 +10,7 @@ const searching = ref(false)
 const searchResult = ref<{ name: string, description: string }[]>([])
 const versions = ref<string[]>([])
 const highlighted = ref(false)
+const showDiff = ref(false)
 
 const DEBOUNCE_SEARCH = 500
 let timer = 0
@@ -115,7 +116,6 @@ async function loadVersions(name: string, setVersion = '') {
       versions: Object.keys(data.versions),
     }))
     versions.value = info.versions.reverse()
-    // TODO: use semver to better match version
     if (setVersion && info.versions.some(v => v === setVersion)) {
       packageVersion.value = setVersion
     } else {
@@ -143,13 +143,30 @@ async function npmInstall() {
     alert('Install command has been copied to clipboard.')
   } catch {}
 }
+
+function diff(ev: MouseEvent) {
+  const el = ev.target as HTMLElement
+  if (el && el.dataset.value) {
+    const name = packageName.value
+    const from = el.dataset.value
+    const to = packageVersion.value
+    const subpath = path.value.replace(/^\/package\b/, '')
+    const url = new URL('https://hyrious.me/tool/diff-npm.html')
+    url.searchParams.set('a', `${name}@${from}${subpath}`)
+    url.searchParams.set('b', `${name}@${to}${subpath}`)
+    url.searchParams.set('s', '1')
+    url.searchParams.set('f', 'l')
+    showDiff.value = false
+    window.open(url.toString(), '_blank')
+  }
+}
 </script>
 
 <template>
   <header>
     <label for="q">npm&nbsp;i</label>
-    <input v-model="searchText" type="text" id="q" placeholder="vue" autocomplete="off" autofocus spellcheck="false"
-      :style="{ width: searchText.length + '.25ch' }" />
+    <input v-model="searchText" type="text" id="q" title="package name" placeholder="vue" autocomplete="off" autofocus
+      spellcheck="false" :style="{ width: searchText.length + '.5ch' }" />
     <transition name="fade">
       <span v-if="showHintOnce">
         <i class="i-mdi-arrow-left"></i>
@@ -157,16 +174,29 @@ async function npmInstall() {
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
-    <select v-model="packageVersion" v-show="versions.length" id="v" :style="{ width: packageVersion.length + '.5ch' }">
+    <select v-model="packageVersion" v-show="versions.length" id="v" title="package version"
+      :style="{ width: packageVersion.length + '.5ch' }">
       <option v-for="v in versions" :value="v">{{ v }}</option>
     </select>
     <span v-show="packageName && !versions.length">
       <i class="i-mdi-loading"></i>
       <span>loading&hellip;</span>
     </span>
-    <button v-show="packageName && packageVersion" @click="npmInstall()">
+    <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
+    <button v-show="packageName && packageVersion && path" title="diff with other version"
+      @click="showDiff = !showDiff">
+      <i class="i-mdi-file-compare"></i>
+    </button>
+    <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
+      @click="diff($event)">
+      <button v-for="v in versions" :data-value="v">
+        <span :data-value="v">{{ packageVersion }}</span>
+        <i class="i-mdi-arrow-left" :data-value="v"></i>
+        <span :data-value="v">{{ v }}</span>
+      </button>
+    </aside>
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
@@ -272,7 +302,7 @@ header {
 }
 
 label[for="q"] {
-  padding-right: 1ch;
+  padding-right: 0.75ch;
 }
 
 input {
@@ -280,8 +310,13 @@ input {
   padding-right: 0;
   border: 0;
   outline: 0;
-  min-width: 3.25ch;
+  min-width: 3.5ch;
+  padding: 0 0.25ch;
   color: var(--fg-on);
+
+  &:focus-visible {
+    background-color: var(--bg-on);
+  }
 }
 
 select {
@@ -365,6 +400,27 @@ aside {
     align-items: center;
     gap: 8px;
     font-size: 14px;
+  }
+}
+
+.diff-versions {
+  display: flex;
+  flex-flow: column nowrap;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  i {
+    width: 16px;
+    height: 16px;
+  }
+
+  >span,
+  >i {
+    pointer-events: none;
   }
 }
 

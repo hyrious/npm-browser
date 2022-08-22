@@ -31,6 +31,8 @@ watchEffect(() => {
       pre.value.textContent = code.value
       emitter.emit("highlighted", false)
     }
+  } else if (pre.value) {
+    pre.value.textContent = ''
   }
 })
 
@@ -81,12 +83,14 @@ watchEffect(() => {
 <template>
   <div class="editor-container">
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
+    <span v-if="!code" class="tip">Select a file to view its source code.</span>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .editor-container {
   height: 100%;
+  position: relative;
 }
 
 pre {
@@ -99,5 +103,13 @@ pre {
 
 .wordwrap {
   white-space: pre-wrap;
+}
+
+.tip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--pre-dim);
 }
 </style>
