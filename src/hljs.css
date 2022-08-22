@@ -179,6 +179,9 @@
   content: attr(data-lineno);
 }
 
+.hljs-code-table {
+  font-family: var(--mono);
+}
 .hljs-code-table .active {
   background-color: var(--bg-on);
 }
