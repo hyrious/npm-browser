@@ -135,6 +135,14 @@ async function share() {
     alert('Shareable URL has been copied to clipboard.')
   } catch {}
 }
+
+async function npmInstall() {
+  try {
+    let text = `npm i ${packageName.value}@${packageVersion.value}`
+    await navigator.clipboard?.writeText(text)
+    alert('Install command has been copied to clipboard.')
+  } catch {}
+}
 </script>
 
 <template>
@@ -149,13 +157,16 @@ async function share() {
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
-    <select v-model="packageVersion" v-show="versions.length" id="v">
+    <select v-model="packageVersion" v-show="versions.length" id="v" :style="{ width: packageVersion.length + '.5ch' }">
       <option v-for="v in versions" :value="v">{{ v }}</option>
     </select>
     <span v-show="packageName && !versions.length">
       <i class="i-mdi-loading"></i>
       <span>loading&hellip;</span>
     </span>
+    <button v-show="packageName && packageVersion" @click="npmInstall()">
+      <i class="i-mdi-content-copy"></i>
+    </button>
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
@@ -276,7 +287,7 @@ input {
 select {
   border: 0;
   outline: 0;
-  padding-left: 0.25ch;
+  padding: 0 0.25ch;
   background: transparent;
   color: var(--fg-on);
   cursor: pointer;
