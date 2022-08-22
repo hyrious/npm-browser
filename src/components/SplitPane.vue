@@ -109,7 +109,7 @@ function dragEnd() {
   .right {
     width: 100% !important;
     height: 100% !important;
-    padding-bottom: 36px;
+    padding-bottom: 45px;
     position: absolute;
     top: 0;
     left: 0;
@@ -148,8 +148,9 @@ function dragEnd() {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 36px;
+    height: 45px;
     z-index: 200;
+    border: 1px solid var(--border);
 
     i {
       display: inline-block;
