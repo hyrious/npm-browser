@@ -41,7 +41,8 @@ body,
   height: 100%;
 }
 
-body {
+body,
+option {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--sans);

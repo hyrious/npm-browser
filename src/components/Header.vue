@@ -411,6 +411,10 @@ aside {
     display: flex;
     align-items: center;
     gap: 4px;
+
+    &:hover {
+      background-color: var(--bg-on);
+    }
   }
 
   i {
