@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia"
-import { wordwrap } from "../stores/code"
+import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
@@ -11,6 +11,26 @@ const searchResult = ref<{ name: string, description: string }[]>([])
 const versions = ref<string[]>([])
 const highlighted = ref(false)
 const showDiff = ref(false)
+const showFullTextSearch = ref(false)
+const fullTextSearchText = ref("")
+const searchingFullText = ref(false)
+type Line = { path: string, line: number, text: string }
+const fullTextSearchResult = ref<Line[] | null>(null)
+type Block = { path: string, lines: Line[] }
+const fullTextSearchResultPretty = computed(() => {
+  let current: Block | null = null
+  const result: Block[] = []
+  if (!fullTextSearchResult.value) return result
+  for (const row of fullTextSearchResult.value) {
+    if (!current || current.path !== row.path) {
+      current = { path: row.path, lines: [row] }
+      result.push(current)
+    } else {
+      current.lines.push(row)
+    }
+  }
+  return result
+})
 
 const DEBOUNCE_SEARCH = 500
 let timer = 0
@@ -160,12 +180,51 @@ function diff(ev: MouseEvent) {
     window.open(url.toString(), '_blank')
   }
 }
+
+const TEXT_EXTS = ['.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.less', '.html', '.md', '.json', '.yaml', '.yml', '.xml', '.svg', '.txt']
+async function fullTextSearch(search?: string) {
+  if (!search) {
+    fullTextSearchText.value = ''
+    fullTextSearchResult.value = null
+    const show = showFullTextSearch.value = !showFullTextSearch.value
+    return show && nextTick(() => {
+      const searchInput = document.querySelector('#s')
+      searchInput && (searchInput as HTMLElement).focus()
+    })
+  }
+
+  searchingFullText.value = true
+  const result: Line[] = []
+  const decoder = new TextDecoder()
+  for (const file of files.value) {
+    // skip minified files
+    if (file.name.includes('.min.')) continue
+    // skip binary files
+    if (!TEXT_EXTS.some(ext => file.name.endsWith(ext))) continue
+
+    const path = file.name.replace(/^package\//, '')
+    const text = decoder.decode(file.buffer)
+    text.split(/\r?\n/).forEach((line, i) => {
+      if (line.includes(fullTextSearchText.value)) {
+        result.push({ path, line: i + 1, text: line })
+      }
+    })
+  }
+  fullTextSearchResult.value = result
+
+  searchingFullText.value = false
+}
+
+function jump(location: { path: string; line: number }) {
+  path.value = '/package/' + location.path // TODO: will break on @types/react
+  line.value = location.line
+}
 </script>
 
 <template>
   <header>
     <label for="q">npm&nbsp;i</label>
-    <input v-model="searchText" type="text" id="q" title="package name" placeholder="vue" autocomplete="off" autofocus
+    <input v-model="searchText" id="q" title="package name" placeholder="vue" autocomplete="off" autofocus
       spellcheck="false" :style="{ width: searchText.length + '.5ch' }" />
     <transition name="fade">
       <span v-if="showHintOnce">
@@ -196,6 +255,27 @@ function diff(ev: MouseEvent) {
         <i class="i-mdi-arrow-left" :data-value="v"></i>
         <span :data-value="v">{{ v }}</span>
       </button>
+    </aside>
+    <button v-show="files.length" title="search from the whole package" @click="fullTextSearch()">
+      <i class="i-mdi-search"></i>
+    </button>
+    <aside v-if="showFullTextSearch" class="full-text-search">
+      <div class="row">
+        <label for="s">Search:</label>
+        <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
+          spellcheck="false">
+        <button :disabled="searchingFullText" @click="fullTextSearch(fullTextSearchText)">
+          <i v-show="searchingFullText" class="i-mdi-loading"></i>
+          <span v-show="!searchingFullText">GO</span>
+        </button>
+      </div>
+      <output>
+        <template v-for="block in fullTextSearchResultPretty">
+          <h4>{{ block.path }}</h4>
+          <button v-for="line in block.lines" @click="jump(line)">{{ line.line }}:{{ line.text }}</button>
+        </template>
+        <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
+      </output>
     </aside>
     <span class="splitter"></span>
     <div class="controls">
@@ -425,6 +505,61 @@ aside {
   >span,
   >i {
     pointer-events: none;
+  }
+}
+
+.full-text-search {
+  padding: 8px;
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    label {
+      font-size: 14px;
+    }
+
+    input {
+      padding: 2px 4px;
+      border: revert;
+      background: revert;
+      font-size: 14px;
+    }
+
+    button {
+      appearance: revert;
+      padding: revert;
+      border: revert;
+      background: revert;
+    }
+  }
+
+  output {
+    display: block;
+    font-size: 14px;
+
+    h4 {
+      margin: 4px 0 0;
+      font-weight: normal;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 0;
+      color: var(--pre);
+      text-align: left;
+
+      &:hover {
+        color: var(--fg-on);
+        font-weight: bold;
+      }
+    }
+
+    p {
+      margin: 8px 0 0;
+    }
   }
 }
 
