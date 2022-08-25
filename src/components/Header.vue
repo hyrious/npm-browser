@@ -215,9 +215,14 @@ async function fullTextSearch(search?: string) {
   searchingFullText.value = false
 }
 
-function jump(location: { path: string; line: number }) {
+async function jump(location: { path: string; line: number }) {
   path.value = '/package/' + location.path // TODO: will break on @types/react
   line.value = location.line
+  await nextTick()
+  const activeLine = document.querySelector('[data-line].active')
+  if (activeLine) {
+    activeLine.scrollIntoView({ block: 'center' })
+  }
 }
 </script>
 
@@ -272,7 +277,7 @@ function jump(location: { path: string; line: number }) {
       <output>
         <template v-for="block in fullTextSearchResultPretty">
           <h4>{{ block.path }}</h4>
-          <button v-for="line in block.lines" @click="jump(line)">{{ line.line }}:{{ line.text }}</button>
+          <button v-for="line in block.lines" @click="jump(line)">{{ line.line }}: {{ line.text }}</button>
         </template>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
@@ -540,20 +545,25 @@ aside {
     font-size: 14px;
 
     h4 {
-      margin: 4px 0 0;
+      margin: 8px 0 0;
+      border-bottom: 1px solid var(--border);
       font-weight: normal;
     }
 
     button {
       display: block;
       width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       padding: 0;
-      color: var(--pre);
+      color: var(--fg);
       text-align: left;
+      line-height: 1.5;
 
       &:hover {
         color: var(--fg-on);
-        font-weight: bold;
+        background: var(--bg-on);
       }
     }
 
