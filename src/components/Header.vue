@@ -31,6 +31,7 @@ const fullTextSearchResultPretty = computed(() => {
   }
   return result
 })
+const fullTextSearchLineNumberWidth = ref(0)
 
 const DEBOUNCE_SEARCH = 500
 let timer = 0
@@ -184,8 +185,6 @@ function diff(ev: MouseEvent) {
 const TEXT_EXTS = ['.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.less', '.html', '.md', '.json', '.yaml', '.yml', '.xml', '.svg', '.txt']
 async function fullTextSearch(search?: string) {
   if (!search) {
-    fullTextSearchText.value = ''
-    fullTextSearchResult.value = null
     const show = showFullTextSearch.value = !showFullTextSearch.value
     return show && nextTick(() => {
       const searchInput = document.querySelector('#s')
@@ -196,6 +195,7 @@ async function fullTextSearch(search?: string) {
   searchingFullText.value = true
   const result: Line[] = []
   const decoder = new TextDecoder()
+  let maxWidth = 0
   for (const file of files.value) {
     // skip minified files
     if (file.name.includes('.min.')) continue
@@ -206,10 +206,12 @@ async function fullTextSearch(search?: string) {
     const text = decoder.decode(file.buffer)
     text.split(/\r?\n/).forEach((line, i) => {
       if (line.includes(fullTextSearchText.value)) {
+        maxWidth = Math.max(maxWidth, `${i + 1}`.length)
         result.push({ path, line: i + 1, text: line })
       }
     })
   }
+  fullTextSearchLineNumberWidth.value = maxWidth
   fullTextSearchResult.value = result
 
   searchingFullText.value = false
@@ -268,7 +270,7 @@ async function jump(location: { path: string; line: number }) {
       <div class="row">
         <label for="s">Search:</label>
         <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
-          spellcheck="false">
+          spellcheck="false" @change="fullTextSearch(fullTextSearchText)">
         <button :disabled="searchingFullText" @click="fullTextSearch(fullTextSearchText)">
           <i v-show="searchingFullText" class="i-mdi-loading"></i>
           <span v-show="!searchingFullText">GO</span>
@@ -276,8 +278,10 @@ async function jump(location: { path: string; line: number }) {
       </div>
       <output>
         <template v-for="block in fullTextSearchResultPretty">
-          <h4>{{ block.path }}</h4>
-          <button v-for="line in block.lines" @click="jump(line)">{{ line.line }}: {{ line.text }}</button>
+          <h4><i class="i-mdi-file"></i><span>{{ block.path }}</span></h4>
+          <button v-for="line in block.lines" @click="jump(line)">{{
+              String(line.line).padStart(fullTextSearchLineNumberWidth)
+          }}: {{ line.text }}</button>
         </template>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
@@ -546,14 +550,26 @@ aside {
 
     h4 {
       margin: 8px 0 0;
+      line-height: 24px;
+      border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       font-weight: normal;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--fg-on);
+      font-family: var(--sans);
+
+      i {
+        width: 16px;
+        height: 16px;
+      }
     }
 
     button {
       display: block;
       width: 100%;
-      white-space: nowrap;
+      white-space: pre;
       overflow: hidden;
       text-overflow: ellipsis;
       padding: 0;
