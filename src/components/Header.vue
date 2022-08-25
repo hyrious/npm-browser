@@ -5,6 +5,7 @@ import { emitter } from "../helpers/hljs"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
+const searchInput = ref()
 const searchText = ref('')
 const searching = ref(false)
 const searchResult = ref<{ name: string, description: string }[]>([])
@@ -97,6 +98,12 @@ onMounted(() => {
     searchText.value = packageName.value
     loadVersions(packageName.value, packageVersion.value)
   }
+
+  document.addEventListener('keyup', ev => {
+    if ((ev.key === '/' || ev.key === 's') && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
+      (searchInput.value as HTMLInputElement).focus()
+    }
+  })
 })
 
 emitter.on("highlighted", value => {
@@ -184,7 +191,7 @@ function diff(ev: MouseEvent) {
 
 const TEXT_EXTS = ['.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.less', '.html', '.md', '.json', '.yaml', '.yml', '.xml', '.svg', '.txt']
 async function fullTextSearch(search?: string) {
-  if (!search) {
+  if (search === undefined) {
     const show = showFullTextSearch.value = !showFullTextSearch.value
     return show && nextTick(() => {
       const searchInput = document.querySelector('#s')
@@ -192,10 +199,18 @@ async function fullTextSearch(search?: string) {
     })
   }
 
+  if (search === "") {
+    fullTextSearchResult.value = null
+    return
+  }
+
   searchingFullText.value = true
   const result: Line[] = []
   const decoder = new TextDecoder()
   let maxWidth = 0
+  // ref: https://github.com/frejs/fre/blob/master/src/schedule.ts
+  const threshold = 5
+  let deadline = 0
   for (const file of files.value) {
     // skip minified files
     if (file.name.includes('.min.')) continue
@@ -210,6 +225,13 @@ async function fullTextSearch(search?: string) {
         result.push({ path, line: i + 1, text: line })
       }
     })
+
+    let now = performance.now()
+    if (now >= deadline) {
+      deadline = now + threshold
+      fullTextSearchResult.value = result.slice()
+      await new Promise(r => requestAnimationFrame(r))
+    }
   }
   fullTextSearchLineNumberWidth.value = maxWidth
   fullTextSearchResult.value = result
@@ -226,17 +248,25 @@ async function jump(location: { path: string; line: number }) {
     activeLine.scrollIntoView({ block: 'center' })
   }
 }
+
+function toggleBlock(ev: MouseEvent) {
+  const el = ev.target as HTMLButtonElement
+  if (el.classList.contains('search-result-heading')) {
+    el.classList.toggle('collapsed')
+  }
+}
 </script>
 
 <template>
   <header>
     <label for="q">npm&nbsp;i</label>
-    <input v-model="searchText" id="q" title="package name" placeholder="vue" autocomplete="off" autofocus
-      spellcheck="false" :style="{ width: searchText.length + '.5ch' }" />
+    <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
+      autofocus spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }" />
     <transition name="fade">
       <span v-if="showHintOnce">
-        <i class="i-mdi-arrow-left"></i>
+        <i class="i-mdi-arrow-left-thin"></i>
         <em class="hint">Enter package name here</em>
+        <span>(press <kbd>s</kbd> to focus input)</span>
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
@@ -251,7 +281,7 @@ async function jump(location: { path: string; line: number }) {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button v-show="packageName && packageVersion && path" title="diff with other version"
+    <button v-show="packageName && packageVersion && path" :class="{ active: showDiff }" title="diff with other version"
       @click="showDiff = !showDiff">
       <i class="i-mdi-file-compare"></i>
     </button>
@@ -263,7 +293,8 @@ async function jump(location: { path: string; line: number }) {
         <span :data-value="v">{{ v }}</span>
       </button>
     </aside>
-    <button v-show="files.length" title="search from the whole package" @click="fullTextSearch()">
+    <button v-show="files.length" title="search from the whole package" :class="{ active: showFullTextSearch }"
+      @click="fullTextSearch()">
       <i class="i-mdi-search"></i>
     </button>
     <aside v-if="showFullTextSearch" class="full-text-search">
@@ -277,12 +308,13 @@ async function jump(location: { path: string; line: number }) {
         </button>
       </div>
       <output>
-        <template v-for="block in fullTextSearchResultPretty">
-          <h4><i class="i-mdi-file"></i><span>{{ block.path }}</span></h4>
-          <button v-for="line in block.lines" @click="jump(line)">{{
+        <div class="search-result-block" v-for="block in fullTextSearchResultPretty">
+          <h4><i class="i-mdi-file"></i><button class="search-result-heading" @click="toggleBlock($event)">{{ block.path
+          }}</button></h4>
+          <button class="search-result-line" v-for="line in block.lines" :title="line.text" @click="jump(line)">{{
               String(line.line).padStart(fullTextSearchLineNumberWidth)
           }}: {{ line.text }}</button>
-        </template>
+        </div>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
     </aside>
@@ -328,6 +360,7 @@ header {
   font-family: var(--mono);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow);
+  z-index: 200;
 
   >span {
     display: inline-flex;
@@ -341,7 +374,6 @@ header {
   .btn,
   button {
     appearance: none;
-    padding: 0;
     border: 0;
     text-decoration: none;
     color: var(--fg);
@@ -350,8 +382,13 @@ header {
     padding: 4px 4px 4px 12px;
     cursor: pointer;
 
-    &:hover {
+    &:hover,
+    &.active {
       color: var(--fg-on);
+    }
+
+    &:disabled {
+      cursor: wait;
     }
   }
 }
@@ -363,6 +400,21 @@ header {
 .hint {
   font-family: var(--sans);
   color: var(--fg-on);
+
+  +span {
+    font-family: var(--sans);
+    color: var(--fg);
+    padding-left: 4px;
+
+    kbd {
+      font-style: normal;
+      background: var(--bg-on);
+      margin-left: 2px;
+      padding: 0 2px;
+      border-radius: 2px;
+      border-bottom: 2px solid var(--border);
+    }
+  }
 }
 
 .controls {
@@ -402,9 +454,16 @@ input {
   min-width: 3.5ch;
   padding: 0 0.25ch;
   color: var(--fg-on);
+  text-decoration: underline dashed;
+  text-underline-position: under;
 
   &:focus-visible {
     background-color: var(--bg-on);
+    text-decoration: none;
+  }
+
+  &.inputting {
+    text-decoration: none;
   }
 }
 
@@ -500,6 +559,7 @@ aside {
     display: flex;
     align-items: center;
     gap: 4px;
+    padding: 4px 12px;
 
     &:hover {
       background-color: var(--bg-on);
@@ -518,12 +578,11 @@ aside {
 }
 
 .full-text-search {
-  padding: 8px;
-
   .row {
     display: flex;
     align-items: center;
     gap: 4px;
+    padding: 8px;
 
     label {
       font-size: 14px;
@@ -541,6 +600,9 @@ aside {
       padding: revert;
       border: revert;
       background: revert;
+      font-family: var(--sans);
+      color: var(--fg-on);
+      font-size: 14px;
     }
   }
 
@@ -549,10 +611,14 @@ aside {
     font-size: 14px;
 
     h4 {
-      margin: 8px 0 0;
+      position: sticky;
+      top: -1px;
+      margin: 0;
+      padding: 0 8px 1px;
       line-height: 24px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      background: var(--bg);
       font-weight: normal;
       display: flex;
       align-items: center;
@@ -564,15 +630,29 @@ aside {
         width: 16px;
         height: 16px;
       }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 0;
+
+        &:hover {
+          background: var(--bg);
+        }
+      }
+
+      &:has(.collapsed) {
+        border-bottom: 0;
+      }
     }
 
     button {
       display: block;
       width: 100%;
+      padding: 0 4px;
       white-space: pre;
       overflow: hidden;
       text-overflow: ellipsis;
-      padding: 0;
       color: var(--fg);
       text-align: left;
       line-height: 1.5;
@@ -583,8 +663,13 @@ aside {
       }
     }
 
+    h4:has(.collapsed)~button {
+      display: none;
+    }
+
     p {
-      margin: 8px 0 0;
+      margin: 0;
+      padding: 4px 8px 8px;
     }
   }
 }
