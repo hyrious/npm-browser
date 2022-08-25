@@ -99,11 +99,18 @@ onMounted(() => {
     loadVersions(packageName.value, packageVersion.value)
   }
 
-  document.addEventListener('keyup', ev => {
-    if ((ev.key === '/' || ev.key === 's') && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
-      (searchInput.value as HTMLInputElement).focus()
+  function focusSearchInput(ev: KeyboardEvent) {
+    // @ts-ignore
+    if (ev.target === this) {
+      if ((ev.key === '/' || ev.key === 's') && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
+        (searchInput.value as HTMLInputElement).focus()
+      }
     }
-  })
+  }
+  document.body.addEventListener('keyup', focusSearchInput)
+  return () => {
+    document.body.removeEventListener('keyup', focusSearchInput)
+  }
 })
 
 emitter.on("highlighted", value => {
