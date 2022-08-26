@@ -7,22 +7,28 @@ export const useApplicationStore = defineStore("app", () => {
   const path = ref("");
   const line = ref(0);
 
-  const search = new URLSearchParams(location.search);
-  const query = parse(search.get("q") || location.hash.slice(1));
-  if (query) {
-    packageName.value = query.name;
-    packageVersion.value = query.version;
-    path.value = query.path;
-    line.value = query.line;
-  }
+  const fromQuery = () => {
+    const search = new URLSearchParams(location.search);
+    const query = parse(search.get("q") || location.hash.slice(1));
+    if (query) {
+      packageName.value = query.name;
+      packageVersion.value = query.version;
+      path.value = query.path;
+      line.value = query.line;
+    }
+    return search;
+  };
+
+  const search = fromQuery();
 
   watchEffect(() => {
     let query = packageName.value;
     if (packageVersion.value) query += `@${packageVersion.value}`;
     if (path.value) query += path.value;
     if (line.value) query += `:${line.value}`;
-    if (query) {
+    if (query && search.get("q") !== query) {
       search.set("q", query);
+      // TODO: if $code has changed because of selecting file, push history
       history.replaceState(null, "", "?" + search.toString());
     }
   });
