@@ -1,0 +1,4 @@
+{
+  // Note: use "Enable (workspace)" to prevent polluting other projects.
+  "recommendations": ["Vue.volar"]
+}

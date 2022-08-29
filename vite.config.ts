@@ -1,9 +1,11 @@
-import VueI18n from "@intlify/vite-plugin-vue-i18n";
-import Vue from "@vitejs/plugin-vue";
 import path from "path";
+
+import Vue from "@vitejs/plugin-vue";
 import Unocss from "unocss/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
+import VueI18n from "@intlify/vite-plugin-vue-i18n";
+
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -21,9 +23,9 @@ export default defineConfig({
     Unocss(),
 
     AutoImport({
-      imports: ["vue", "vue-i18n", "vue/macros"],
+      imports: ["vue"],
+      dirs: ["src/composables"],
       dts: "src/auto-imports.d.ts",
-      dirs: ["src/stores"],
       vueTemplate: true,
     }),
 
@@ -34,7 +36,7 @@ export default defineConfig({
     VueI18n({
       runtimeOnly: true,
       compositionOnly: true,
-      include: [path.resolve(__dirname, "locales/**")],
+      include: [path.resolve(__dirname, "src/locales/**")],
     }),
   ],
 
@@ -42,7 +44,7 @@ export default defineConfig({
     sourcemap: true,
   },
 
-  ssr: {
-    noExternal: [/vue-i18n/],
+  esbuild: {
+    legalComments: "none",
   },
 });

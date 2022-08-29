@@ -8,11 +8,6 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     App: typeof import('./components/App.vue')['default']
-    Editor: typeof import('./components/Editor.vue')['default']
-    Explorer: typeof import('./components/Explorer.vue')['default']
-    File: typeof import('./components/File.vue')['default']
-    Footer: typeof import('./components/Footer.vue')['default']
-    Header: typeof import('./components/Header.vue')['default']
-    SplitPane: typeof import('./components/SplitPane.vue')['default']
+    FileIcon: typeof import('./components/FileIcon.vue')['default']
   }
 }

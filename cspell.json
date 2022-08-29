@@ -1,3 +1,21 @@
 {
-  "words": ["intlify", "pako", "pinia", "unocss", "untar"]
+  "words": [
+    "argb",
+    "composables",
+    "esbuild",
+    "filenamify",
+    "highlightjs",
+    "hyrious",
+    "iconify",
+    "intlify",
+    "keyval",
+    "Noto",
+    "pako",
+    "pinia",
+    "truegray",
+    "unocss",
+    "unplugin",
+    "untar",
+    "wopjs"
+  ]
 }

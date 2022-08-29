@@ -10,10 +10,13 @@ declare module "js-untar" {
   export interface File {
     name: string;
     buffer: ArrayBuffer;
+    size: number; // equal to buffer.byteLength
   }
-  export default function untar(buffer: ArrayBuffer): Promise<File[]> & {
-    progress(callback: (file: File) => void): Promise<File[]>;
-  };
+  interface ProgressivePromise<T> extends Promise<T> {
+    progress(callback: (file: File) => void): this;
+  }
+  function untar(buffer: ArrayBuffer): ProgressivePromise<File[]>;
+  export default untar;
 }
 
 declare module "@highlightjs/cdn-assets/es/highlight.js" {

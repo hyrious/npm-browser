@@ -7,11 +7,13 @@
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "lib": ["esnext", "dom"],
-    "isolatedModules": true,
-    "skipLibCheck": true,
     "jsx": "preserve",
+    "lib": ["esnext", "dom"],
     "types": [],
-    "useUnknownInCatchVariables": false
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false,
+    "paths": {
+      "~/*": ["./src/*"]
+    }
   }
 }

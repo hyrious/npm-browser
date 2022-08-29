@@ -1,0 +1,67 @@
+@import "sanitize.css";
+
+:root {
+  color-scheme: light;
+
+  --sans: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --mono: "Noto Sans Mono", ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  --bg: #fff;
+  --bg-on: #ddd;
+  --fg: #222;
+  --fg-on: #000;
+  --pre: #222;
+  --pre-dim: #777;
+  --pre-val: #870;
+  --border: #ddd;
+  --shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  --highlight: #3ca877;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: #121212;
+  --bg-on: #333;
+  --fg: #aaa;
+  --fg-on: #ddd;
+  --pre: #ccc;
+  --pre-dim: #999;
+  --pre-val: #cb8;
+  --border: #383838;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --highlight: #22863a;
+}
+
+.dark ::-moz-selection {
+  background: #444;
+}
+
+.dark ::selection {
+  background: #444;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+}
+
+pre,
+code,
+samp {
+  font-family: var(--mono);
+}
+
+i {
+  display: inline-block;
+  vertical-align: text-bottom;
+}

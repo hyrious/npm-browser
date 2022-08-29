@@ -1,7 +1,12 @@
 import untar, { File } from "js-untar";
 import { inflate, Data } from "pako";
 
-export default async function extractPackage(data: Data, callback: (file: File) => void) {
-  const array = inflate(data);
-  return await untar(array.buffer).progress(callback);
+/**
+ * ```js
+ * const { extract } = await import("~/helpers/untar");
+ * const files = await extract(file);
+ * ```
+ */
+export function extract(data: Data, progress: (file: File) => void) {
+  return untar(inflate(data).buffer).progress(progress);
 }
