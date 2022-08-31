@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import prettyBytes from "pretty-bytes"
 import { construct, FileEntry } from '../helpers/construct';
 import { get, set } from '../helpers/idb';
 
@@ -7,6 +8,10 @@ const { packageName, packageVersion, path } = storeToRefs(useApplicationStore())
 const root = ref<FileEntry>()
 
 const nameVersion = computed(() => packageName.value && `${packageName.value}@${packageVersion.value}`)
+const size = ref(0)
+const sizePretty = computed(() => prettyBytes(size.value))
+const packedSize = ref(0)
+const packedSizePretty = computed(() => prettyBytes(packedSize.value))
 
 let timer = 0
 let abortController: AbortController | null = null
@@ -43,11 +48,16 @@ async function fetchPackage(name: string, version: string) {
     throw e
   }
 
+  packedSize.value = buffer.byteLength
+
   try {
+    let totalSize = 0
     const { default: extractPackage } = await extractPackageP
     const nodes = await extractPackage(buffer, file => {
       statusMessage('Extracting ' + file.name)
+      totalSize += file.buffer.byteLength
     })
+    size.value = totalSize
     files.value = nodes;
     statusMessage('')
     root.value = (construct(nodes.map(e => e.name), path.value).children || [])[0]
@@ -65,7 +75,10 @@ async function fetchPackage(name: string, version: string) {
 
 <template>
   <header>
-    <h3 :title="nameVersion">{{ nameVersion }}</h3>
+    <h3 :title="nameVersion">
+      <span>{{ nameVersion }}</span>
+      <span class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
+    </h3>
   </header>
   <ul v-if="root?.children">
     <File v-for="file in root.children" :node="file" />
@@ -91,5 +104,9 @@ ul {
   list-style-type: none;
   overflow-y: auto;
   height: 100%;
+}
+
+.size {
+  padding-left: 8px;
 }
 </style>

@@ -17,6 +17,7 @@
     "modern-normalize": "^1.1.0",
     "pako": "^2.0.4",
     "pinia": "^2.0.19",
+    "pretty-bytes": "^6.0.0",
     "sanitize.css": "^13.0.0",
     "vue": "^3.2.37",
     "vue-i18n": "^9.2.2"
