@@ -12,5 +12,5 @@ window.DEBUG = import.meta.env.DEV;
  * ```
  */
 export function createDebug(namespace: string) {
-  return (...args: any[]) => DEBUG && console.log(`[${namespace}]`, ...args);
+  return (...args: any[]) => DEBUG && console.debug(`[${namespace}]`, ...args);
 }

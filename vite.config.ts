@@ -23,7 +23,7 @@ export default defineConfig({
     Unocss(),
 
     AutoImport({
-      imports: ["vue"],
+      imports: ["vue", "vue-i18n"],
       dirs: ["src/composables"],
       dts: "src/auto-imports.d.ts",
       vueTemplate: true,

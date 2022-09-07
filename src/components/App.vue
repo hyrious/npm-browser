@@ -1,8 +1,4 @@
-<script setup lang="ts">
-</script>
-
 <template>
+  <TopBar />
+  <Status />
 </template>
-
-<style lang="scss">
-</style>

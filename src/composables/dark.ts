@@ -1,7 +1,8 @@
 import { listen } from "@wopjs/dom";
 
-// @ts-ignore
-const prefersDark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)");
+const prefersDark: MediaQueryList | undefined =
+  // @ts-ignore
+  window.matchMedia && matchMedia("(prefers-color-scheme: dark)");
 
 /**
  * ```js
@@ -10,6 +11,7 @@ const prefersDark = window.matchMedia && matchMedia("(prefers-color-scheme: dark
  * ```
  */
 export function useDark() {
+  if (!prefersDark) return ref(false);
   const dark = ref(prefersDark.matches);
   listen(prefersDark, "change", (ev) => (dark.value = ev.matches));
   const classList = document.documentElement.classList;

@@ -1,5 +1,6 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { useDark } from "./dark";
+export * from "./pressing";
 
 export const useAppStore = defineStore("app", () => {
   const dark = useDark();

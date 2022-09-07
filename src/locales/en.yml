@@ -1,1 +1,5 @@
-a: 1
+press-return-to-continue: Press return to continue
+theme-light: "theme: light"
+theme-dark: "theme: dark"
+status-installing: Installing {name}…
+no-input: Please enter a package name

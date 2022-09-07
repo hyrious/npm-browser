@@ -9,5 +9,8 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     App: typeof import('./components/App.vue')['default']
     FileIcon: typeof import('./components/FileIcon.vue')['default']
+    Status: typeof import('./components/Status.vue')['default']
+    ToggleDark: typeof import('./components/ToggleDark.vue')['default']
+    TopBar: typeof import('./components/TopBar.vue')['default']
   }
 }

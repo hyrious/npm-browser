@@ -61,7 +61,30 @@ samp {
   font-family: var(--mono);
 }
 
+input {
+  font-size: 1rem;
+}
+
 i {
   display: inline-block;
   vertical-align: text-bottom;
+}
+
+.btn-icon {
+  position: relative;
+  color: var(--fg);
+
+  &:hover {
+    color: var(--fg-on);
+    background-color: var(--bg-on);
+  }
+
+  > i {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }

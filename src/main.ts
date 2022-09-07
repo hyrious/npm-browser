@@ -11,7 +11,8 @@ const app = createApp(App);
 app.use(createPinia()).use(
   createI18n({
     legacy: false,
-    locale: "en",
+    locale: navigator.language.startsWith("zh") ? "zh-CN" : "en",
+    fallbackLocale: "en",
     messages: Object.fromEntries(
       Object.entries(import.meta.glob<{ default: any }>("./locales/*.yml", { eager: true })).map(
         ([key, value]) => [key.slice("./locales/".length, -".yml".length), value.default]

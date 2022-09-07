@@ -1,1 +1,5 @@
-a: 1
+press-return-to-continue: 按回车键继续
+theme-light: 主题：明亮
+theme-dark: 主题：暗黑
+status-installing: 下载 {name} 中…
+no-input: 请输入包名
