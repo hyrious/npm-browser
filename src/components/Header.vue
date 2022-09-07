@@ -3,6 +3,7 @@ import { storeToRefs } from "pinia"
 import { $ as querySelector } from "@hyrious/utils"
 import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
+import { is_binary } from "../helpers/is-binary"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
@@ -100,6 +101,8 @@ onMounted(() => {
     skip = true
     searchText.value = packageName.value
     loadVersions(packageName.value, packageVersion.value)
+  } else if (searchInput.value) {
+    (searchInput.value as HTMLInputElement).focus()
   }
 
   const AtoZ = 'abcdefghijklmnopqrstuvwxyz'
@@ -184,7 +187,9 @@ async function npmInstall() {
     let text = `npm i ${packageName.value}@${packageVersion.value}`
     await navigator.clipboard?.writeText(text)
     alert('Install command has been copied to clipboard.')
-  } catch {}
+  } catch (e) {
+    alert(e.message)
+  }
 }
 
 function diff(ev: MouseEvent) {
@@ -231,6 +236,7 @@ async function fullTextSearch(search?: string) {
     if (file.name.includes('.min.')) continue
     // skip binary files
     if (!TEXT_EXTS.some(ext => file.name.endsWith(ext))) continue
+    if (is_binary(file.buffer)) continue
 
     const path = file.name.replace(/^package\//, '')
     const text = decoder.decode(file.buffer)
@@ -314,7 +320,7 @@ function focus_search_result_by_index() {
   <header>
     <label for="q">npm&nbsp;i</label>
     <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
-      autofocus spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
+      spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
       @keyup="press_return_to_kick_start_and_handle_arrows($event)" />
     <transition name="fade">
       <span v-if="showHintOnce">

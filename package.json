@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@highlightjs/cdn-assets": "^11.6.0",
+    "@wopjs/dom": "^0.1.2",
     "idb-keyval": "^6.2.0",
     "js-untar": "^2.0.0",
     "modern-normalize": "^1.1.0",

@@ -5,6 +5,7 @@
     "pako",
     "pinia",
     "unocss",
-    "untar"
+    "untar",
+    "wopjs"
   ]
 }

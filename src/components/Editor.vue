@@ -2,14 +2,23 @@
 import { wordwrap } from "../stores/code"
 import { emitter, update } from "../helpers/hljs"
 import { tick } from "@hyrious/utils";
+import { is_binary } from "../helpers/is-binary";
 const app = useApplicationStore()
 
 const pre = ref()
 
 const decoder = new TextDecoder()
+const failed = ref('')
 const code = computed(() => {
   const file = files.value.find(e => e.name === app.path.slice(1))
-  return file && decoder.decode(file.buffer)
+  failed.value = ''
+  if (file) {
+    if (is_binary(file.buffer)) {
+      failed.value = 'Cannot open binary file.'
+    } else {
+      return decoder.decode(file.buffer)
+    }
+  }
 })
 const lang = computed(() => {
   const path = app.path
@@ -83,7 +92,8 @@ watchEffect(() => {
 <template>
   <div class="editor-container">
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
-    <span v-if="!code" class="tip">Select a file to view its source code.</span>
+    <span v-if="failed" class="tip">{{ failed }}</span>
+    <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
   </div>
 </template>
 

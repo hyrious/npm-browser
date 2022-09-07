@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import prettyBytes from "pretty-bytes"
+import { listen } from "@wopjs/dom"
 import { construct, FileEntry } from '../helpers/construct';
 import { get, set } from '../helpers/idb';
 
@@ -77,6 +78,45 @@ async function fetchPackage(name: string, version: string) {
   }
 
   fetching.value = false
+}
+
+onMounted(() => listen(document.body, 'keydown', e => {
+  if (e.target === document.body && e.key === '.') {
+    const pkg = files.value.find(e => e.name === 'package/package.json')
+    const buffer = pkg?.buffer
+    const json = buffer && JSON.parse(new TextDecoder().decode(buffer))
+    json && open_homepage(json)
+  }
+}))
+
+function open_homepage(json: any) {
+  if (typeof json.homepage === 'string') {
+    open(json.homepage, '_blank')
+  } else if (typeof json.repository === 'object') {
+    let { url } = json.repository
+    if (typeof url === 'string') {
+      if (url.startsWith('git+')) {
+        url = url.slice(4)
+      }
+      if (url.endsWith('.git')) {
+        url = url.slice(0, -4)
+      }
+      if (url.startsWith('http')) {
+        open(url, '_blank')
+      }
+    }
+  } else if (typeof json.repository === 'string') {
+    try {
+      new URL(json.repository)
+      open(json.repository, '_blank')
+    } catch {
+      const url = 'https://github.com/' + json.repository
+      open(url, '_blank')
+    }
+  } else if (packageName.value.includes('/')) {
+    const url = 'https://github.com/' + packageName.value.slice(1)
+    open(url, '_blank')
+  }
 }
 </script>
 

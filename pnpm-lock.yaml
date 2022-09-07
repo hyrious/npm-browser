@@ -9,6 +9,7 @@ specifiers:
   '@types/pako': ^2.0.0
   '@unocss/preset-icons': ^0.45.18
   '@vitejs/plugin-vue': ^3.1.0
+  '@wopjs/dom': ^0.1.2
   highlight.js: ^11.6.0
   idb-keyval: ^6.2.0
   js-untar: ^2.0.0
@@ -28,6 +29,7 @@ specifiers:
 
 dependencies:
   '@highlightjs/cdn-assets': 11.6.0
+  '@wopjs/dom': 0.1.2
   idb-keyval: 6.2.0
   js-untar: 2.0.0
   modern-normalize: 1.1.0
@@ -539,6 +541,10 @@ packages:
 
   /@vue/shared/3.2.38:
     resolution: {integrity: sha512-dTyhTIRmGXBjxJE+skC8tTWCGLCVc4wQgRRLt8+O9p5ewBAjoBwtCAkLPrtToSr1xltoe3st21Pv953aOZ7alg==}
+
+  /@wopjs/dom/0.1.2:
+    resolution: {integrity: sha512-m/HzAeezWdnFAHXcUFCyvPrIsiq+O3tb42CHewbSSNxU0+guDV2HcZfNaPwz7TgZJTstYnrHefuwkhThkV0Gsw==}
+    dev: false
 
   /acorn-jsx/5.3.2_acorn@7.4.1:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
