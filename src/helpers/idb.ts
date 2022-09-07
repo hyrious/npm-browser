@@ -13,4 +13,5 @@ export function set(name: string, version: string, tgz: Uint8Array) {
 // for debugging
 Object.assign(window, {
   cached: () => idb.keys(NPM_PACKAGES),
+  idb: { get, set, NPM_PACKAGES },
 });

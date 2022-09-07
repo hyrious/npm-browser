@@ -20,8 +20,10 @@ const collapsed = computed(() => props.node.collapsed)
 function select() {
   if (folder.value) {
     props.node.collapsed = !collapsed.value
-  } else {
+  } else if (app.path !== path.value) {
     app.path = path.value
+  } else {
+    app.path = ""
   }
 }
 </script>

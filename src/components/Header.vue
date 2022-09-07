@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia"
+import { $ as querySelector } from "@hyrious/utils"
 import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
@@ -33,6 +34,7 @@ const fullTextSearchResultPretty = computed(() => {
   return result
 })
 const fullTextSearchLineNumberWidth = ref(0)
+const searchResultIndex = ref(-1)
 
 const DEBOUNCE_SEARCH = 500
 let timer = 0
@@ -75,6 +77,7 @@ watch(searchText, (name) => {
   packageVersion.value = ''
   versions.value = []
   line.value = 0
+  searchResultIndex.value = -1
   debouncedSearch(name)
 })
 
@@ -99,11 +102,16 @@ onMounted(() => {
     loadVersions(packageName.value, packageVersion.value)
   }
 
+  const AtoZ = 'abcdefghijklmnopqrstuvwxyz'
   function focusSearchInput(ev: KeyboardEvent) {
     // @ts-ignore
     if (ev.target === this) {
-      if ((ev.key === '/' || ev.key === 's') && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
-        (searchInput.value as HTMLInputElement).focus()
+      if ((ev.key === '@' && ev.shiftKey) || (AtoZ.includes(ev.key) && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey)) {
+        const input = (searchInput.value as HTMLInputElement | null)
+        if (input) {
+          input.focus()
+          input.value = ev.key
+        }
       }
     }
   }
@@ -262,18 +270,56 @@ function toggleBlock(ev: MouseEvent) {
     el.classList.toggle('collapsed')
   }
 }
+
+function press_return_to_kick_start_and_handle_arrows(ev: KeyboardEvent) {
+  if (ev.key === "Enter" && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey) {
+    ev.preventDefault()
+    ev.stopPropagation()
+    const index = searchResultIndex.value
+    if (index === -1) {
+      const name = searchText.value.trim()
+      name && choose({ name })
+    } else {
+      choose(searchResult.value[index])
+    }
+  } else {
+    handle_arrows(ev)
+  }
+}
+
+function handle_arrows(ev: KeyboardEvent) {
+  if (ev.key === 'ArrowUp') {
+    ev.preventDefault()
+    select_candidate(-1)
+  } else if (ev.key === 'ArrowDown') {
+    ev.preventDefault()
+    select_candidate(+1)
+  }
+}
+
+function select_candidate(step: number) {
+  const size = searchResult.value.length
+  const value = searchResultIndex.value
+  const next = (value + step + size) % size
+  searchResultIndex.value = next
+  nextTick(focus_search_result_by_index)
+}
+
+function focus_search_result_by_index() {
+  querySelector('.searching>ul>li.active')?.scrollIntoView({ block: 'nearest' })
+}
 </script>
 
 <template>
   <header>
     <label for="q">npm&nbsp;i</label>
     <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
-      autofocus spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }" />
+      autofocus spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
+      @keyup="press_return_to_kick_start_and_handle_arrows($event)" />
     <transition name="fade">
       <span v-if="showHintOnce">
         <i class="i-mdi-arrow-left-thin"></i>
         <em class="hint">Enter package name here</em>
-        <span>(press <kbd>s</kbd> to focus input)</span>
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
@@ -319,7 +365,7 @@ function toggleBlock(ev: MouseEvent) {
           <h4><i class="i-mdi-file"></i><button class="search-result-heading" @click="toggleBlock($event)">{{ block.path
           }}</button></h4>
           <button class="search-result-line" v-for="line in block.lines" :title="line.text" @click="jump(line)">{{
-              String(line.line).padStart(fullTextSearchLineNumberWidth)
+          String(line.line).padStart(fullTextSearchLineNumberWidth)
           }}: {{ line.text }}</button>
         </div>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
@@ -338,9 +384,10 @@ function toggleBlock(ev: MouseEvent) {
       <i class="i-mdi-share-variant"></i>
     </button>
   </header>
-  <aside v-show="searching">
+  <aside class="searching" v-show="searching">
     <ul v-if="searchResult.length > 0">
-      <li v-for="pkg in searchResult" :key="pkg.name" @click="choose(pkg)" :title="pkg.description">
+      <li v-for="pkg, i in searchResult" :key="pkg.name" @click="choose(pkg)" :title="pkg.description"
+        :class="{ active: searchResultIndex === i }">
         <h3>{{ pkg.name }}</h3>
         <p>{{ pkg.description }}</p>
       </li>
@@ -490,16 +537,6 @@ i {
   flex-shrink: 0;
 }
 
-.i-mdi-loading {
-  animation: rotate 0.5s linear infinite;
-}
-
-@keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 aside {
   position: absolute;
   top: 44px;
@@ -522,7 +559,8 @@ aside {
       padding: 4px 8px;
       cursor: pointer;
 
-      &:hover {
+      &:hover,
+      &.active {
         background: var(--bg-on);
       }
 

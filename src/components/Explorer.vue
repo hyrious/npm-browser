@@ -5,13 +5,14 @@ import { construct, FileEntry } from '../helpers/construct';
 import { get, set } from '../helpers/idb';
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore())
-const root = ref<FileEntry>()
+const root = ref<FileEntry | null>(null)
 
-const nameVersion = computed(() => packageName.value && `${packageName.value}@${packageVersion.value}`)
+const fetching = ref(false)
+const nameVersion = computed(() => packageName.value && packageVersion.value && `${packageName.value}@${packageVersion.value}`)
 const size = ref(0)
-const sizePretty = computed(() => prettyBytes(size.value))
+const sizePretty = computed(() => nameVersion.value && prettyBytes(size.value))
 const packedSize = ref(0)
-const packedSizePretty = computed(() => prettyBytes(packedSize.value))
+const packedSizePretty = computed(() => nameVersion.value && prettyBytes(packedSize.value))
 
 let timer = 0
 let abortController: AbortController | null = null
@@ -29,6 +30,8 @@ watchEffect(() => {
 
 const extractPackageP = import('../helpers/untar');
 async function fetchPackage(name: string, version: string) {
+  fetching.value = true
+  root.value = null
   let buffer: ArrayBuffer
 
   try {
@@ -43,6 +46,7 @@ async function fetchPackage(name: string, version: string) {
       await set(name, version, new Uint8Array(buffer))
     }
   } catch (e) {
+    fetching.value = false
     if (e.name === "AbortError") return
     statusMessage(e.message)
     throw e
@@ -63,13 +67,16 @@ async function fetchPackage(name: string, version: string) {
     root.value = (construct(nodes.map(e => e.name), path.value).children || [])[0]
     const selected = path.value.slice(1)
     if (!nodes.some(e => e.name === selected)) {
-      path.value = '/packages/package.json'
+      path.value = ''
     }
   } catch (e) {
+    fetching.value = false
     if (e.name === "AbortError") return
     statusMessage(e.message)
     throw e
   }
+
+  fetching.value = false
 }
 </script>
 
@@ -77,12 +84,16 @@ async function fetchPackage(name: string, version: string) {
   <header>
     <h3 :title="nameVersion">
       <span>{{ nameVersion }}</span>
-      <span class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
+      <span v-if="size > 0" class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
     </h3>
   </header>
   <ul v-if="root?.children">
     <File v-for="file in root.children" :node="file" />
   </ul>
+  <div v-else-if="fetching" class="loading">
+    <i class="i-mdi-loading"></i>
+    <span>loading&hellip;</span>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -108,5 +119,19 @@ ul {
 
 .size {
   padding-left: 8px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  font-size: 14px;
+  padding: 8px 16px;
+
+  i {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+  }
 }
 </style>
