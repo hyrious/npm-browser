@@ -21,6 +21,8 @@ export function construct(array: string[], focus = "") {
   }
   array.sort().forEach((line) => {
     let current = root;
+    // skip non-real files
+    if (line.endsWith("/")) return;
     const parts = line.split("/");
     let path = "";
     for (let part of parts) {

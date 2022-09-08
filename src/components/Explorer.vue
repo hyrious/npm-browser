@@ -82,7 +82,7 @@ async function fetchPackage(name: string, version: string) {
 
 onMounted(() => listen(document.body, 'keydown', e => {
   if (e.target === document.body && e.key === '.') {
-    const pkg = files.value.find(e => e.name === 'package/package.json')
+    const pkg = files.value.find(e => e.name === root_folder.value + '/package.json')
     const buffer = pkg?.buffer
     const json = buffer && JSON.parse(new TextDecoder().decode(buffer))
     json && open_homepage(json)
@@ -124,7 +124,7 @@ function open_homepage(json: any) {
   <header>
     <h3 :title="nameVersion">
       <span>{{ nameVersion }}</span>
-      <span v-if="size > 0" class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
+      <span v-if="!fetching && size > 0" class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
     </h3>
   </header>
   <ul v-if="root?.children">

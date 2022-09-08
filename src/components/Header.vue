@@ -192,16 +192,24 @@ async function npmInstall() {
   }
 }
 
+const subpath = computed(() => {
+  const prefix = root_folder.value
+  let subpath = path.value
+  if (subpath.startsWith('/' + prefix)) {
+    subpath = subpath.slice(prefix.length + 1)
+  }
+  return subpath
+})
+
 function diff(ev: MouseEvent) {
   const el = ev.target as HTMLElement
   if (el && el.dataset.value) {
     const name = packageName.value
     const from = el.dataset.value
     const to = packageVersion.value
-    const subpath = path.value.replace(/^\/package\b/, '')
     const url = new URL('https://hyrious.me/tool/diff-npm.html')
-    url.searchParams.set('a', `${name}@${from}${subpath}`)
-    url.searchParams.set('b', `${name}@${to}${subpath}`)
+    url.searchParams.set('a', `${name}@${from}${subpath.value}`)
+    url.searchParams.set('b', `${name}@${to}${subpath.value}`)
     url.searchParams.set('s', '1')
     url.searchParams.set('f', 'l')
     showDiff.value = false
@@ -227,7 +235,7 @@ async function fullTextSearch(search?: string) {
   searchingFullText.value = true
   const result: Line[] = []
   const decoder = new TextDecoder()
-  let maxWidth = 0
+  let maxWidth = 2
   // ref: https://github.com/frejs/fre/blob/master/src/schedule.ts
   const threshold = 5
   let deadline = 0
@@ -238,7 +246,7 @@ async function fullTextSearch(search?: string) {
     if (!TEXT_EXTS.some(ext => file.name.endsWith(ext))) continue
     if (is_binary(file.buffer)) continue
 
-    const path = file.name.replace(/^package\//, '')
+    const path = file.name.replace(/^\w+\//, '')
     const text = decoder.decode(file.buffer)
     text.split(/\r?\n/).forEach((line, i) => {
       if (line.includes(fullTextSearchText.value)) {
@@ -251,6 +259,7 @@ async function fullTextSearch(search?: string) {
     if (now >= deadline) {
       deadline = now + threshold
       fullTextSearchResult.value = result.slice()
+      fullTextSearchLineNumberWidth.value = maxWidth
       await new Promise(r => requestAnimationFrame(r))
     }
   }
@@ -261,7 +270,7 @@ async function fullTextSearch(search?: string) {
 }
 
 async function jump(location: { path: string; line: number }) {
-  path.value = '/package/' + location.path // TODO: will break on @types/react
+  path.value = '/' + root_folder.value + '/' + location.path
   line.value = location.line
   await nextTick()
   const activeLine = document.querySelector('[data-line].active')
@@ -306,13 +315,23 @@ function handle_arrows(ev: KeyboardEvent) {
 function select_candidate(step: number) {
   const size = searchResult.value.length
   const value = searchResultIndex.value
-  const next = (value + step + size) % size
+  const next = value === -1 ? (step > 0 ? 0 : size - 1) : (value + step + size) % size
   searchResultIndex.value = next
   nextTick(focus_search_result_by_index)
 }
 
 function focus_search_result_by_index() {
   querySelector('.searching>ul>li.active')?.scrollIntoView({ block: 'nearest' })
+}
+
+function jsdelivr(ev: MouseEvent) {
+  let url: string;
+  if (ev.altKey) {
+    url = `https://unpkg.com/${packageName.value}@${packageVersion.value}${subpath.value}`
+  } else {
+    url = `https://cdn.jsdelivr.net/npm/${packageName.value}@${packageVersion.value}${subpath.value}`
+  }
+  open(url, '_blank')
 }
 </script>
 
@@ -377,6 +396,10 @@ function focus_search_result_by_index() {
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
     </aside>
+    <button v-show="packageName && packageVersion && path"
+      title="open this file in jsdelivr (press alt/option for unpkg)" @click="jsdelivr($event)">
+      <i class="i-mdi-link-variant"></i>
+    </button>
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>

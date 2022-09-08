@@ -33,6 +33,21 @@ export const useApplicationStore = defineStore("app", () => {
     }
   });
 
+  watch(
+    [packageName, packageVersion, path],
+    ([name, version, path]) => {
+      const normal_path = path.replace(/^\/\w+\//, "");
+      if (path) {
+        document.title = `${normal_path} - ${name} ${version}`;
+      } else if (name) {
+        document.title = version ? `${name}@${version}` : name;
+      } else {
+        document.title = "NPM Browser";
+      }
+    },
+    { immediate: true }
+  );
+
   return {
     packageName,
     packageVersion,
