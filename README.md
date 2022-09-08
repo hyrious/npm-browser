@@ -4,12 +4,19 @@
 
 ### Usage
 
-**URL Pattern**: `https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}`
+**URL Pattern**:
+
+```yml
+https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
+```
 
 - View some package's latest contents:\
   <samp>https://hyrious.me/npm-browser/?q=vue</samp>
 - View some specific file in some package's specific version:\
   <samp>https://hyrious.me/npm-browser/?q=@github/textarea-autosize@0.3.0/package/dist/index.js:72</samp>
+
+**Useful Functions**:
+  
 - Goto some package's homepage:\
   Press <kbd>.</kbd>
 - Search source code from all files in some package:\
