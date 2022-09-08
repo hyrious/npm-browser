@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia"
+import { listen } from "@wopjs/dom"
 import { $ as querySelector } from "@hyrious/utils"
 import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
@@ -118,9 +119,24 @@ onMounted(() => {
       }
     }
   }
-  document.body.addEventListener('keyup', focusSearchInput)
+  const stop_listen_keyup = listen(document.body, 'keyup', focusSearchInput)
+
+  function paste(ev: ClipboardEvent) {
+    if ((ev.target as HTMLElement).tagName !== 'INPUT') {
+      const data = ev.clipboardData?.getData('Text')
+      if (data && data.length <= 214) {
+        ev.stopPropagation()
+        ev.preventDefault()
+        searchText.value = data;
+        (searchInput.value as HTMLInputElement | null)?.focus()
+      }
+    }
+  }
+  const stop_listen_paste = listen(document.body, 'paste', paste)
+
   return () => {
-    document.body.removeEventListener('keyup', focusSearchInput)
+    stop_listen_keyup()
+    stop_listen_paste()
   }
 })
 
