@@ -5,6 +5,7 @@
     "jsdelivr",
     "pako",
     "pinia",
+    "pnpm",
     "unocss",
     "untar",
     "wopjs"
