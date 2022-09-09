@@ -45,12 +45,14 @@ function select() {
 <style lang="scss" scoped>
 li {
   position: relative;
-  line-height: 22px;
+  line-height: 25px;
 }
 
 div {
   display: flex;
   align-items: center;
+  margin: 0 -4px;
+  padding: 0 4px;
   gap: 4px;
 
   &:hover,

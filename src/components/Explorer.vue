@@ -128,14 +128,15 @@ function open_homepage(json: any) {
 
 function choose(nameVersion: string) {
   const parts = nameVersion.split('@')
+  let name: string, version: string;
   if (nameVersion[0] === '@') {
-    packageName.value = '@' + parts[1]
-    packageVersion.value = parts[2]
+    name = '@' + parts[1]
+    version = parts[2]
   } else {
-    packageName.value = parts[0]
-    packageVersion.value = parts[1]
+    name = parts[0]
+    version = parts[1]
   }
-  events.emit("search", packageName.value)
+  location.search = `?q=${name}@${version}`
 }
 
 function confirm_delete_all() {
@@ -161,18 +162,18 @@ function confirm_delete_all() {
     <span>loading&hellip;</span>
   </div>
   <template v-else-if="!nameVersion">
-    <h3 class="history-title">History</h3>
+    <h3 class="history-title">
+      <span>History</span>
+      <button @click="confirm_delete_all()" class="history-delete-all">
+        <span>Delete All</span>
+        <i class="i-mdi-trash-can-outline"></i>
+      </button>
+    </h3>
     <TransitionGroup name="list" tag="ul" class="cached">
       <li v-for="item in history" :key="item" class="history-item">
         <button title="open" @click="choose(item)">{{ item }}</button>
         <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
           <i class="i-mdi-close"></i>
-        </button>
-      </li>
-      <li v-if="history.length > 0" class="history-item remove-all" key="__remove all__">
-        <button @click="confirm_delete_all()">
-          <i class="i-mdi-close"></i>
-          <span>Delete All</span>
         </button>
       </li>
     </TransitionGroup>
@@ -187,6 +188,7 @@ h3 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
 }
 
 ul {
@@ -219,16 +221,19 @@ ul {
 .cached {
   display: flex;
   flex-flow: column nowrap;
-  gap: 8px;
 }
 
 .history-item {
   display: flex;
   align-items: center;
-  gap: 0.75ch;
   white-space: nowrap;
+  margin: 0 -8px;
 
   button {
+    border: 0;
+    padding: 4px 8px;
+    text-align: left;
+    flex: 1;
     cursor: pointer;
   }
 
@@ -236,13 +241,38 @@ ul {
     color: var(--fg-on);
     background-color: var(--bg-on);
   }
+
+  &:hover .history-delete-btn {
+    opacity: 1;
+  }
+}
+
+.history-delete-all {
+  border: 0;
+  position: absolute;
+  top: 0;
+  right: 16px;
+  bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+
+  >span {
+    padding-right: 0.25rem;
+  }
+
+  &:hover {
+    color: var(--fg-on);
+    background-color: var(--bg-on);
+  }
 }
 
 .history-delete-btn {
-  position: relative;
+  position: absolute;
+  right: 16px;
   flex-shrink: 0;
   width: 24px;
   height: 24px;
+  opacity: 0;
 
   i {
     position: absolute;
@@ -252,7 +282,7 @@ ul {
   }
 }
 
-.i-mdi-close {
+i {
   display: inline-block;
   width: 20px;
   height: 20px;
