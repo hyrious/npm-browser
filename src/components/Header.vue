@@ -5,6 +5,7 @@ import { $ as querySelector } from "@hyrious/utils"
 import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
 import { is_binary } from "../helpers/is-binary"
+import { events } from "../helpers/events"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
@@ -134,9 +135,16 @@ onMounted(() => {
   }
   const stop_listen_paste = listen(document.body, 'paste', paste)
 
+  const stop_listen_search = events.on("search", text => {
+    skip = true
+    searchText.value = text
+    showHintOnce.value = false
+  })
+
   return () => {
     stop_listen_keyup()
     stop_listen_paste()
+    stop_listen_search()
   }
 })
 

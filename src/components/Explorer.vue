@@ -3,17 +3,24 @@ import { storeToRefs } from 'pinia';
 import prettyBytes from "pretty-bytes"
 import { listen } from "@wopjs/dom"
 import { construct, FileEntry } from '../helpers/construct';
-import { get, set } from '../helpers/idb';
+import { get, set, cached, remove, removeAll } from '../helpers/idb';
+import { events } from '../helpers/events';
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore())
 const root = ref<FileEntry | null>(null)
-
+const history = ref<string[]>([])
 const fetching = ref(false)
 const nameVersion = computed(() => packageName.value && packageVersion.value && `${packageName.value}@${packageVersion.value}`)
 const size = ref(0)
 const sizePretty = computed(() => nameVersion.value && prettyBytes(size.value))
 const packedSize = ref(0)
 const packedSizePretty = computed(() => nameVersion.value && prettyBytes(packedSize.value))
+
+function refresh_history() {
+  cached().then(keys => { history.value = keys as string[] })
+}
+
+onMounted(refresh_history)
 
 let timer = 0
 let abortController: AbortController | null = null
@@ -118,10 +125,29 @@ function open_homepage(json: any) {
     open(url, '_blank')
   }
 }
+
+function choose(nameVersion: string) {
+  const parts = nameVersion.split('@')
+  if (nameVersion[0] === '@') {
+    packageName.value = '@' + parts[1]
+    packageVersion.value = parts[2]
+  } else {
+    packageName.value = parts[0]
+    packageVersion.value = parts[1]
+  }
+  events.emit("search", packageName.value)
+}
+
+function confirm_delete_all() {
+  if (confirm('Are you sure you want to delete all cached packages?')) {
+    removeAll()
+    refresh_history()
+  }
+}
 </script>
 
 <template>
-  <header>
+  <header v-if="nameVersion">
     <h3 :title="nameVersion">
       <span>{{ nameVersion }}</span>
       <span v-if="!fetching && size > 0" class="size" :title="'Packed: ' + packedSizePretty">{{ sizePretty }}</span>
@@ -134,18 +160,33 @@ function open_homepage(json: any) {
     <i class="i-mdi-loading"></i>
     <span>loading&hellip;</span>
   </div>
+  <template v-else-if="!root">
+    <h3 class="history-title">History</h3>
+    <TransitionGroup name="list" tag="ul" class="cached">
+      <li v-for="item in history" :key="item" class="history-item">
+        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <i class="i-mdi-close"></i>
+        </button>
+      </li>
+      <li v-if="history.length > 0" class="history-item remove-all" key="__remove all__">
+        <button @click="confirm_delete_all()">
+          <i class="i-mdi-close"></i>
+          <span>Delete All</span>
+        </button>
+      </li>
+    </TransitionGroup>
+  </template>
 </template>
 
 <style lang="scss" scoped>
-header {
-  h3 {
-    margin: 0;
-    padding: 6px 16px 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+h3 {
+  margin: 0;
+  padding: 6px 16px 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 ul {
@@ -173,5 +214,70 @@ ul {
     width: 16px;
     height: 16px;
   }
+}
+
+.cached {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 8px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75ch;
+  white-space: nowrap;
+
+  button {
+    cursor: pointer;
+  }
+
+  button:hover {
+    color: var(--fg-on);
+    background-color: var(--bg-on);
+  }
+}
+
+.history-delete-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.i-mdi-close {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: text-bottom;
+}
+
+.list-move,
+.list-enter-active {
+  transition: all 0.2s ease;
+}
+
+.list-leave-active {
+  transition: opacity 0.2s, transform 1s;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-leave-to {
+  opacity: 0;
+}
+
+.list-leave-active {
+  position: absolute;
 }
 </style>
