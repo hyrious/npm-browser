@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FileEntry } from '../helpers/construct'
+import FileIcon from './FileIcon.vue';
 
 export interface Props {
   node: FileEntry
@@ -32,7 +33,7 @@ function select() {
   <li :class="{ folder, file: !folder, collapsed }">
     <div @click="select()" :class="{ selected }">
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
-      <i v-else class="i-mdi-file"></i>
+      <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
     </div>
     <ul v-if="!collapsed && props.node.children">

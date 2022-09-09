@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "file-icons": "esbuild-dev scripts/make-file-icons.ts"
   },
   "dependencies": {
     "@highlightjs/cdn-assets": "^11.6.0",
@@ -24,6 +25,7 @@
     "vue-i18n": "^9.2.2"
   },
   "devDependencies": {
+    "@hyrious/esbuild-dev": "^0.8.3",
     "@hyrious/utils": "^0.0.6",
     "@iconify-json/mdi": "^1.1.31",
     "@intlify/vite-plugin-vue-i18n": "^6.0.1",
@@ -32,6 +34,7 @@
     "@unocss/preset-icons": "^0.45.18",
     "@vitejs/plugin-vue": "^3.1.0",
     "highlight.js": "^11.6.0",
+    "https-proxy-agent": "^5.0.1",
     "sass": "^1.54.8",
     "unocss": "^0.45.18",
     "unplugin-auto-import": "^0.11.2",

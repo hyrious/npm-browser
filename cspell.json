@@ -1,13 +1,17 @@
 {
   "words": [
+    "esbuild",
     "highlightjs",
     "hyrious",
+    "iconify",
     "intlify",
     "jsdelivr",
+    "keyval",
     "pako",
     "pinia",
     "pnpm",
     "unocss",
+    "unplugin",
     "untar",
     "wopjs"
   ]

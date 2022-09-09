@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@highlightjs/cdn-assets': ^11.6.0
+  '@hyrious/esbuild-dev': ^0.8.3
   '@hyrious/utils': ^0.0.6
   '@iconify-json/mdi': ^1.1.31
   '@intlify/vite-plugin-vue-i18n': ^6.0.1
@@ -11,6 +12,7 @@ specifiers:
   '@vitejs/plugin-vue': ^3.1.0
   '@wopjs/dom': ^0.1.2
   highlight.js: ^11.6.0
+  https-proxy-agent: ^5.0.1
   idb-keyval: ^6.2.0
   js-untar: ^2.0.0
   modern-normalize: ^1.1.0
@@ -41,6 +43,7 @@ dependencies:
   vue-i18n: 9.2.2_vue@3.2.38
 
 devDependencies:
+  '@hyrious/esbuild-dev': 0.8.3
   '@hyrious/utils': 0.0.6
   '@iconify-json/mdi': 1.1.31
   '@intlify/vite-plugin-vue-i18n': 6.0.1_vite@3.1.0+vue-i18n@9.2.2
@@ -49,6 +52,7 @@ devDependencies:
   '@unocss/preset-icons': 0.45.18
   '@vitejs/plugin-vue': 3.1.0_vite@3.1.0+vue@3.2.38
   highlight.js: 11.6.0
+  https-proxy-agent: 5.0.1
   sass: 1.54.8
   unocss: 0.45.18_vite@3.1.0
   unplugin-auto-import: 0.11.2_vite@3.1.0
@@ -113,6 +117,14 @@ packages:
     resolution: {integrity: sha512-Mod+0LGTetSd0JbLGOHesCP3FLz8T/BOuDitF6stBNmHSLDmds1i4hT02T98Xlj3bGgPCbRsiF2D7i0Nraa+sQ==}
     engines: {node: '>=12.0.0'}
     dev: false
+
+  /@hyrious/esbuild-dev/0.8.3:
+    resolution: {integrity: sha512-kM3+q5D6eSunAzmbccetW70w/KouSW4oQJ6gGx8ynCXmJL/Kcy4q6rBPkLdp8pPbFihTTVOf/vOiCdyHsOcI5A==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    hasBin: true
+    peerDependencies:
+      esbuild: '*'
+    dev: true
 
   /@hyrious/utils/0.0.6:
     resolution: {integrity: sha512-rkdXgKbQ4MWclsoOM7pAmZVcxcG2/MkSf0syURu5d2n/fgcDeoR754i7e7+aqBvnCtL5YpCs+9UhiJ3Gsphqew==}
@@ -566,6 +578,15 @@ packages:
     hasBin: true
     dev: true
 
+  /agent-base/6.0.2:
+    resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
+    engines: {node: '>= 6.0.0'}
+    dependencies:
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /anymatch/3.1.2:
     resolution: {integrity: sha512-P43ePfOAIupkguHUycrc4qJ9kz8ZiuOUijaETwX7THt0Y/GNK7v0aa8rY816xWjZ7rJdA5XdMcpVFTKMq+RvWg==}
     engines: {node: '>= 8'}
@@ -1007,6 +1028,16 @@ packages:
   /highlight.js/11.6.0:
     resolution: {integrity: sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==}
     engines: {node: '>=12.0.0'}
+    dev: true
+
+  /https-proxy-agent/5.0.1:
+    resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
+    engines: {node: '>= 6'}
+    dependencies:
+      agent-base: 6.0.2
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /human-signals/2.1.0:

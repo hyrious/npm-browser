@@ -160,7 +160,7 @@ function confirm_delete_all() {
     <i class="i-mdi-loading"></i>
     <span>loading&hellip;</span>
   </div>
-  <template v-else-if="!root">
+  <template v-else-if="!nameVersion">
     <h3 class="history-title">History</h3>
     <TransitionGroup name="list" tag="ul" class="cached">
       <li v-for="item in history" :key="item" class="history-item">
