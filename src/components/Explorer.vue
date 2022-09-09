@@ -176,6 +176,30 @@ function confirm_delete_all() {
           <i class="i-mdi-close"></i>
         </button>
       </li>
+      <li v-for="item in history" :key="item" class="history-item">
+        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <i class="i-mdi-close"></i>
+        </button>
+      </li>
+      <li v-for="item in history" :key="item" class="history-item">
+        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <i class="i-mdi-close"></i>
+        </button>
+      </li>
+      <li v-for="item in history" :key="item" class="history-item">
+        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <i class="i-mdi-close"></i>
+        </button>
+      </li>
+      <li v-for="item in history" :key="item" class="history-item">
+        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <i class="i-mdi-close"></i>
+        </button>
+      </li>
     </TransitionGroup>
   </template>
 </template>
@@ -224,6 +248,7 @@ ul {
 }
 
 .history-item {
+  position: relative;
   display: flex;
   align-items: center;
   white-space: nowrap;
@@ -268,7 +293,10 @@ ul {
 
 .history-delete-btn {
   position: absolute;
-  right: 16px;
+  top: 0;
+  right: 4px;
+  bottom: 0;
+  margin: auto;
   flex-shrink: 0;
   width: 24px;
   height: 24px;
