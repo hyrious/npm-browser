@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{ name: string }>(), {
-  name: '',
+  name: "",
 });
 
 const ext = computed(() => {
-  const index = props.name.lastIndexOf('.');
-  return index > -1 ? props.name.slice(index + 1).toLowerCase() : '';
+  const index = props.name.lastIndexOf(".");
+  return index > -1 ? props.name.slice(index + 1).toLowerCase() : "";
 });
 </script>
 

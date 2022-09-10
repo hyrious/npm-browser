@@ -1,92 +1,92 @@
 <script setup lang="ts">
-import { wordwrap } from "../stores/code"
-import { emitter, update } from "../helpers/hljs"
+import { wordwrap } from "../stores/code";
+import { emitter, update } from "../helpers/hljs";
 import { tick } from "@hyrious/utils";
 import { is_binary } from "../helpers/is-binary";
-const app = useApplicationStore()
+const app = useApplicationStore();
 
-const pre = ref()
+const pre = ref();
 
-const decoder = new TextDecoder()
-const failed = ref('')
+const decoder = new TextDecoder();
+const failed = ref("");
 const code = computed(() => {
-  const file = files.value.find(e => e.name === app.path.slice(1))
-  failed.value = ''
+  const file = files.value.find((e) => e.name === app.path.slice(1));
+  failed.value = "";
   if (file) {
     if (is_binary(file.buffer)) {
-      failed.value = 'Cannot open binary file.'
+      failed.value = "Cannot open binary file.";
     } else {
-      return decoder.decode(file.buffer)
+      return decoder.decode(file.buffer);
     }
   }
-})
+});
 const lang = computed(() => {
-  const path = app.path
-  const i = path.lastIndexOf('.')
-  if (i < 0) return 'text'
-  let ext = path.slice(i + 1)
-  if (ext === 'map') ext = 'json'
-  if (ext === 'cjs') ext = 'js'
-  return ext
-})
+  const path = app.path;
+  const i = path.lastIndexOf(".");
+  if (i < 0) return "text";
+  let ext = path.slice(i + 1);
+  if (ext === "map") ext = "json";
+  if (ext === "cjs") ext = "js";
+  return ext;
+});
 
-const HLJS_MAX_LENGTH = 20480
+const HLJS_MAX_LENGTH = 20480;
 
 watchEffect(() => {
   if (code.value && pre.value) {
     if (code.value.length < HLJS_MAX_LENGTH) {
-      update(pre.value, code.value, lang.value, true)
+      update(pre.value, code.value, lang.value, true);
     } else {
-      pre.value.textContent = code.value
-      emitter.emit("highlighted", false)
+      pre.value.textContent = code.value;
+      emitter.emit("highlighted", false);
     }
   } else if (pre.value) {
-    pre.value.textContent = ''
+    pre.value.textContent = "";
   }
-})
+});
 
-emitter.on('update', (lineno) => {
+emitter.on("update", (lineno) => {
   if (code.value && pre.value) {
-    update(pre.value, code.value, lang.value, lineno)
+    update(pre.value, code.value, lang.value, lineno);
   }
-})
+});
 
-emitter.on("highlighted", highlighted => {
+emitter.on("highlighted", (highlighted) => {
   if (highlighted && pre.value) {
-    activateLineNumbers(pre.value)
+    activateLineNumbers(pre.value);
   }
-})
+});
 
-const activeLine = ref<HTMLElement | null>(null)
+const activeLine = ref<HTMLElement | null>(null);
 
 function activateLineNumbers(el: HTMLPreElement) {
-  el.querySelectorAll('[data-lineno]').forEach((td_, index) => {
-    const td = td_ as HTMLElement
-    const line = index + 1
+  el.querySelectorAll("[data-lineno]").forEach((td_, index) => {
+    const td = td_ as HTMLElement;
+    const line = index + 1;
     if (line === app.line) {
-      const tr = td.parentElement as HTMLElement
-      activeLine.value = tr
-      tr.classList.add("active")
+      const tr = td.parentElement as HTMLElement;
+      activeLine.value = tr;
+      tr.classList.add("active");
       tick().then(() => {
-        tr.scrollIntoView({ block: "center" })
-      })
+        tr.scrollIntoView({ block: "center" });
+      });
     }
     td.onclick = function setLineNumber() {
-      const line = parseInt(td.dataset.lineno!)
-      app.line = app.line === line ? 0 : line
-    }
-  })
+      const line = parseInt(td.dataset.lineno!);
+      app.line = app.line === line ? 0 : line;
+    };
+  });
 }
 
 watchEffect(() => {
   if (activeLine.value) {
-    activeLine.value.classList.remove("active")
+    activeLine.value.classList.remove("active");
   }
-  activeLine.value = document.querySelector(`[data-line="${app.line}"]`)
+  activeLine.value = document.querySelector(`[data-line="${app.line}"]`);
   if (activeLine.value) {
-    activeLine.value.classList.add("active")
+    activeLine.value.classList.add("active");
   }
-})
+});
 </script>
 
 <template>

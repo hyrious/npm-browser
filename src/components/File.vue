@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { FileEntry } from '../helpers/construct'
-import FileIcon from './FileIcon.vue';
+import { FileEntry } from "../helpers/construct";
+import FileIcon from "./FileIcon.vue";
 
 export interface Props {
-  node: FileEntry
+  node: FileEntry;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  node: () => ({ name: '', path: '', collapsed: false })
-})
+  node: () => ({ name: "", path: "", collapsed: false }),
+});
 
-const app = useApplicationStore()
+const app = useApplicationStore();
 
-const name = computed(() => props.node.name)
-const path = computed(() => props.node.path)
-const folder = computed(() => props.node.children)
-const selected = computed(() => props.node.path === app.path)
-const collapsed = computed(() => props.node.collapsed)
+const name = computed(() => props.node.name);
+const path = computed(() => props.node.path);
+const folder = computed(() => props.node.children);
+const selected = computed(() => props.node.path === app.path);
+const collapsed = computed(() => props.node.collapsed);
 
 function select() {
   if (folder.value) {
-    props.node.collapsed = !collapsed.value
+    props.node.collapsed = !collapsed.value;
   } else if (app.path !== path.value) {
-    app.path = path.value
+    app.path = path.value;
   } else {
-    app.path = ""
+    app.path = "";
   }
 }
 </script>
@@ -67,7 +67,7 @@ label {
   text-overflow: ellipsis;
 }
 
-.selected>label {
+.selected > label {
   color: var(--fg-on);
 }
 

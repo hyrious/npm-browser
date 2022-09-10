@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <Header></Header>
@@ -14,5 +13,4 @@
   <Footer></Footer>
 </template>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

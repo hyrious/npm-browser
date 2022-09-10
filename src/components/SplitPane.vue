@@ -1,45 +1,51 @@
 <!-- derived from https://github.com/vuejs/repl/blob/main/src/SplitPane.vue -->
 <script setup lang="ts">
-const container = ref()
+const container = ref();
 
 const state = reactive({
   dragging: false,
-  split: 25
-})
+  split: 25,
+});
 
 const boundSplit = computed(() => {
   const { split } = state;
   return split < 20 ? 20 : split > 80 ? 80 : split;
-})
+});
 
-const showRight = ref(false)
+const showRight = ref(false);
 
-let startPosition = 0
-let startSplit = 0
+let startPosition = 0;
+let startSplit = 0;
 
 function dragStart(e: PointerEvent) {
-  state.dragging = true
-  startPosition = e.pageX
-  startSplit = boundSplit.value
+  state.dragging = true;
+  startPosition = e.pageX;
+  startSplit = boundSplit.value;
 }
 
 function dragMove(e: PointerEvent) {
   if (state.dragging) {
-    const position = e.pageX
-    const totalSize = container.value.offsetWidth
-    const dp = position - startPosition
-    state.split = startSplit + ~~((dp / totalSize) * 100)
+    const position = e.pageX;
+    const totalSize = container.value.offsetWidth;
+    const dp = position - startPosition;
+    state.split = startSplit + ~~((dp / totalSize) * 100);
   }
 }
 
 function dragEnd() {
-  state.dragging = false
+  state.dragging = false;
 }
 </script>
 
 <template>
-  <div ref="container" class="split-pane" :class="{ dragging: state.dragging, 'show-right': showRight }"
-    @pointermove="dragMove" @pointerup="dragEnd" @pointerleave="dragEnd">
+  <div
+    ref="container"
+    class="split-pane"
+    :class="{ dragging: state.dragging, 'show-right': showRight }"
+    @pointermove="dragMove"
+    @pointerup="dragEnd"
+    @pointerleave="dragEnd"
+  >
     <div class="left" :style="{ width: boundSplit + '%' }">
       <slot name="left"></slot>
       <div class="dragger" @pointerdown.prevent="dragStart"></div>
@@ -49,7 +55,7 @@ function dragEnd() {
     </div>
     <button class="toggler" @click="showRight = !showRight">
       <i class="i-mdi-chevron-left" :class="{ active: showRight }"></i>
-      {{ showRight ? 'Explorer' : 'Code' }}
+      {{ showRight ? "Explorer" : "Code" }}
       <i class="i-mdi-chevron-right" :class="{ active: !showRight }"></i>
     </button>
   </div>
@@ -100,7 +106,6 @@ function dragEnd() {
 }
 
 @media (max-width: 720px) {
-
   .split-pane {
     display: block;
   }
