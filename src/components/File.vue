@@ -59,6 +59,15 @@ div {
   &.selected {
     background: var(--bg-on);
   }
+
+  @media (max-width: 720px) {
+    &:hover {
+      background: transparent;
+    }
+    &.selected {
+      background: var(--bg-on);
+    }
+  }
 }
 
 label {
