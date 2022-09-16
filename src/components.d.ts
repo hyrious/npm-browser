@@ -14,6 +14,7 @@ declare module '@vue/runtime-core' {
     FileIcon: typeof import('./components/FileIcon.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
     Header: typeof import('./components/Header.vue')['default']
+    Information: typeof import('./components/Information.vue')['default']
     SplitPane: typeof import('./components/SplitPane.vue')['default']
   }
 }

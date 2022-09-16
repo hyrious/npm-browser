@@ -6,6 +6,7 @@ import { files, wordwrap } from "../stores/code"
 import { emitter } from "../helpers/hljs"
 import { is_binary } from "../helpers/is-binary"
 import { events } from "../helpers/events"
+import Information from "./Information.vue"
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
 
 const showHintOnce = ref(!packageName.value)
@@ -38,6 +39,7 @@ const fullTextSearchResultPretty = computed(() => {
 })
 const fullTextSearchLineNumberWidth = ref(0)
 const searchResultIndex = ref(-1)
+const information = ref(false)
 
 const DEBOUNCE_SEARCH = 500
 let timer = 0
@@ -141,10 +143,17 @@ onMounted(() => {
     showHintOnce.value = false
   })
 
+  const stop_listen_cmd_k = listen(document, "keydown", ev => {
+    if (ev.metaKey && ev.key === 'k') {
+      fullTextSearch()
+    }
+  })
+
   return () => {
     stop_listen_keyup()
     stop_listen_paste()
     stop_listen_search()
+    stop_listen_cmd_k()
   }
 })
 
@@ -395,7 +404,7 @@ function jsdelivr(ev: MouseEvent) {
         <span :data-value="v">{{ v }}</span>
       </button>
     </aside>
-    <button v-show="files.length" title="search from the whole package" :class="{ active: showFullTextSearch }"
+    <button v-show="files.length" title="search from the whole package (cmd+k)" :class="{ active: showFullTextSearch }"
       @click="fullTextSearch()">
       <i class="i-mdi-search"></i>
     </button>
@@ -424,6 +433,13 @@ function jsdelivr(ev: MouseEvent) {
       title="open this file in jsdelivr (press alt/option for unpkg)" @click="jsdelivr($event)">
       <i class="i-mdi-link-variant"></i>
     </button>
+    <button class="information" :class="{ active: information }" v-show="packageName && packageVersion"
+      @click="information = !information">
+      <i class="i-mdi-information-outline"></i>
+    </button>
+    <div class="information-panel" v-show="information">
+      <Information />
+    </div>
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
@@ -770,6 +786,24 @@ aside {
       padding: 4px 8px 8px;
     }
   }
+}
+
+.information-panel {
+  position: absolute;
+  top: 44px;
+  left: 65px;
+  max-width: 400px;
+  max-height: 400px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--bg);
+  z-index: 9999;
+  padding: 8px;
+  user-select: none;
+  pointer-events: 0;
+  display: flex;
+  flex-flow: row wrap;
+  gap: 8px;
 }
 
 @media (max-width: 720px) {
