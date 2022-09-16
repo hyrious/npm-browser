@@ -2,15 +2,16 @@
 import { storeToRefs } from "pinia"
 const { packageName, packageVersion } = storeToRefs(useApplicationStore())
 
-const weeklyDownloads = computed(() => `https://badgen.net/npm/dw/${packageName.value}`)
-const bundlephobia = computed(() => `https://badgen.net/bundlephobia/minzip/${packageName.value}`)
+const weeklyDownloads = computed(() => `https://img.shields.io/npm/dw/${packageName.value}`)
+const bundlephobia = computed(() => `https://img.shields.io/bundlephobia/minzip/${packageName.value}/${packageVersion.value}`)
 const pkg = computed(() => {
   const f = files.value.find(e => trim_root(e.name) === 'package.json')
   if (!f) return ""
   return JSON.parse(decoder.decode(f.buffer))
 })
-const repo = computed(find_github_repo)
+const repo = computed(() => find_github_repo())
 const desc = computed(() => pkg.value.description)
+const stars = computed(() => `https://img.shields.io/github/stars/${repo.value}`)
 
 function trim_root(str: string) {
   const i = str.indexOf('/')
@@ -38,8 +39,6 @@ function normalize_git_repo(repo: string) {
   }
   return repo
 }
-
-const stars = computed(() => `https://badgen.net/github/stars/${repo.value}`)
 </script>
 
 <template v-if="packageName && packageVersion">
