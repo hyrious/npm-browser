@@ -2,6 +2,7 @@
 import { storeToRefs } from "pinia";
 import prettyBytes from "pretty-bytes";
 import { listen } from "@wopjs/dom";
+import { disposable } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
@@ -94,16 +95,31 @@ async function fetchPackage(name: string, version: string) {
   fetching.value = false;
 }
 
-onMounted(() =>
-  listen(document.body, "keydown", (e) => {
-    if (e.target === document.body && e.key === ".") {
-      const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
-      const buffer = pkg?.buffer;
-      const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
-      json && open_homepage(json);
-    }
-  })
-);
+onMounted(() => {
+  const { push, flush } = disposable();
+  push(
+    listen(document.body, "keydown", (e) => {
+      if (e.target === document.body && e.key === ".") {
+        const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
+        const buffer = pkg?.buffer;
+        const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
+        json && open_homepage(json);
+      }
+    })
+  );
+  push(
+    events.on("jump", (location) => {
+      const parts = location.split("/").slice(2);
+      let node: FileEntry | null | undefined = root.value;
+      parts.forEach((name) => {
+        if (!node) return;
+        node = node.children?.find((e) => e.name === name);
+        if (node) node.collapsed = false;
+      });
+    })
+  );
+  return flush;
+});
 
 function open_homepage(json: any) {
   if (typeof json.homepage === "string") {
@@ -158,11 +174,11 @@ function confirm_delete_all() {
 
 <template>
   <header v-if="nameVersion">
-    <h3 :title="nameVersion">
+    <h3 :title="nameVersion + ' ' + sizePretty">
       <span>{{ nameVersion }}</span>
-      <span v-if="!fetching && size > 0" class="size" :title="'Packed: ' + packedSizePretty">{{
-        sizePretty
-      }}</span>
+      <span v-if="!fetching && size > 0" class="size" :title="'Packed: ' + packedSizePretty">
+        {{ sizePretty }}
+      </span>
     </h3>
   </header>
   <ul v-if="root?.children">

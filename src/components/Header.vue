@@ -1,171 +1,179 @@
 <script lang="ts" setup>
-import { storeToRefs } from "pinia"
-import { listen } from "@wopjs/dom"
-import { $ as querySelector } from "@hyrious/utils"
-import { files, wordwrap } from "../stores/code"
-import { emitter } from "../helpers/hljs"
-import { is_binary } from "../helpers/is-binary"
-import { events } from "../helpers/events"
-import Information from "./Information.vue"
-const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore())
+import { storeToRefs } from "pinia";
+import { listen } from "@wopjs/dom";
+import { $ as querySelector } from "@hyrious/utils";
+import { files, wordwrap } from "../stores/code";
+import { emitter } from "../helpers/hljs";
+import { is_binary } from "../helpers/is-binary";
+import { events } from "../helpers/events";
+import Information from "./Information.vue";
+const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore());
 
-const showHintOnce = ref(!packageName.value)
-const searchInput = ref()
-const searchText = ref('')
-const searching = ref(false)
-const searchResult = ref<{ name: string, description: string }[]>([])
-const versions = ref<string[]>([])
-const highlighted = ref(false)
-const showDiff = ref(false)
-const showFullTextSearch = ref(false)
-const fullTextSearchText = ref("")
-const searchingFullText = ref(false)
-type Line = { path: string, line: number, text: string }
-const fullTextSearchResult = ref<Line[] | null>(null)
-type Block = { path: string, lines: Line[] }
+const showHintOnce = ref(!packageName.value);
+const searchInput = ref();
+const searchText = ref("");
+const searching = ref(false);
+const searchResult = ref<{ name: string; description: string }[]>([]);
+const versions = ref<string[]>([]);
+const highlighted = ref(false);
+const showDiff = ref(false);
+const showFullTextSearch = ref(false);
+const fullTextSearchText = ref("");
+const searchingFullText = ref(false);
+type Line = { path: string; line: number; text: string };
+const fullTextSearchResult = ref<Line[] | null>(null);
+type Block = { path: string; lines: Line[] };
 const fullTextSearchResultPretty = computed(() => {
-  let current: Block | null = null
-  const result: Block[] = []
-  if (!fullTextSearchResult.value) return result
+  let current: Block | null = null;
+  const result: Block[] = [];
+  if (!fullTextSearchResult.value) return result;
   for (const row of fullTextSearchResult.value) {
     if (!current || current.path !== row.path) {
-      current = { path: row.path, lines: [row] }
-      result.push(current)
+      current = { path: row.path, lines: [row] };
+      result.push(current);
     } else {
-      current.lines.push(row)
+      current.lines.push(row);
     }
   }
-  return result
-})
-const fullTextSearchLineNumberWidth = ref(0)
-const searchResultIndex = ref(-1)
-const information = ref(false)
+  return result;
+});
+const fullTextSearchLineNumberWidth = ref(0);
+const searchResultIndex = ref(-1);
+const information = ref(false);
 
-const DEBOUNCE_SEARCH = 500
-let timer = 0
+const DEBOUNCE_SEARCH = 500;
+let timer = 0;
 function debouncedSearch(str: string) {
-  clearTimeout(timer)
+  clearTimeout(timer);
   if ((str = str.trim())) {
-    timer = setTimeout(search, DEBOUNCE_SEARCH, str)
-    searching.value = true
-    searchResult.value = []
+    timer = setTimeout(search, DEBOUNCE_SEARCH, str);
+    searching.value = true;
+    searchResult.value = [];
   } else {
-    searchResult.value = []
-    searching.value = false
+    searchResult.value = [];
+    searching.value = false;
   }
 }
 
-const api = new URL('https://registry.npmjs.org/-/v1/search')
-let abortController: AbortController | null = null
+const api = new URL("https://registry.npmjs.org/-/v1/search");
+let abortController: AbortController | null = null;
 async function search(str: string) {
-  api.searchParams.set("text", str)
+  api.searchParams.set("text", str);
   try {
-    abortController && abortController.abort()
-    abortController = new AbortController()
-    const ret = await fetch(api, { signal: abortController.signal }).then(r => r.json())
-    searchResult.value = ret.objects.map((e: any) => e.package)
+    abortController && abortController.abort();
+    abortController = new AbortController();
+    const ret = await fetch(api, { signal: abortController.signal }).then((r) => r.json());
+    searchResult.value = ret.objects.map((e: any) => e.package);
   } catch (e) {
-    if (e.name === 'AbortError') return
-    statusMessage(e.message)
-    throw e
+    if (e.name === "AbortError") return;
+    statusMessage(e.message);
+    throw e;
   }
 }
 
-let skip = false
+let skip = false;
 watch(searchText, (name) => {
   if (skip) {
-    skip = false
-    return
+    skip = false;
+    return;
   }
-  showHintOnce.value = false
-  packageName.value = ''
-  packageVersion.value = ''
-  versions.value = []
-  line.value = 0
-  searchResultIndex.value = -1
-  debouncedSearch(name)
-})
+  showHintOnce.value = false;
+  packageName.value = "";
+  packageVersion.value = "";
+  versions.value = [];
+  line.value = 0;
+  searchResultIndex.value = -1;
+  debouncedSearch(name);
+});
 
 function choose(pkg: { name: string }) {
-  skip = true
-  searching.value = false
-  packageName.value = searchText.value = pkg.name
-  searchResult.value = []
+  skip = true;
+  searching.value = false;
+  packageName.value = searchText.value = pkg.name;
+  searchResult.value = [];
 }
 
-watch(packageName, name => {
+watch(packageName, (name) => {
   if (name) {
-    versions.value = []
-    debouncedLoadVersions(packageName.value)
+    versions.value = [];
+    debouncedLoadVersions(packageName.value);
   }
-})
+});
 
 onMounted(() => {
   if (packageName.value) {
-    skip = true
-    searchText.value = packageName.value
-    loadVersions(packageName.value, packageVersion.value)
+    skip = true;
+    searchText.value = packageName.value;
+    loadVersions(packageName.value, packageVersion.value);
   } else if (searchInput.value) {
-    (searchInput.value as HTMLInputElement).focus()
+    (searchInput.value as HTMLInputElement).focus();
   }
 
-  const AtoZ = 'abcdefghijklmnopqrstuvwxyz'
+  const AtoZ = "abcdefghijklmnopqrstuvwxyz";
   function focusSearchInput(ev: KeyboardEvent) {
     // @ts-ignore
     if (ev.target === this) {
-      if ((ev.key === '@' && ev.shiftKey) || (AtoZ.includes(ev.key) && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey)) {
-        const input = (searchInput.value as HTMLInputElement | null)
+      if (
+        (ev.key === "@" && ev.shiftKey) ||
+        (AtoZ.includes(ev.key) && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey)
+      ) {
+        const input = searchInput.value as HTMLInputElement | null;
         if (input) {
-          input.focus()
-          input.value = ev.key
+          input.focus();
+          input.value = ev.key;
         }
       }
     }
   }
-  const stop_listen_keyup = listen(document.body, 'keyup', focusSearchInput)
+  const stop_listen_keyup = listen(document.body, "keyup", focusSearchInput);
 
   function paste(ev: ClipboardEvent) {
-    if ((ev.target as HTMLElement).tagName !== 'INPUT') {
-      const data = ev.clipboardData?.getData('Text')
+    if ((ev.target as HTMLElement).tagName !== "INPUT") {
+      const data = ev.clipboardData?.getData("Text");
       if (data && data.length <= 214) {
-        ev.stopPropagation()
-        ev.preventDefault()
+        ev.stopPropagation();
+        ev.preventDefault();
         searchText.value = data;
-        (searchInput.value as HTMLInputElement | null)?.focus()
+        (searchInput.value as HTMLInputElement | null)?.focus();
       }
     }
   }
-  const stop_listen_paste = listen(document.body, 'paste', paste)
+  const stop_listen_paste = listen(document.body, "paste", paste);
 
-  const stop_listen_search = events.on("search", text => {
-    skip = true
-    searchText.value = text
-    showHintOnce.value = false
-  })
+  const stop_listen_search = events.on("search", (text) => {
+    skip = true;
+    searchText.value = text;
+    showHintOnce.value = false;
+  });
 
-  const stop_listen_cmd_k = listen(document, "keydown", ev => {
-    if (ev.metaKey && ev.key === 'k') {
-      fullTextSearch()
+  const stop_listen_cmd_k = listen(document, "keydown", (ev) => {
+    if (ev.metaKey && ev.key === "k") {
+      fullTextSearch();
     }
-  })
+  });
+
+  const stop_listen_jsdelivr = events.on("jsdelivr", ({ ev, path }) => {
+    jsdelivr(ev, path);
+  });
 
   return () => {
-    stop_listen_keyup()
-    stop_listen_paste()
-    stop_listen_search()
-    stop_listen_cmd_k()
-  }
-})
+    stop_listen_keyup();
+    stop_listen_paste();
+    stop_listen_search();
+    stop_listen_cmd_k();
+    stop_listen_jsdelivr();
+  };
+});
 
-emitter.on("highlighted", value => {
-  highlighted.value = value
-})
+emitter.on("highlighted", (value) => {
+  highlighted.value = value;
+});
 
-const DEBOUNCE_VERSIONS = 500
-let timerVersions = 0
+const DEBOUNCE_VERSIONS = 500;
+let timerVersions = 0;
 function debouncedLoadVersions(name: string) {
-  clearTimeout(timerVersions)
-  timerVersions = setTimeout(loadVersions, DEBOUNCE_VERSIONS, name)
+  clearTimeout(timerVersions);
+  timerVersions = setTimeout(loadVersions, DEBOUNCE_VERSIONS, name);
 }
 
 interface NpmInstallData {
@@ -181,199 +189,231 @@ interface NpmPackageInfo {
   dist: { tarball: string; fileCount?: number };
 }
 
-async function loadVersions(name: string, setVersion = '') {
+async function loadVersions(name: string, setVersion = "") {
   try {
-    abortController && abortController.abort()
-    abortController = new AbortController()
+    abortController && abortController.abort();
+    abortController = new AbortController();
     const res = await fetch(`https://registry.npmjs.org/${name}`, {
       headers: { Accept: "application/vnd.npm.install-v1+json" },
-      signal: abortController.signal
-    })
-    if (!res.ok) throw new Error(`Failed to fetch ${res.url}: ${await res.text()}`)
+      signal: abortController.signal,
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${res.url}: ${await res.text()}`);
     const info = await (res.json() as Promise<NpmInstallData>).then((data) => ({
       latest: data["dist-tags"].latest,
       versions: Object.keys(data.versions),
-    }))
-    versions.value = info.versions.reverse()
-    if (setVersion && info.versions.some(v => v === setVersion)) {
-      packageVersion.value = setVersion
+    }));
+    versions.value = info.versions.reverse();
+    if (setVersion && info.versions.some((v) => v === setVersion)) {
+      packageVersion.value = setVersion;
     } else {
-      packageVersion.value = info.latest
+      packageVersion.value = info.latest;
     }
   } catch (e) {
-    if (e.name === 'AbortError') return
-    statusMessage(e.message)
-    throw e
+    if (e.name === "AbortError") return;
+    statusMessage(e.message);
+    throw e;
   }
 }
 
 async function share() {
   try {
-    let url = location.href
-    await navigator.clipboard?.writeText(url)
-    alert('Shareable URL has been copied to clipboard.')
+    let url = location.href;
+    await navigator.clipboard?.writeText(url);
+    alert("Shareable URL has been copied to clipboard.");
   } catch {}
 }
 
 async function npmInstall() {
   try {
-    let text = `npm i ${packageName.value}@${packageVersion.value}`
-    await navigator.clipboard?.writeText(text)
-    alert('Install command has been copied to clipboard.')
+    let text = `npm i ${packageName.value}@${packageVersion.value}`;
+    await navigator.clipboard?.writeText(text);
+    alert("Install command has been copied to clipboard.");
   } catch (e) {
-    alert(e.message)
+    alert(e.message);
   }
 }
 
-const subpath = computed(() => {
-  const prefix = root_folder.value
-  let subpath = path.value
-  if (subpath.startsWith('/' + prefix)) {
-    subpath = subpath.slice(prefix.length + 1)
+function strip_root(path: string) {
+  const prefix = root_folder.value;
+  let subpath = path;
+  if (subpath.startsWith("/" + prefix)) {
+    subpath = subpath.slice(prefix.length + 1);
   }
-  return subpath
-})
+  return subpath;
+}
+
+const subpath = computed(() => strip_root(path.value));
 
 function diff(ev: MouseEvent) {
-  const el = ev.target as HTMLElement
+  const el = ev.target as HTMLElement;
   if (el && el.dataset.value) {
-    const name = packageName.value
-    const from = el.dataset.value
-    const to = packageVersion.value
-    const url = new URL('https://hyrious.me/tool/diff-npm.html')
-    url.searchParams.set('a', `${name}@${from}${subpath.value}`)
-    url.searchParams.set('b', `${name}@${to}${subpath.value}`)
-    url.searchParams.set('s', '1')
-    url.searchParams.set('f', 'l')
-    showDiff.value = false
-    window.open(url.toString(), '_blank')
+    const name = packageName.value;
+    const from = el.dataset.value;
+    const to = packageVersion.value;
+    const url = new URL("https://hyrious.me/tool/diff-npm.html");
+    url.searchParams.set("a", `${name}@${from}${subpath.value}`);
+    url.searchParams.set("b", `${name}@${to}${subpath.value}`);
+    url.searchParams.set("s", "1");
+    url.searchParams.set("f", "l");
+    showDiff.value = false;
+    window.open(url.toString(), "_blank");
   }
 }
 
-const TEXT_EXTS = ['.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.less', '.html', '.md', '.json', '.yaml', '.yml', '.xml', '.svg', '.txt']
+const TEXT_EXTS = [
+  ".js",
+  ".ts",
+  ".jsx",
+  ".tsx",
+  ".css",
+  ".scss",
+  ".less",
+  ".html",
+  ".md",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".xml",
+  ".svg",
+  ".txt",
+];
 async function fullTextSearch(search?: string) {
   if (search === undefined) {
-    const show = showFullTextSearch.value = !showFullTextSearch.value
-    return show && nextTick(() => {
-      const searchInput = document.querySelector('#s')
-      searchInput && (searchInput as HTMLElement).focus()
-    })
+    const show = (showFullTextSearch.value = !showFullTextSearch.value);
+    return (
+      show &&
+      nextTick(() => {
+        const searchInput = document.querySelector("#s");
+        searchInput && (searchInput as HTMLElement).focus();
+      })
+    );
   }
 
   if (search === "") {
-    fullTextSearchResult.value = null
-    return
+    fullTextSearchResult.value = null;
+    return;
   }
 
-  searchingFullText.value = true
-  const result: Line[] = []
-  const decoder = new TextDecoder()
-  let maxWidth = 2
+  searchingFullText.value = true;
+  const result: Line[] = [];
+  const decoder = new TextDecoder();
+  let maxWidth = 2;
   // ref: https://github.com/frejs/fre/blob/master/src/schedule.ts
-  const threshold = 5
-  let deadline = 0
+  const threshold = 5;
+  let deadline = 0;
   for (const file of files.value) {
     // skip minified files
-    if (file.name.includes('.min.')) continue
+    if (file.name.includes(".min.")) continue;
     // skip binary files
-    if (!TEXT_EXTS.some(ext => file.name.endsWith(ext))) continue
-    if (is_binary(file.buffer)) continue
+    if (!TEXT_EXTS.some((ext) => file.name.endsWith(ext))) continue;
+    if (is_binary(file.buffer)) continue;
 
-    const path = file.name.replace(/^\w+\//, '')
-    const text = decoder.decode(file.buffer)
+    const path = file.name.replace(/^\w+\//, "");
+    const text = decoder.decode(file.buffer);
     text.split(/\r?\n/).forEach((line, i) => {
       if (line.includes(fullTextSearchText.value)) {
-        maxWidth = Math.max(maxWidth, `${i + 1}`.length)
-        result.push({ path, line: i + 1, text: line })
+        maxWidth = Math.max(maxWidth, `${i + 1}`.length);
+        result.push({ path, line: i + 1, text: line });
       }
-    })
+    });
 
-    let now = performance.now()
+    let now = performance.now();
     if (now >= deadline) {
-      deadline = now + threshold
-      fullTextSearchResult.value = result.slice()
-      fullTextSearchLineNumberWidth.value = maxWidth
-      await new Promise(r => requestAnimationFrame(r))
+      deadline = now + threshold;
+      fullTextSearchResult.value = result.slice();
+      fullTextSearchLineNumberWidth.value = maxWidth;
+      await new Promise((r) => requestAnimationFrame(r));
     }
   }
-  fullTextSearchLineNumberWidth.value = maxWidth
-  fullTextSearchResult.value = result
+  fullTextSearchLineNumberWidth.value = maxWidth;
+  fullTextSearchResult.value = result;
 
-  searchingFullText.value = false
+  searchingFullText.value = false;
 }
 
 async function jump(location: { path: string; line: number }) {
-  path.value = '/' + root_folder.value + '/' + location.path
-  line.value = location.line
-  await nextTick()
-  const activeLine = document.querySelector('[data-line].active')
+  path.value = "/" + root_folder.value + "/" + location.path;
+  line.value = location.line;
+  await nextTick();
+  const activeLine = document.querySelector("[data-line].active");
   if (activeLine) {
-    activeLine.scrollIntoView({ block: 'center' })
+    activeLine.scrollIntoView({ block: "center" });
   }
+  events.emit("jump", path.value);
 }
 
 function toggleBlock(ev: MouseEvent) {
-  const el = ev.target as HTMLButtonElement
-  if (el.classList.contains('search-result-heading')) {
-    el.classList.toggle('collapsed')
+  const el = ev.target as HTMLButtonElement;
+  if (el.classList.contains("search-result-heading")) {
+    el.classList.toggle("collapsed");
   }
 }
 
 function press_return_to_kick_start_and_handle_arrows(ev: KeyboardEvent) {
   if (ev.key === "Enter" && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey) {
-    ev.preventDefault()
-    ev.stopPropagation()
-    const index = searchResultIndex.value
+    ev.preventDefault();
+    ev.stopPropagation();
+    const index = searchResultIndex.value;
     if (index === -1) {
-      const name = searchText.value.trim()
-      name && choose({ name })
+      const name = searchText.value.trim();
+      name && choose({ name });
     } else {
-      choose(searchResult.value[index])
+      choose(searchResult.value[index]);
     }
   } else {
-    handle_arrows(ev)
+    handle_arrows(ev);
   }
 }
 
 function handle_arrows(ev: KeyboardEvent) {
-  if (ev.key === 'ArrowUp') {
-    ev.preventDefault()
-    select_candidate(-1)
-  } else if (ev.key === 'ArrowDown') {
-    ev.preventDefault()
-    select_candidate(+1)
+  if (ev.key === "ArrowUp") {
+    ev.preventDefault();
+    select_candidate(-1);
+  } else if (ev.key === "ArrowDown") {
+    ev.preventDefault();
+    select_candidate(+1);
   }
 }
 
 function select_candidate(step: number) {
-  const size = searchResult.value.length
-  const value = searchResultIndex.value
-  const next = value === -1 ? (step > 0 ? 0 : size - 1) : (value + step + size) % size
-  searchResultIndex.value = next
-  nextTick(focus_search_result_by_index)
+  const size = searchResult.value.length;
+  const value = searchResultIndex.value;
+  const next = value === -1 ? (step > 0 ? 0 : size - 1) : (value + step + size) % size;
+  searchResultIndex.value = next;
+  nextTick(focus_search_result_by_index);
 }
 
 function focus_search_result_by_index() {
-  querySelector('.searching>ul>li.active')?.scrollIntoView({ block: 'nearest' })
+  querySelector(".searching>ul>li.active")?.scrollIntoView({ block: "nearest" });
 }
 
-function jsdelivr(ev: MouseEvent) {
+function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
+  const suffix = path ? strip_root(path) : subpath.value;
   let url: string;
   if (ev.altKey) {
-    url = `https://unpkg.com/${packageName.value}@${packageVersion.value}${subpath.value}`
+    url = `https://unpkg.com/${packageName.value}@${packageVersion.value}${suffix}`;
   } else {
-    url = `https://cdn.jsdelivr.net/npm/${packageName.value}@${packageVersion.value}${subpath.value}`
+    url = `https://cdn.jsdelivr.net/npm/${packageName.value}@${packageVersion.value}${suffix}`;
   }
-  open(url, '_blank')
+  open(url, "_blank");
 }
 </script>
 
 <template>
   <header>
     <label for="q">npm&nbsp;i</label>
-    <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
-      spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
-      @keyup="press_return_to_kick_start_and_handle_arrows($event)" />
+    <input
+      v-model="searchText"
+      id="q"
+      ref="searchInput"
+      title="package name"
+      placeholder="vue"
+      autocomplete="off"
+      spellcheck="false"
+      :class="{ inputting: searchText }"
+      :style="{ width: searchText.length + '.5ch' }"
+      @keyup="press_return_to_kick_start_and_handle_arrows($event)"
+    />
     <transition name="fade">
       <span v-if="showHintOnce">
         <i class="i-mdi-arrow-left-thin"></i>
@@ -381,8 +421,13 @@ function jsdelivr(ev: MouseEvent) {
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
-    <select v-model="packageVersion" v-show="versions.length" id="v" title="package version"
-      :style="{ width: packageVersion.length + '.5ch' }">
+    <select
+      v-model="packageVersion"
+      v-show="versions.length"
+      id="v"
+      title="package version"
+      :style="{ width: packageVersion.length + '.5ch' }"
+    >
       <option v-for="v in versions" :value="v">{{ v }}</option>
     </select>
     <span v-show="packageName && !versions.length">
@@ -392,27 +437,46 @@ function jsdelivr(ev: MouseEvent) {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button v-show="packageName && packageVersion && path" :class="{ active: showDiff }" title="diff with other version"
-      @click="showDiff = !showDiff">
+    <button
+      v-show="packageName && packageVersion && path"
+      :class="{ active: showDiff }"
+      title="diff with other version"
+      @click="showDiff = !showDiff"
+    >
       <i class="i-mdi-file-compare"></i>
     </button>
-    <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
-      @click="diff($event)">
+    <aside
+      v-if="showDiff"
+      class="diff-versions"
+      :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
+      @click="diff($event)"
+    >
       <button v-for="v in versions" :data-value="v">
         <span :data-value="v">{{ packageVersion }}</span>
         <i class="i-mdi-arrow-left" :data-value="v"></i>
         <span :data-value="v">{{ v }}</span>
       </button>
     </aside>
-    <button v-show="files.length" title="search from the whole package (cmd+k)" :class="{ active: showFullTextSearch }"
-      @click="fullTextSearch()">
+    <button
+      v-show="files.length"
+      title="search from the whole package (cmd+k)"
+      :class="{ active: showFullTextSearch }"
+      @click="fullTextSearch()"
+    >
       <i class="i-mdi-search"></i>
     </button>
     <aside v-if="showFullTextSearch" class="full-text-search">
       <div class="row">
         <label for="s">Search:</label>
-        <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
-          spellcheck="false" @change="fullTextSearch(fullTextSearchText)">
+        <input
+          v-model="fullTextSearchText"
+          :disabled="searchingFullText"
+          id="s"
+          title="code"
+          autocomplete="off"
+          spellcheck="false"
+          @change="fullTextSearch(fullTextSearchText)"
+        />
         <button :disabled="searchingFullText" @click="fullTextSearch(fullTextSearchText)">
           <i v-show="searchingFullText" class="i-mdi-loading"></i>
           <span v-show="!searchingFullText">GO</span>
@@ -420,21 +484,35 @@ function jsdelivr(ev: MouseEvent) {
       </div>
       <output>
         <div class="search-result-block" v-for="block in fullTextSearchResultPretty">
-          <h4><i class="i-mdi-file"></i><button class="search-result-heading" @click="toggleBlock($event)">{{ block.path
-          }}</button></h4>
-          <button class="search-result-line" v-for="line in block.lines" :title="line.text" @click="jump(line)">{{
-          String(line.line).padStart(fullTextSearchLineNumberWidth)
-          }}: {{ line.text }}</button>
+          <h4>
+            <i class="i-mdi-file"></i>
+            <button class="search-result-heading" @click="toggleBlock($event)">{{ block.path }}</button>
+          </h4>
+          <button
+            class="search-result-line"
+            v-for="line in block.lines"
+            :title="line.text"
+            @click="jump(line)"
+          >
+            {{ String(line.line).padStart(fullTextSearchLineNumberWidth) }}: {{ line.text }}
+          </button>
         </div>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
     </aside>
-    <button v-show="packageName && packageVersion && path"
-      title="open this file in jsdelivr (press alt/option for unpkg)" @click="jsdelivr($event)">
+    <button
+      v-show="packageName && packageVersion && path"
+      title="open this file in jsdelivr (press alt/option for unpkg)"
+      @click="jsdelivr($event)"
+    >
       <i class="i-mdi-link-variant"></i>
     </button>
-    <button class="information" :class="{ active: information }" v-show="packageName && packageVersion"
-      @click="information = !information">
+    <button
+      class="information"
+      :class="{ active: information }"
+      v-show="packageName && packageVersion"
+      @click="information = !information"
+    >
       <i class="i-mdi-information-outline"></i>
     </button>
     <div class="information-panel" v-show="information">
@@ -443,8 +521,13 @@ function jsdelivr(ev: MouseEvent) {
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
-      <button :class="{ active: highlighted }" title="(press shift to add line numbers)"
-        @click="emitter.emit('update', $event.shiftKey)">highlight-it</button>
+      <button
+        :class="{ active: highlighted }"
+        title="(press shift to add line numbers)"
+        @click="emitter.emit('update', $event.shiftKey)"
+      >
+        highlight-it
+      </button>
     </div>
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>
@@ -455,8 +538,13 @@ function jsdelivr(ev: MouseEvent) {
   </header>
   <aside class="searching" v-show="searching">
     <ul v-if="searchResult.length > 0">
-      <li v-for="pkg, i in searchResult" :key="pkg.name" @click="choose(pkg)" :title="pkg.description"
-        :class="{ active: searchResultIndex === i }">
+      <li
+        v-for="(pkg, i) in searchResult"
+        :key="pkg.name"
+        @click="choose(pkg)"
+        :title="pkg.description"
+        :class="{ active: searchResultIndex === i }"
+      >
         <h3>{{ pkg.name }}</h3>
         <p>{{ pkg.description }}</p>
       </li>
@@ -485,7 +573,7 @@ header {
   box-shadow: var(--shadow);
   z-index: 200;
 
-  >span {
+  > span {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -524,7 +612,7 @@ header {
   font-family: var(--sans);
   color: var(--fg-on);
 
-  +span {
+  + span {
     font-family: var(--sans);
     color: var(--fg);
     padding-left: 4px;
@@ -654,7 +742,7 @@ aside {
     }
   }
 
-  >p {
+  > p {
     margin: 0;
     padding: 4px 8px;
     color: var(--fg);
@@ -685,8 +773,8 @@ aside {
     height: 16px;
   }
 
-  >span,
-  >i {
+  > span,
+  > i {
     pointer-events: none;
   }
 }
@@ -777,7 +865,7 @@ aside {
       }
     }
 
-    h4:has(.collapsed)~button {
+    h4:has(.collapsed) ~ button {
       display: none;
     }
 
@@ -808,7 +896,6 @@ aside {
 
 @media (max-width: 720px) {
   header {
-
     .btn,
     button,
     .hint {

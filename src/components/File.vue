@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FileEntry } from "../helpers/construct";
+import { events } from "../helpers/events";
 import FileIcon from "./FileIcon.vue";
 
 export interface Props {
@@ -18,7 +19,11 @@ const folder = computed(() => props.node.children);
 const selected = computed(() => props.node.path === app.path);
 const collapsed = computed(() => props.node.collapsed);
 
-function select() {
+function select(ev: MouseEvent) {
+  if (ev.metaKey || ev.ctrlKey) {
+    events.emit("jsdelivr", { ev, path: path.value });
+    return;
+  }
   if (folder.value) {
     props.node.collapsed = !collapsed.value;
   } else if (app.path !== path.value) {
@@ -31,7 +36,7 @@ function select() {
 
 <template>
   <li :class="{ folder, file: !folder, collapsed }">
-    <div @click="select()" :class="{ selected }">
+    <div @click="select($event)" :class="{ selected }">
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
