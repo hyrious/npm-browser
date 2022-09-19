@@ -21,7 +21,8 @@ const collapsed = computed(() => props.node.collapsed);
 
 function select(ev: MouseEvent) {
   if (ev.metaKey || ev.ctrlKey) {
-    events.emit("jsdelivr", { ev, path: path.value });
+    const p = path.value + (folder.value ? "/" : "");
+    events.emit("jsdelivr", { ev, path: p });
     return;
   }
   if (folder.value) {
