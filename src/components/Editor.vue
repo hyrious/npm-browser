@@ -30,11 +30,23 @@ const lang = computed(() => {
   return ext;
 });
 
-const HLJS_MAX_LENGTH = 20480;
+const HLJS_MAX_LINES = 8000;
+const HLJS_MAX_WIDTH = 1000;
+
+function lines(str: string) {
+  let [j, i, n] = [0, -1, 0];
+  while ((i = str.indexOf("\n", i + 1)) !== -1) {
+    n++;
+    if (n >= HLJS_MAX_LINES) return Infinity;
+    if (i - j >= HLJS_MAX_WIDTH) return Infinity;
+    j = i;
+  }
+  return n;
+}
 
 watchEffect(() => {
   if (code.value && pre.value) {
-    if (code.value.length < HLJS_MAX_LENGTH) {
+    if (lines(code.value) < HLJS_MAX_LINES) {
       update(pre.value, code.value, lang.value, true);
     } else {
       pre.value.textContent = code.value;

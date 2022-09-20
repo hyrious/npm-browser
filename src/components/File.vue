@@ -29,6 +29,7 @@ function select(ev: MouseEvent) {
     props.node.collapsed = !collapsed.value;
   } else if (app.path !== path.value) {
     app.path = path.value;
+    app.line = 0;
   } else {
     app.path = "";
   }
