@@ -6,6 +6,7 @@ import { disposable } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
+import { normalize_git_repo } from "../helpers/utils";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
 const root = ref<FileEntry | null>(null);
@@ -105,6 +106,12 @@ onMounted(() => {
         const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
         json && open_homepage(json);
       }
+      if (e.target === document.body && e.key === ",") {
+        const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
+        const buffer = pkg?.buffer;
+        const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
+        json && open_github(json);
+      }
     })
   );
   push(
@@ -120,6 +127,17 @@ onMounted(() => {
   );
   return flush;
 });
+
+function open_github(json: any) {
+  let repo = json.repository;
+  let normalized = "";
+  if (typeof repo === "string") normalized = normalize_git_repo(repo);
+  if (typeof repo === "object" && repo.type === "git") normalized = normalize_git_repo(repo.url);
+  if (normalized) {
+    const url = "https://github.com/" + normalized;
+    open(url, "_blank");
+  }
+}
 
 function open_homepage(json: any) {
   if (typeof json.homepage === "string") {
