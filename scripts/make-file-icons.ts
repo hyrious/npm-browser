@@ -54,7 +54,10 @@ for (const [name, color] of Object.entries(icons)) {
   tasks.push(
     fetch(`${baseUrl}/build/assets/${name}.svg`, `${name}.svg`).then((svg) => {
       const hsl: string = colors[color as string];
-      const rendered = svg.replace('xmlns="http://www.w3.org/2000/svg" ', "").replace("#000", hsl);
+      const rendered = svg
+        .replace('xmlns="http://www.w3.org/2000/svg" ', "")
+        .replace("#000", hsl)
+        .replace('width="100%" height="100%" ', ""); // fix svelte
       console.log(".", type);
       result[type] = rendered;
     })
@@ -62,4 +65,6 @@ for (const [name, color] of Object.entries(icons)) {
 }
 await Promise.all(tasks);
 
-writeFileSync("scripts/file-icons.json", JSON.stringify(result, null, 2));
+const sorted = Object.fromEntries(Object.entries(result).sort((a, b) => a[0].localeCompare(b[0])));
+
+writeFileSync("scripts/file-icons.json", JSON.stringify(sorted, null, 2));
