@@ -8,6 +8,7 @@
     </template>
     <template #right>
       <Editor />
+      <QuickOpen />
     </template>
   </SplitPane>
   <Footer></Footer>
