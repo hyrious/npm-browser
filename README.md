@@ -17,8 +17,10 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
 
 **Useful Functions**:
   
-- Goto some package's homepage:\
-  Press <kbd>.</kbd>
+- Goto some package's homepage/github_repo:\
+  Press <kbd>.</kbd> / <kbd>,</kbd>
+- Quick open a file:\
+  Press <kbd>ctrl + p</kbd>
 - Search source code from all files in some package:\
   Click the :mag: icon
 - Open the viewing file in JsDelivr or UNPKG:\
