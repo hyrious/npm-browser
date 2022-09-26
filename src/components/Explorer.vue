@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import prettyBytes from "pretty-bytes";
-import { listen } from "@wopjs/dom";
+import { listen, querySelector } from "@wopjs/dom";
 import { disposable } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
@@ -123,6 +123,8 @@ onMounted(() => {
         node = node.children?.find((e) => e.name === name);
         if (node) node.collapsed = false;
       });
+      const el = querySelector(".selected");
+      el && el.scrollIntoView({ block: "center" });
     })
   );
   return flush;

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { wait } from "@hyrious/utils";
+import { querySelector } from "@wopjs/dom";
 import { FileEntry } from "../helpers/construct";
 import { events } from "../helpers/events";
 import FileIcon from "./FileIcon.vue";
@@ -34,6 +36,17 @@ function select(ev: MouseEvent) {
     app.path = "";
   }
 }
+
+watch(
+  path,
+  async () => {
+    // wait until files refresh
+    await wait(100);
+    const el = querySelector(".selected");
+    el && el.scrollIntoView({ block: "center" });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

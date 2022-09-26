@@ -2,6 +2,7 @@
 import { match_trace } from "@hyrious/fuzzy-match";
 import { clamp, disposable, _ } from "@hyrious/utils";
 import { listen, querySelector } from "@wopjs/dom";
+import { events } from "../helpers/events";
 import { files } from "../stores/code";
 import TextWithStops from "./TextWithStops.vue";
 
@@ -52,9 +53,12 @@ function strip_root(path: string) {
   return subpath;
 }
 
+const MAX_ITEMS = 100;
+
 const filtered = computed<FilteredFile[]>(() => {
   if (!pattern.value) {
     return files.value
+      .slice(0, MAX_ITEMS)
       .map((f) => ({
         name: basename(f.name),
         path: strip_root(f.name),
@@ -64,23 +68,34 @@ const filtered = computed<FilteredFile[]>(() => {
 
   const pat = pattern.value;
   const result: FilteredFile[] = [];
-  files.value.forEach((f) => {
+  for (const f of files.value) {
     const name = basename(f.name);
     const path = strip_root(f.name);
 
     const m1 = match_trace(pat, name);
     const m2 = match_trace(pat, path);
+    let score = -Infinity;
+    if (m1) {
+      score = m1.score;
+    }
+    if (m2) {
+      score = Math.max(score, m2.score);
+    }
 
     if (m1 || m2) {
       result.push({
-        score: m1?.score ?? m2?.score,
+        score,
         name,
         name_stops: m1?.stops,
         path,
         path_stops: m2?.stops,
       });
+
+      if (result.length >= MAX_ITEMS) {
+        break;
+      }
     }
-  });
+  }
   result.sort((a, b) => {
     if (a.score === _ && b.score === _) {
       return a.path.localeCompare(b.path);
@@ -91,7 +106,7 @@ const filtered = computed<FilteredFile[]>(() => {
     if (b.score === _) {
       return -200;
     }
-    const diff = a.score - b.score;
+    const diff = b.score - a.score;
     return diff === 0 ? a.path.localeCompare(b.path) : diff;
   });
 
@@ -127,6 +142,7 @@ function select(i?: number) {
   const f = filtered.value[i ?? clamp(keyboardIndex.value, 0, filtered.value.length - 1)];
   if (f) {
     app.path = "/" + root_folder.value + "/" + f.path;
+    events.emit("jump", app.path);
   }
   open.value = false;
 }
@@ -148,6 +164,7 @@ function select(i?: number) {
         v-for="(file, i) in filtered"
         :key="file.path"
         :class="{ active: keyboardIndex === i }"
+        :data-score="file.score"
         @click="select(i)"
       >
         <h4><TextWithStops :text="file.name" :stops="file.name_stops" /></h4>
