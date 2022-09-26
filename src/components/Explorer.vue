@@ -2,7 +2,7 @@
 import { storeToRefs } from "pinia";
 import prettyBytes from "pretty-bytes";
 import { listen, querySelector } from "@wopjs/dom";
-import { disposable } from "@hyrious/utils";
+import { disposable, wait } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
@@ -123,9 +123,19 @@ onMounted(() => {
         node = node.children?.find((e) => e.name === name);
         if (node) node.collapsed = false;
       });
-      const el = querySelector(".selected");
-      el && el.scrollIntoView({ block: "center" });
     })
+  );
+  push(
+    watch(
+      path,
+      async () => {
+        // wait until files refresh
+        await wait(100);
+        const el = querySelector(".selected");
+        el && el.scrollIntoView({ block: "center" });
+      },
+      { immediate: true }
+    )
   );
   return flush;
 });

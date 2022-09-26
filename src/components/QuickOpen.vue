@@ -20,6 +20,7 @@ onMounted(() => {
       open.value = !open.value;
       if (open.value) {
         keyboardIndex.value = -1;
+        pattern.value = "";
         nextTick(() => {
           querySelector<HTMLInputElement>("#ctrl_p")?.focus();
         });
