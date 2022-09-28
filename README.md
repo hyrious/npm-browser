@@ -21,6 +21,8 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
   Press <kbd>.</kbd> / <kbd>,</kbd>
 - Quick open a file:\
   Press <kbd>ctrl + p</kbd>
+- Focus current file in sidebar:\
+  Press <kbd>alt/option + r</kbd>
 - Search source code from all files in some package:\
   Click the :mag: icon
 - Open the viewing file in JsDelivr or UNPKG:\

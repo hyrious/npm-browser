@@ -29,7 +29,24 @@ onMounted(() => {
       open.value = false;
     }
   }
-  push(listen(document, "keydown", ctrl_p, { capture: true }));
+  push(listen(document.body, "keydown", ctrl_p, { capture: true }));
+  push(
+    watch([pattern, keyboardIndex], ([p, i]) => {
+      if (p && i === -1) {
+        keyboardIndex.value = 0;
+      } else if (!p && i !== -1) {
+        keyboardIndex.value = -1;
+      }
+    })
+  );
+  function alt_r(ev: KeyboardEvent) {
+    if (ev.altKey && (ev.key === "r" || ev.key === "®")) {
+      ev.stopImmediatePropagation();
+      ev.preventDefault();
+      events.emit("jump", app.path);
+    }
+  }
+  push(listen(document.body, "keydown", alt_r, { capture: true }));
   return flush;
 });
 
@@ -58,13 +75,10 @@ const MAX_ITEMS = 100;
 
 const filtered = computed<FilteredFile[]>(() => {
   if (!pattern.value) {
-    return files.value
-      .slice(0, MAX_ITEMS)
-      .map((f) => ({
-        name: basename(f.name),
-        path: strip_root(f.name),
-      }))
-      .sort((a, b) => a.path.localeCompare(b.path));
+    return files.value.slice(0, MAX_ITEMS).map((f) => ({
+      name: basename(f.name),
+      path: strip_root(f.name),
+    }));
   }
 
   const pat = pattern.value;

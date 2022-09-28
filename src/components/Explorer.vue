@@ -7,6 +7,7 @@ import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
 import { normalize_git_repo } from "../helpers/utils";
+import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
 const root = ref<FileEntry | null>(null);
@@ -54,9 +55,10 @@ async function fetchPackage(name: string, version: string) {
       buffer = cached.buffer;
     } else {
       abortController = new AbortController();
-      buffer = await fetch(`https://registry.npmjs.org/${name}/-/${name.split("/").pop()}-${version}.tgz`, {
-        signal: abortController.signal,
-      }).then((r) => r.arrayBuffer());
+      buffer = await fetch_with_mirror_retry(
+        `https://registry.npmjs.org/${name}/-/${name.split("/").pop()}-${version}.tgz`,
+        { signal: abortController.signal }
+      ).then((r) => r.arrayBuffer());
       await set(name, version, new Uint8Array(buffer));
     }
   } catch (e) {
@@ -94,6 +96,14 @@ async function fetchPackage(name: string, version: string) {
   }
 
   fetching.value = false;
+  focus_in_sidebar();
+}
+
+async function focus_in_sidebar() {
+  // wait until sidebar refresh
+  await wait(100);
+  const el = querySelector(".selected");
+  el && el.scrollIntoView({ block: "center" });
 }
 
 onMounted(() => {
@@ -123,19 +133,8 @@ onMounted(() => {
         node = node.children?.find((e) => e.name === name);
         if (node) node.collapsed = false;
       });
+      focus_in_sidebar();
     })
-  );
-  push(
-    watch(
-      path,
-      async () => {
-        // wait until files refresh
-        await wait(100);
-        const el = querySelector(".selected");
-        el && el.scrollIntoView({ block: "center" });
-      },
-      { immediate: true }
-    )
   );
   return flush;
 });
@@ -200,15 +199,24 @@ function confirm_delete_all() {
     refresh_history();
   }
 }
+
+function fold_all() {
+  function traverse(node: FileEntry | null | undefined) {
+    if (!node) return;
+    node.collapsed = true;
+    node.children?.forEach(traverse);
+  }
+  traverse(root.value);
+}
 </script>
 
 <template>
-  <header v-if="nameVersion">
+  <header v-if="nameVersion && !fetching && size > 0">
     <h3 :title="nameVersion + ' ' + sizePretty">
-      <span>{{ nameVersion }}</span>
-      <span v-if="!fetching && size > 0" class="size" :title="'Packed: ' + packedSizePretty">
-        {{ sizePretty }}
-      </span>
+      <span class="size">{{ sizePretty }} (gzip: {{ packedSizePretty }})</span>
+      <button class="fold-all" title="fold all" @click="fold_all()">
+        <i class="i-mdi-collapse-all"></i>
+      </button>
     </h3>
   </header>
   <ul v-if="root?.children">
@@ -250,6 +258,8 @@ h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 ul {
@@ -262,7 +272,30 @@ ul {
 }
 
 .size {
-  padding-left: 8px;
+  flex: 1;
+}
+
+.fold-all {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--fg-on);
+  }
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .loading {

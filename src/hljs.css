@@ -163,6 +163,7 @@
 /* https://gist.github.com/hackjutsu/0a6338d66f4fd7d338fd0c04f3454394 */
 .hljs-line-number {
   text-align: right;
+  padding-left: 8px;
   padding-right: 8px;
   color: var(--pre-dim);
   width: 1%; /* this hack makes the table full width, don't know why */

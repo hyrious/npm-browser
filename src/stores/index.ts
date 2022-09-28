@@ -37,7 +37,7 @@ export const useApplicationStore = defineStore("app", () => {
     [packageName, packageVersion, path],
     ([name, version, path]) => {
       const normal_path = path.replace(/^\/\w+\//, "");
-      if (path) {
+      if (path && name && version) {
         document.title = `${normal_path} · ${name}@${version}`;
       } else if (name) {
         document.title = version ? `${name}@${version}` : name;

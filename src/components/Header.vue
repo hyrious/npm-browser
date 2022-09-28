@@ -5,6 +5,7 @@ import { $ as querySelector } from "@hyrious/utils";
 import { files, wordwrap } from "../stores/code";
 import { emitter } from "../helpers/hljs";
 import { is_binary } from "../helpers/is-binary";
+import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
 import Information from "./Information.vue";
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore());
@@ -62,7 +63,7 @@ async function search(str: string) {
   try {
     abortController && abortController.abort();
     abortController = new AbortController();
-    const ret = await fetch(api, { signal: abortController.signal }).then((r) => r.json());
+    const ret = await fetch_with_mirror_retry(api, { signal: abortController.signal }).then((r) => r.json());
     searchResult.value = ret.objects.map((e: any) => e.package);
   } catch (e) {
     if (e.name === "AbortError") return;
@@ -113,19 +114,22 @@ onMounted(() => {
   function focusSearchInput(ev: KeyboardEvent) {
     // @ts-ignore
     if (ev.target === this) {
+      const { key, shiftKey, ctrlKey, altKey, metaKey } = ev;
       if (
-        (ev.key === "@" && ev.shiftKey) ||
-        (AtoZ.includes(ev.key) && !ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey)
+        (key === "@" && shiftKey && !ctrlKey && !altKey && !metaKey) ||
+        (AtoZ.includes(key) && !shiftKey && !ctrlKey && !altKey && !metaKey)
       ) {
+        ev.stopImmediatePropagation();
+        ev.preventDefault();
         const input = searchInput.value as HTMLInputElement | null;
         if (input) {
           input.focus();
-          input.value = ev.key;
+          input.value = key;
         }
       }
     }
   }
-  const stop_listen_keyup = listen(document.body, "keyup", focusSearchInput);
+  const stop_listen_keydown = listen(document.body, "keydown", focusSearchInput, { capture: true });
 
   function paste(ev: ClipboardEvent) {
     if ((ev.target as HTMLElement).tagName !== "INPUT") {
@@ -146,7 +150,7 @@ onMounted(() => {
     showHintOnce.value = false;
   });
 
-  const stop_listen_cmd_k = listen(document, "keydown", (ev) => {
+  const stop_listen_cmd_k = listen(document.body, "keydown", (ev) => {
     if (ev.metaKey && ev.key === "k") {
       fullTextSearch();
     }
@@ -157,7 +161,7 @@ onMounted(() => {
   });
 
   return () => {
-    stop_listen_keyup();
+    stop_listen_keydown();
     stop_listen_paste();
     stop_listen_search();
     stop_listen_cmd_k();
@@ -193,7 +197,7 @@ async function loadVersions(name: string, setVersion = "") {
   try {
     abortController && abortController.abort();
     abortController = new AbortController();
-    const res = await fetch(`https://registry.npmjs.org/${name}`, {
+    const res = await fetch_with_mirror_retry(`https://registry.npmjs.org/${name}`, {
       headers: { Accept: "application/vnd.npm.install-v1+json" },
       signal: abortController.signal,
     });

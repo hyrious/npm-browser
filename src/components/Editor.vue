@@ -103,6 +103,9 @@ watchEffect(() => {
 
 <template>
   <div class="editor-container">
+    <header>
+      <h1>{{ app.path }}</h1>
+    </header>
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
     <span v-if="failed" class="tip">{{ failed }}</span>
     <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
@@ -110,21 +113,43 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
+header {
+  flex-shrink: 0;
+}
+
+h1 {
+  margin: 0;
+  padding: 6px 8px 4px;
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .editor-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
   height: 100%;
   position: relative;
 }
 
 pre {
+  flex: 1;
   margin: 0;
-  padding: 8px;
+  padding: 4px 8px 8px;
   overflow-y: auto;
   height: 100%;
   font-size: 13px;
 }
 
+pre:has(table) {
+  padding: 4px 0 8px;
+}
+
 .wordwrap {
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .tip {
