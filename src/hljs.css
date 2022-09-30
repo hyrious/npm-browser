@@ -170,6 +170,7 @@
   min-width: 32px;
   font-size: 12px;
   font-family: var(--mono);
+  white-space: nowrap;
   cursor: pointer;
 }
 .hljs-line-number:hover {
