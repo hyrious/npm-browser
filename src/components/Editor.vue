@@ -90,6 +90,15 @@ function activateLineNumbers(el: HTMLPreElement) {
   });
 }
 
+function strip_root(path: string) {
+  const prefix = root_folder.value;
+  let subpath = path;
+  if (subpath.startsWith("/" + prefix)) {
+    subpath = subpath.slice(prefix.length + 1);
+  }
+  return subpath;
+}
+
 watchEffect(() => {
   if (activeLine.value) {
     activeLine.value.classList.remove("active");
@@ -104,7 +113,7 @@ watchEffect(() => {
 <template>
   <div class="editor-container">
     <header>
-      <h1>{{ app.path }}</h1>
+      <h1>{{ strip_root(app.path) }}</h1>
     </header>
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
     <span v-if="failed" class="tip">{{ failed }}</span>

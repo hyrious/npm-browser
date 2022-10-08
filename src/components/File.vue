@@ -71,6 +71,7 @@ div {
     &:hover {
       background: transparent;
     }
+
     &.selected {
       background: var(--bg-on);
     }

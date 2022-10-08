@@ -105,10 +105,6 @@ const filtered = computed<FilteredFile[]>(() => {
         path,
         path_stops: m2?.stops,
       });
-
-      if (result.length >= MAX_ITEMS) {
-        break;
-      }
     }
   }
   result.sort((a, b) => {
@@ -125,7 +121,7 @@ const filtered = computed<FilteredFile[]>(() => {
     return diff === 0 ? a.path.localeCompare(b.path) : diff;
   });
 
-  return result;
+  return result.slice(0, MAX_ITEMS);
 });
 
 function listen_keyboard(ev: KeyboardEvent) {
@@ -182,8 +178,12 @@ function select(i?: number) {
         :data-score="file.score"
         @click="select(i)"
       >
-        <h4><TextWithStops :text="file.name" :stops="file.name_stops" /></h4>
-        <p><TextWithStops :text="file.path" :stops="file.path_stops" /></p>
+        <h4>
+          <TextWithStops :text="file.name" :stops="file.name_stops" />
+        </h4>
+        <p>
+          <TextWithStops :text="file.path" :stops="file.path_stops" />
+        </p>
       </li>
     </ul>
   </section>
@@ -265,6 +265,7 @@ li:hover {
   h4 {
     color: var(--fg-on);
   }
+
   p {
     opacity: 1;
   }
