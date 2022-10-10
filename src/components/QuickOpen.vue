@@ -191,8 +191,8 @@ function select(i?: number) {
 
 <style lang="scss" scoped>
 .quick-open {
-  position: fixed;
-  top: 44px;
+  position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   margin: 0 auto;

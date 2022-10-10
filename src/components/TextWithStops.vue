@@ -17,15 +17,31 @@ const parts = computed<Part[]>(() => {
     return [props];
   }
 
+  const ranges: [start: number, end: number][] = [];
+  let last_range: [start: number, end: number] | null = null;
+  for (const stop of props.stops) {
+    if (last_range === null) {
+      last_range = [stop, stop];
+    } else if (stop === last_range[1] + 1) {
+      last_range[1] = stop;
+    } else {
+      ranges.push(last_range);
+      last_range = [stop, stop];
+    }
+  }
+  if (last_range) {
+    ranges.push(last_range);
+  }
+
   const str = props.text;
   const parts: Part[] = [];
   let last = 0;
-  for (const stop of props.stops) {
-    if (stop > last) {
-      parts.push({ text: str.slice(last, stop) });
+  for (const [start, end] of ranges) {
+    if (start > last) {
+      parts.push({ text: str.slice(last, start) });
     }
-    parts.push({ bold: true, text: str[stop] });
-    last = stop + 1;
+    parts.push({ bold: true, text: str.slice(start, end + 1) });
+    last = end + 1;
   }
   if (last < str.length) {
     parts.push({ text: str.slice(last) });

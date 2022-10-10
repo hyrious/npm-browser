@@ -182,11 +182,15 @@
 }
 
 .hljs-code-table {
-  font-family: var(--mono);
+  font-family: monospace;
 }
 .hljs-code-table .active {
   background-color: var(--bg-on);
 }
 .hljs-code-table .active .hljs-line-number {
   color: var(--fg-on);
+}
+
+.hljs:focus-visible {
+  outline: none;
 }

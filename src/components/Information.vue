@@ -32,7 +32,7 @@ function find_github_repo() {
 </script>
 
 <template v-if="packageName && packageVersion">
-  <p class="desc">{{ desc }}</p>
+  <p v-if="desc" class="desc">{{ desc }}</p>
   <a :href="'https://www.npmjs.com/package/' + packageName" target="_blank" rel="noopener noreferrer">
     <img :src="weeklyDownloads" alt="" />
   </a>

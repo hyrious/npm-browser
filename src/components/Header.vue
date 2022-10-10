@@ -463,7 +463,7 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
     </aside>
     <button
       v-show="files.length"
-      title="search from the whole package (cmd+k)"
+      title="search from the whole package (ctrl/cmd+k)"
       :class="{ active: showFullTextSearch }"
       @click="fullTextSearch()"
     >
@@ -516,6 +516,7 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
       :class="{ active: information }"
       v-show="packageName && packageVersion"
       @click="information = !information"
+      title="info"
     >
       <i class="i-mdi-information-outline"></i>
     </button>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { tick } from "@hyrious/utils";
+import prettyBytes from "pretty-bytes";
 import { wordwrap } from "../stores/code";
 import { emitter, update } from "../helpers/hljs";
-import { tick } from "@hyrious/utils";
 import { is_binary } from "../helpers/is-binary";
 const app = useApplicationStore();
 
@@ -114,6 +115,7 @@ watchEffect(() => {
   <div class="editor-container">
     <header>
       <h1>{{ strip_root(app.path) }}</h1>
+      <span class="size">{{ code && prettyBytes(code.length, { binary: true }) }}</span>
     </header>
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
     <span v-if="failed" class="tip">{{ failed }}</span>
@@ -124,15 +126,23 @@ watchEffect(() => {
 <style lang="scss" scoped>
 header {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 h1 {
+  flex: 1;
   margin: 0;
   padding: 6px 8px 4px;
   font-size: 14px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.size {
+  padding: 6px 8px 4px;
+  font-size: 14px;
 }
 
 .editor-container {
@@ -150,6 +160,7 @@ pre {
   overflow-y: auto;
   height: 100%;
   font-size: 13px;
+  font-family: monospace;
 }
 
 pre:has(table) {
