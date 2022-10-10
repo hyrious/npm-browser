@@ -663,10 +663,9 @@ label[for="q"] {
 }
 
 input {
-  padding-left: 0;
-  padding-right: 0;
   border: 0;
   outline: 0;
+  line-height: 1.5;
   min-width: 3.5ch;
   padding: 0 0.25ch;
   color: var(--fg-on);
