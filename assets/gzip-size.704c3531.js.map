@@ -1,0 +1,1 @@
+{"version":3,"file":"gzip-size.704c3531.js","sources":["../../src/helpers/gzip-size.ts"],"sourcesContent":["import { Data, gzip } from \"pako\";\n\nexport default function gzipSize(data: Data) {\n  return gzip(data).byteLength;\n}\n"],"names":["gzipSize","data","gzip"],"mappings":"2CAEA,SAAwBA,EAASC,EAAY,CACpC,OAAAC,EAAKD,CAAI,EAAE,UACpB"}
