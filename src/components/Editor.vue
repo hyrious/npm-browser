@@ -10,14 +10,15 @@ const pre = ref();
 
 const decoder = new TextDecoder();
 const failed = ref("");
+const file = computed(() => files.value.find((e) => e.name === app.path.slice(1)));
+const buffer = computed(() => file.value?.buffer);
 const code = computed(() => {
-  const file = files.value.find((e) => e.name === app.path.slice(1));
   failed.value = "";
-  if (file) {
-    if (is_binary(file.buffer)) {
+  if (buffer.value) {
+    if (is_binary(buffer.value)) {
       failed.value = "Cannot open binary file.";
     } else {
-      return decoder.decode(file.buffer);
+      return decoder.decode(buffer.value);
     }
   }
 });
@@ -29,6 +30,17 @@ const lang = computed(() => {
   if (ext === "map") ext = "json";
   if (ext === "cjs") ext = "js";
   return ext;
+});
+
+const gzipSizeFn = ref<(data: ArrayBuffer) => number>();
+import("../helpers/gzip-size").then((mod) => {
+  gzipSizeFn.value = mod.default;
+});
+
+const gzipSize = computed(() => {
+  if (buffer.value && gzipSizeFn.value) {
+    return gzipSizeFn.value(buffer.value);
+  }
 });
 
 const HLJS_MAX_LINES = 8000;
@@ -115,7 +127,8 @@ watchEffect(() => {
   <div class="editor-container">
     <header>
       <h1>{{ strip_root(app.path) }}</h1>
-      <span class="size">{{ code && prettyBytes(code.length, { binary: true }) }}</span>
+      <span class="size">{{ buffer && prettyBytes(buffer.byteLength, { binary: true }) }}</span>
+      <span class="size">{{ gzipSize && `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
     </header>
     <pre ref="pre" class="hljs" :class="{ wordwrap }"></pre>
     <span v-if="failed" class="tip">{{ failed }}</span>
@@ -141,7 +154,7 @@ h1 {
 }
 
 .size {
-  padding: 6px 8px 4px;
+  padding: 6px 8px 4px 0px;
   font-size: 14px;
 }
 
