@@ -110,13 +110,13 @@ onMounted(() => {
   const { push, flush } = disposable();
   push(
     listen(document.body, "keydown", (e) => {
-      if (e.target === document.body && e.key === ".") {
+      if (e.target.tagName !== "INPUT" && e.key === ".") {
         const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
         const buffer = pkg?.buffer;
         const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
         json && open_homepage(json);
       }
-      if (e.target === document.body && e.key === ",") {
+      if (e.target.tagName !== "INPUT" && e.key === ",") {
         const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
         const buffer = pkg?.buffer;
         const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
