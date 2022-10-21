@@ -21,6 +21,13 @@ export const useApplicationStore = defineStore("app", () => {
 
   const search = fromQuery();
 
+  const snapshot = () => ({
+    name: packageName.value,
+    version: packageVersion.value,
+    path: path.value,
+    line: line.value,
+  });
+
   watchEffect(() => {
     let query = packageName.value;
     if (packageVersion.value) query += `@${packageVersion.value}`;
@@ -28,8 +35,10 @@ export const useApplicationStore = defineStore("app", () => {
     if (line.value) query += `:${line.value}`;
     if (query && search.get("q") !== query) {
       search.set("q", query);
-      // TODO: if $code has changed because of selecting file, push history
-      history.replaceState(null, "", "?" + search.toString());
+      // decode here to preserve '@', '/' symbols, hopefully it should not cause any issues
+      const url = "?" + decodeURIComponent(search.toString());
+      // TODO: push state if it is resolved
+      history.replaceState(snapshot(), "", url);
     }
   });
 
