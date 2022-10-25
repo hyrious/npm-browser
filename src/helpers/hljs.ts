@@ -91,4 +91,4 @@ export function update(pre: HTMLPreElement, code: string, lang: string, lineno?:
   }
 }
 
-export const emitter = observable({ update: true, highlighted: true });
+export const emitter = observable({ update: void 0, highlighted: true });

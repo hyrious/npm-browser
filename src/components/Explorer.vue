@@ -110,13 +110,13 @@ onMounted(() => {
   const { push, flush } = disposable();
   push(
     listen(document.body, "keydown", (e) => {
-      if (e.target.tagName !== "INPUT" && e.key === ".") {
+      if ((e.target as HTMLElement).tagName !== "INPUT" && e.key === ".") {
         const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
         const buffer = pkg?.buffer;
         const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
         json && open_homepage(json);
       }
-      if (e.target.tagName !== "INPUT" && e.key === ",") {
+      if ((e.target as HTMLElement).tagName !== "INPUT" && e.key === ",") {
         const pkg = files.value.find((e) => e.name === root_folder.value + "/package.json");
         const buffer = pkg?.buffer;
         const json = buffer && JSON.parse(new TextDecoder().decode(buffer));
@@ -242,10 +242,7 @@ function fold_all() {
         </button>
       </li>
     </TransitionGroup>
-    <p class="no-history" v-else>
-      Install your first package<br />
-      from the top bar<i class="i-mdi-arrow-up-thin"></i>
-    </p>
+    <p class="no-history" v-else>Empty.</p>
   </template>
 </template>
 
@@ -346,7 +343,7 @@ ul {
   border: 0;
   position: absolute;
   top: 0;
-  right: 16px;
+  right: 8px;
   bottom: 0;
   font-weight: normal;
   cursor: pointer;

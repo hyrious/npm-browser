@@ -341,7 +341,7 @@ async function jump(location: { path: string; line: number }) {
   await nextTick();
   const activeLine = document.querySelector("[data-line].active");
   if (activeLine) {
-    activeLine.scrollIntoView({ block: "center" });
+    activeLine.scrollIntoView({ block: "start" });
   }
   events.emit("jump", path.value);
 }
@@ -401,11 +401,15 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
   }
   open(url, "_blank");
 }
+
+function uninstall() {
+  location.href = location.origin + location.pathname;
+}
 </script>
 
 <template>
   <header>
-    <label for="q">npm&nbsp;i</label>
+    <button class="site-title" title="double click to uninstall" @dblclick="uninstall()">npm&nbsp;i</button>
     <input
       v-model="searchText"
       id="q"
@@ -526,13 +530,7 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
-      <button
-        :class="{ active: highlighted }"
-        title="(press shift to add line numbers)"
-        @click="emitter.emit('update', $event.shiftKey)"
-      >
-        highlight-it
-      </button>
+      <button :class="{ active: highlighted }" @click="emitter.emit('update')">highlight-it</button>
     </div>
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>
@@ -564,6 +562,11 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
 <style lang="scss" scoped>
 label {
   color: var(--pre-dim);
+}
+
+.site-title {
+  padding: 0;
+  padding-right: 0.75ch;
 }
 
 header {

@@ -37,7 +37,6 @@ export const useApplicationStore = defineStore("app", () => {
       search.set("q", query);
       // decode here to preserve '@', '/' symbols, hopefully it should not cause any issues
       const url = "?" + decodeURIComponent(search.toString());
-      // TODO: push state if it is resolved
       history.replaceState(snapshot(), "", url);
     }
   });
