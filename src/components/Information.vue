@@ -54,5 +54,6 @@ function find_github_repo() {
   font-size: 14px;
   line-height: 1.5;
   font-family: var(--sans);
+  flex-basis: 100%;
 }
 </style>
