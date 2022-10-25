@@ -530,7 +530,7 @@ function uninstall() {
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="wordwrap = !wordwrap">word-wrap</button>
-      <button :class="{ active: highlighted }" @click="emitter.emit('update')">highlight-it</button>
+      <!-- <button :class="{ active: highlighted }" @click="emitter.emit('update')">highlight-it</button> -->
     </div>
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>

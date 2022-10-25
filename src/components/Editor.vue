@@ -62,14 +62,20 @@ const gzipSize = computed(() => {
 });
 
 const HLJS_MAX_LINES = 8000;
-const HLJS_MAX_WIDTH = 1000;
+const HLJS_MAX_WIDTH = 2000;
 
 function lines(str: string) {
   let [j, i, n] = [0, -1, 0];
   while ((i = str.indexOf("\n", i + 1)) !== -1) {
     n++;
-    if (n >= HLJS_MAX_LINES) return Infinity;
-    if (i - j >= HLJS_MAX_WIDTH) return Infinity;
+    if (n >= HLJS_MAX_LINES) {
+      console.warn(`lines overflow, max is ${HLJS_MAX_LINES}`);
+      return Infinity;
+    }
+    if (i - j >= HLJS_MAX_WIDTH) {
+      console.warn(`width overflow, max is ${HLJS_MAX_WIDTH}, got`, i - j);
+      return Infinity;
+    }
     j = i;
   }
   return n;
