@@ -7,31 +7,14 @@ import { is_binary } from "../helpers/is-binary";
 const app = useApplicationStore();
 
 const codeBlock = ref();
-const tipEl = ref<HTMLElement>();
-const tipBound = shallowRef<DOMRect>(new DOMRect());
-
-watch(tipEl, (el, _, onCleanup) => {
-  if (el) {
-    let raf = 0;
-    function update() {
-      if (!el) return;
-      raf = requestAnimationFrame(update);
-      tipBound.value = el.getBoundingClientRect();
-    }
-    update();
-    onCleanup(() => cancelAnimationFrame(raf));
-  }
-});
+const tipEl = ref();
 
 const decoder = new TextDecoder();
 const failed = ref("");
-const arrow = ref(false);
-const name_ver_length = computed(() => app.packageName.length + app.packageVersion.length + 1);
 const file = computed(() => files.value.find((e) => e.name === app.path.slice(1)));
 const buffer = computed(() => file.value?.buffer);
 const code = computed(() => {
   failed.value = "";
-  arrow.value = false;
   if (buffer.value) {
     if (is_binary(buffer.value)) {
       failed.value = "Cannot open binary file.";
@@ -88,7 +71,6 @@ watchEffect(() => {
     } else {
       codeBlock.value.textContent = "";
       failed.value = "File too large to render,\nClick 🔗 to view it on CDN.";
-      arrow.value = true;
       emitter.emit("highlighted", false);
     }
   } else if (codeBlock.value) {
@@ -97,7 +79,7 @@ watchEffect(() => {
 });
 
 emitter.on("update", () => {
-  if (code.value && codeBlock.value && !arrow.value) {
+  if (code.value && codeBlock.value && !failed.value) {
     update(codeBlock.value, code.value, lang.value, true);
   }
 });
@@ -147,6 +129,11 @@ watchEffect(() => {
     activeLine.value.classList.add("active");
   }
 });
+
+const cdnBtn = ref<HTMLElement | null>(null);
+onMounted(() => {
+  cdnBtn.value = document.querySelector("#cdn-link");
+});
 </script>
 
 <template>
@@ -159,26 +146,7 @@ watchEffect(() => {
     <pre ref="codeBlock" class="hljs" :class="{ wordwrap }"></pre>
     <span v-if="failed" ref="tipEl" class="tip">{{ failed }}</span>
     <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
-    <svg
-      v-if="arrow"
-      class="arrow"
-      :style="{ '--ch': name_ver_length + 'ch', height: tipBound.top + 'px' }"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="3"
-      stroke-linecap="round"
-      :viewBox="'0 0 ' + [tipBound.left - 350, tipBound.top].join(' ')"
-    >
-      <path d="M22,4 l-5,10 10,0 -5,-10" fill="currentColor" />
-      <path
-        :d="
-          'M22,4 C22,120 ' +
-          [tipBound.left - 480, tipBound.top - 15] +
-          ' ' +
-          [tipBound.left - 390, tipBound.top - 15]
-        "
-      />
-    </svg>
+    <Arrow :fromEl="tipEl" :toEl="cdnBtn" />
   </div>
 </template>
 
@@ -236,12 +204,5 @@ pre {
   white-space: pre-wrap;
   line-height: 1.5;
   text-align: center;
-}
-
-.arrow {
-  position: fixed;
-  top: 36px;
-  left: calc(var(--ch) + 8ch + 1rem + 36px * 3);
-  z-index: 1000;
 }
 </style>

@@ -509,6 +509,7 @@ function uninstall() {
       </output>
     </aside>
     <button
+      id="cdn-link"
       v-show="packageName && packageVersion && path"
       title="open this file in jsdelivr (press alt/option for unpkg)"
       @click="jsdelivr($event)"
