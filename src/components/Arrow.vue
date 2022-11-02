@@ -90,16 +90,8 @@ const pathD = computed<string>(() => {
 </script>
 
 <template>
-  <svg
-    v-if="props.fromEl && props.toEl"
-    class="arrow"
-    :style="style"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="3"
-    stroke-linecap="round"
-    :viewBox="viewBox"
-  >
+  <svg v-if="props.fromEl && props.toEl" class="arrow" :style="style" fill="none" stroke="currentColor" stroke-width="3"
+    stroke-linecap="round" :viewBox="viewBox">
     <path :d="pathA" fill="currentColor" />
     <path :d="pathD" />
   </svg>
@@ -114,5 +106,11 @@ const pathD = computed<string>(() => {
   height: var(--height);
   z-index: 1000;
   pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .arrow {
+    display: none;
+  }
 }
 </style>

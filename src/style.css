@@ -1,6 +1,7 @@
 @import "sanitize.css";
 @import "sanitize.css/forms.css";
 @import "./hljs.css";
+@import "./markdown.css";
 
 :root {
   color-scheme: light dark;

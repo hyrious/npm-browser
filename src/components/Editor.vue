@@ -4,14 +4,18 @@ import prettyBytes from "pretty-bytes";
 import { wordwrap } from "../stores/code";
 import { emitter, update } from "../helpers/hljs";
 import { is_binary } from "../helpers/is-binary";
+import { renderMarkdown } from "../helpers/marked";
+import { repo } from "../stores/repo";
 const app = useApplicationStore();
 
 const codeBlock = ref();
 const tipEl = ref();
+const markdownEl = ref();
 
 const decoder = new TextDecoder();
 const failed = ref("");
 const file = computed(() => files.value.find((e) => e.name === app.path.slice(1)));
+const isMarkdown = computed(() => file.value?.name.endsWith(".md"));
 const buffer = computed(() => file.value?.buffer);
 const code = computed(() => {
   failed.value = "";
@@ -29,9 +33,11 @@ const lang = computed(() => {
   if (i < 0) return "text";
   let ext = path.slice(i + 1);
   if (ext === "map") ext = "json";
-  if (ext === "cjs") ext = "js";
+  if (ext === "cjs" || ext === "mjs") ext = "js";
+  if (ext === "cts" || ext === "mts") ext = "ts";
   return ext;
 });
+const showMarkdown = ref(true);
 
 const gzipSizeFn = ref<(data: ArrayBuffer) => number>();
 import("../helpers/gzip-size").then((mod) => {
@@ -134,12 +140,25 @@ const cdnBtn = ref<HTMLElement | null>(null);
 onMounted(() => {
   cdnBtn.value = document.querySelector("#cdn-link");
 });
+
+watchEffect(() => {
+  if (code.value && markdownEl.value && isMarkdown.value) {
+    const baseUrl = repo.value ? `https://github.com/${repo.value}/blob/HEAD` : ''
+    renderMarkdown(code.value, markdownEl.value, baseUrl);
+  }
+})
 </script>
 
 <template>
   <div class="editor-container">
     <header>
-      <h1>{{ strip_root(app.path) }}</h1>
+      <h1>
+        <span>{{ strip_root(app.path) }}</span>
+        <button v-show="isMarkdown" class="markdown-btn" :class="{ active: showMarkdown }" title="render it"
+          @click="showMarkdown = !showMarkdown">
+          <i class="i-mdi-language-markdown"></i>
+        </button>
+      </h1>
       <span class="size">{{ buffer && prettyBytes(buffer.byteLength, { binary: true }) }}</span>
       <span class="size">{{ gzipSize && `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
     </header>
@@ -147,6 +166,8 @@ onMounted(() => {
     <span v-if="failed" ref="tipEl" class="tip">{{ failed }}</span>
     <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
     <Arrow :fromEl="tipEl" :toEl="cdnBtn" />
+    <article v-if="isMarkdown && showMarkdown" ref="markdownEl" class="markdown-body">
+    </article>
   </div>
 </template>
 
@@ -165,6 +186,8 @@ h1 {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
 }
 
 .size {
@@ -178,6 +201,41 @@ h1 {
   flex-wrap: nowrap;
   height: 100%;
   position: relative;
+}
+
+.markdown-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  position: relative;
+  left: 4px;
+  cursor: pointer;
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover,
+  &.active {
+    color: var(--fg-on);
+  }
+}
+
+.markdown-body {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg);
+  overflow: auto;
+  padding: 2em 2ch;
 }
 
 pre {

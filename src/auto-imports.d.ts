@@ -14,6 +14,7 @@ declare global {
   const customRef: typeof import('vue')['customRef']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
+  const desc: typeof import('./stores/repo')['desc']
   const effectScope: typeof import('vue')['effectScope']
   const files: typeof import('./stores/code')['files']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
@@ -39,10 +40,12 @@ declare global {
   const onServerPrefetch: typeof import('vue')['onServerPrefetch']
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
+  const pkg: typeof import('./stores/repo')['pkg']
   const provide: typeof import('vue')['provide']
   const reactive: typeof import('vue')['reactive']
   const readonly: typeof import('vue')['readonly']
   const ref: typeof import('vue')['ref']
+  const repo: typeof import('./stores/repo')['repo']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const root_folder: typeof import('./stores/code')['root_folder']
   const shallowReactive: typeof import('vue')['shallowReactive']
@@ -84,6 +87,7 @@ declare module '@vue/runtime-core' {
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
+    readonly desc: UnwrapRef<typeof import('./stores/repo')['desc']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly files: UnwrapRef<typeof import('./stores/code')['files']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
@@ -109,10 +113,12 @@ declare module '@vue/runtime-core' {
     readonly onServerPrefetch: UnwrapRef<typeof import('vue')['onServerPrefetch']>
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
+    readonly pkg: UnwrapRef<typeof import('./stores/repo')['pkg']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
+    readonly repo: UnwrapRef<typeof import('./stores/repo')['repo']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly root_folder: UnwrapRef<typeof import('./stores/code')['root_folder']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>

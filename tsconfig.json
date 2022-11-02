@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "jsx": "preserve",
     "types": [],
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "resolveJsonModule": true
   }
 }

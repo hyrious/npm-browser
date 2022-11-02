@@ -4,19 +4,27 @@ specifiers:
   '@highlightjs/cdn-assets': ^11.6.0
   '@hyrious/esbuild-dev': ^0.8.6
   '@hyrious/fuzzy-match': ^0.1.1
+  '@hyrious/github-markdown-css': ^0.1.1
   '@hyrious/utils': ^0.0.6
   '@iconify-json/mdi': ^1.1.34
   '@intlify/vite-plugin-vue-i18n': ^6.0.3
+  '@types/katex': ^0.14.0
+  '@types/marked': ^4.0.7
   '@types/node': ^18.7.18
   '@types/pako': ^2.0.0
   '@unocss/preset-icons': ^0.45.30
   '@vitejs/plugin-vue': ^3.1.2
   '@wopjs/dom': ^0.1.3
   esbuild: ^0.15.12
+  escape-goat: ^4.0.0
+  github-slugger: ^2.0.0
   highlight.js: ^11.6.0
   https-proxy-agent: ^5.0.1
   idb-keyval: ^6.2.0
   js-untar: ^2.0.0
+  katex: ^0.16.3
+  markdown-it-emoji: ^2.0.2
+  marked: ^4.2.1
   modern-normalize: ^1.1.0
   pako: ^2.0.4
   pinia: ^2.0.23
@@ -34,9 +42,15 @@ specifiers:
 dependencies:
   '@highlightjs/cdn-assets': 11.6.0
   '@hyrious/fuzzy-match': 0.1.1
+  '@hyrious/github-markdown-css': 0.1.1
   '@wopjs/dom': 0.1.3
+  escape-goat: 4.0.0
+  github-slugger: 2.0.0
   idb-keyval: 6.2.0
   js-untar: 2.0.0
+  katex: 0.16.3
+  markdown-it-emoji: 2.0.2
+  marked: 4.2.1
   modern-normalize: 1.1.0
   pako: 2.0.4
   pinia: 2.0.23_vue@3.2.41
@@ -50,6 +64,8 @@ devDependencies:
   '@hyrious/utils': 0.0.6
   '@iconify-json/mdi': 1.1.34
   '@intlify/vite-plugin-vue-i18n': 6.0.3_vite@3.1.8+vue-i18n@9.2.2
+  '@types/katex': 0.14.0
+  '@types/marked': 4.0.7
   '@types/node': 18.7.18
   '@types/pako': 2.0.0
   '@unocss/preset-icons': 0.45.30
@@ -147,6 +163,10 @@ packages:
 
   /@hyrious/fuzzy-match/0.1.1:
     resolution: {integrity: sha512-QkqNe9cB0+ZlPJZxN+3P/8z3XcCiNbT3dxHN1YaYX0+izI+u7hIUOikbZUvc/Bs4HYsJbX2KQWSs/NMotTGqew==}
+    dev: false
+
+  /@hyrious/github-markdown-css/0.1.1:
+    resolution: {integrity: sha512-JjzfzhnjeNLZK1mFGFl4iAR+RnETiz6nqCsLMzE3h3X92/eWnPtzsg9ri2TSKbbtqUO/WrihttvsLZcx5yEsbQ==}
     dev: false
 
   /@hyrious/utils/0.0.6:
@@ -347,6 +367,14 @@ packages:
 
   /@types/estree/1.0.0:
     resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
+    dev: true
+
+  /@types/katex/0.14.0:
+    resolution: {integrity: sha512-+2FW2CcT0K3P+JMR8YG846bmDwplKUTsWgT2ENwdQ1UdVfRk3GQrh6Mi4sTopy30gI8Uau5CEqHTDZ6YvWIUPA==}
+    dev: true
+
+  /@types/marked/4.0.7:
+    resolution: {integrity: sha512-eEAhnz21CwvKVW+YvRvcTuFKNU9CV1qH+opcgVK3pIMI6YZzDm6gc8o2vHjldFk6MGKt5pueSB7IOpvpx5Qekw==}
     dev: true
 
   /@types/node/18.7.18:
@@ -701,6 +729,11 @@ packages:
     resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
     dev: true
 
+  /commander/8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
+    dev: false
+
   /consola/2.15.3:
     resolution: {integrity: sha512-9vAdYbHj6x2fLKC4+oPH0kFzY/orMZyG2Aj+kNylHxKGJ/Ed4dpNyAQYwJOdqO4zdM7XpVHmyejQDcQHrnuXbw==}
     dev: true
@@ -959,6 +992,11 @@ packages:
       esbuild-windows-arm64: 0.15.12
     dev: true
 
+  /escape-goat/4.0.0:
+    resolution: {integrity: sha512-2Sd4ShcWxbx6OY1IHyla/CVNwvg7XwZVoXZHcSu9w9SReNP1EzzD5T8NWKIR38fIqEns9kDWKUQTXXAmlDrdPg==}
+    engines: {node: '>=12'}
+    dev: false
+
   /escape-string-regexp/5.0.0:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
@@ -1060,6 +1098,10 @@ packages:
     resolution: {integrity: sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg==}
     engines: {node: '>=10'}
     dev: true
+
+  /github-slugger/2.0.0:
+    resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
+    dev: false
 
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -1187,6 +1229,13 @@ packages:
       graceful-fs: 4.2.10
     dev: true
 
+  /katex/0.16.3:
+    resolution: {integrity: sha512-3EykQddareoRmbtNiNEDgl3IGjryyrp2eg/25fHDEnlHymIDi33bptkMv6K4EOC2LZCybLW/ZkEo6Le+EM9pmA==}
+    hasBin: true
+    dependencies:
+      commander: 8.3.0
+    dev: false
+
   /kolorist/1.5.1:
     resolution: {integrity: sha512-lxpCM3HTvquGxKGzHeknB/sUjuVoUElLlfYnXZT73K8geR9jQbroGlSCFBax9/0mpGoD3kzcMLnOlGQPJJNyqQ==}
     dev: true
@@ -1222,6 +1271,16 @@ packages:
     dependencies:
       sourcemap-codec: 1.4.8
     dev: true
+
+  /markdown-it-emoji/2.0.2:
+    resolution: {integrity: sha512-zLftSaNrKuYl0kR5zm4gxXjHaOI3FAOEaloKmRA5hijmJZvSjmxcokOLlzycb/HXlUFWzXqpIEoyEMCE4i9MvQ==}
+    dev: false
+
+  /marked/4.2.1:
+    resolution: {integrity: sha512-VK1/jNtwqDLvPktNpL0Fdg3qoeUZhmRsuiIjPEy/lHwXW4ouLoZfO4XoWd4ClDt+hupV1VLpkZhEovjU0W/kqA==}
+    engines: {node: '>= 12'}
+    hasBin: true
+    dev: false
 
   /mdn-data/2.0.28:
     resolution: {integrity: sha512-aylIc7Z9y4yzHYAJNuESG3hfhC+0Ibp/MAMiaOZgNv4pmEdFyfZhhhny4MNiAfWdBQ1RQ2mfDWmM1x8SvGyp8g==}

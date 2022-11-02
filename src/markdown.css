@@ -1,0 +1,43 @@
+/* simplified from https://github.com/hyrious/marked-cli/blob/main/src/style.css */
+@import "@hyrious/github-markdown-css";
+@import "katex/dist/katex.css";
+
+.mermaid {
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown-body {
+    --color-accent-fg: #58a6ff;
+    --color-attention-fg: #d29922;
+    --pre-bg: #2a2a2a;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .markdown-body {
+    --color-accent-fg: #0969da;
+    --color-attention-fg: #9a6700;
+    --pre-bg: #efefef;
+  }
+}
+
+.color-fg-accent {
+  color: var(--color-accent-fg) !important;
+}
+
+.color-fg-attention {
+  color: var(--color-attention-fg) !important;
+}
+
+.mr-2 {
+  margin-right: 8px !important;
+}
+
+.markdown-body img {
+  background-color: var(--bg);
+}
+
+.markdown-body .highlight pre, .markdown-body pre {
+  background-color: var(--pre-bg);
+}
