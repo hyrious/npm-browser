@@ -2,6 +2,9 @@
 
 export {};
 import hljs from "@highlightjs/cdn-assets/es/highlight.js";
+import powershell from "@highlightjs/cdn-assets/es/languages/powershell.min.js";
+
+hljs.registerLanguage("powershell", powershell);
 
 // https://github.com/AlexxNB/highlightjs-svelte/blob/master/src/svelte.js
 hljs.registerLanguage("svelte", (hljs) => ({
@@ -98,6 +101,6 @@ hljs.registerLanguage("vue", (hljs) => ({
 
 addEventListener("message", ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {
   const { id, code, lang } = data;
-  const { value } = hljs.highlight(code, { language: lang || "js" });
+  const { value } = hljs.highlight(code, { language: lang || "js", ignoreIllegals: true });
   postMessage({ id, value });
 });
