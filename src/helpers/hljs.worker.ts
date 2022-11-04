@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 export {};
+import { htmlEscape } from "escape-goat"
 import hljs from "@highlightjs/cdn-assets/es/highlight.js";
 import powershell from "@highlightjs/cdn-assets/es/languages/powershell.min.js";
 
@@ -101,6 +102,11 @@ hljs.registerLanguage("vue", (hljs) => ({
 
 addEventListener("message", ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {
   const { id, code, lang } = data;
-  const { value } = hljs.highlight(code, { language: lang || "js", ignoreIllegals: true });
-  postMessage({ id, value });
+  try {
+    const { value } = hljs.highlight(code, { language: lang || "js", ignoreIllegals: true });
+    postMessage({ id, value });
+  } catch (error) {
+    console.error(error);
+    postMessage({ id, value: htmlEscape(code) });
+  }
 });
