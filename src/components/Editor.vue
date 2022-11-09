@@ -108,6 +108,8 @@ const extensions = computed(() =>
         color: 'var(--fg)',
         backgroundColor: 'var(--bg)',
       },
+      '&.cm-editor': { height: '100%' },
+      '.cm-scroller': { overflow: 'auto' },
       '&.cm-editor.cm-focused': {
         outline: 'none',
       },
