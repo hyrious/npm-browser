@@ -1,121 +1,56 @@
 <script setup lang="ts">
-import { tick } from "@hyrious/utils";
 import prettyBytes from "pretty-bytes";
-import { wordwrap } from "../stores/code";
-import { emitter, update } from "../helpers/hljs";
+import { disposable } from "@hyrious/utils";
+import { listen } from "@wopjs/dom";
+import { basicSetup, EditorView } from "codemirror"
+import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { githubDark } from '@ddietr/codemirror-themes/github-dark'
+import { javascript } from "@codemirror/lang-javascript"
+import { css } from "@codemirror/lang-css"
+import { json } from "@codemirror/lang-json"
+import { markdown } from "@codemirror/lang-markdown"
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
-import { repo } from "../stores/repo";
-const app = useApplicationStore();
 
-const codeBlock = ref();
-const tipEl = ref();
-const markdownEl = ref();
+const decoder = new TextDecoder()
 
-const decoder = new TextDecoder();
-const failed = ref("");
-const file = computed(() => files.value.find((e) => e.name === app.path.slice(1)));
-const isMarkdown = computed(() => file.value?.name.endsWith(".md"));
-const buffer = computed(() => file.value?.buffer);
+const app = useApplicationStore()
+const file = computed(() => files.value.find(e => e.name === app.path.slice(1)))
+const isMarkdown = computed(() => file.value?.name.endsWith('.md'))
+const showMarkdown = ref(true);
+const buffer = computed(() => file.value?.buffer)
+const failed = ref<"" | "binary">("")
 const code = computed(() => {
-  failed.value = "";
   if (buffer.value) {
     if (is_binary(buffer.value)) {
-      failed.value = "Cannot open binary file.";
+      failed.value = "binary"
     } else {
-      return decoder.decode(buffer.value);
+      return decoder.decode(buffer.value)
     }
+  } else {
+    return ""
   }
-});
+})
 const lang = computed(() => {
-  const path = app.path;
-  const i = path.lastIndexOf(".");
-  if (i < 0) return "text";
-  let ext = path.slice(i + 1);
+  const path = app.path
+  const i = path.lastIndexOf('.')
+  if (i < 0) return 'text'
+  let ext = path.slice(i + 1)
   if (ext === "map") ext = "json";
   if (ext === "cjs" || ext === "mjs") ext = "js";
   if (ext === "cts" || ext === "mts") ext = "ts";
   return ext;
-});
-const showMarkdown = ref(true);
+})
 
 const gzipSizeFn = ref<(data: ArrayBuffer) => number>();
 import("../helpers/gzip-size").then((mod) => {
   gzipSizeFn.value = mod.default;
 });
-
 const gzipSize = computed(() => {
   if (buffer.value && gzipSizeFn.value) {
     return gzipSizeFn.value(buffer.value);
   }
 });
-
-const HLJS_MAX_LINES = 8000;
-const HLJS_MAX_WIDTH = 2000;
-
-function lines(str: string) {
-  let [j, i, n] = [0, -1, 0];
-  while ((i = str.indexOf("\n", i + 1)) !== -1) {
-    n++;
-    if (n >= HLJS_MAX_LINES) {
-      console.warn(`lines overflow, max is ${HLJS_MAX_LINES}`);
-      return Infinity;
-    }
-    if (i - j >= HLJS_MAX_WIDTH) {
-      console.warn(`width overflow, max is ${HLJS_MAX_WIDTH}, got`, i - j);
-      return Infinity;
-    }
-    j = i;
-  }
-  return n;
-}
-
-watchEffect(() => {
-  if (code.value && codeBlock.value) {
-    if (lines(code.value) < HLJS_MAX_LINES) {
-      update(codeBlock.value, code.value, lang.value, true);
-    } else {
-      codeBlock.value.textContent = "";
-      failed.value = "File too large to render,\nClick 🔗 to view it on CDN.";
-      emitter.emit("highlighted", false);
-    }
-  } else if (codeBlock.value) {
-    codeBlock.value.textContent = "";
-  }
-});
-
-emitter.on("update", () => {
-  if (code.value && codeBlock.value && !failed.value) {
-    update(codeBlock.value, code.value, lang.value, true);
-  }
-});
-
-emitter.on("highlighted", (highlighted) => {
-  if (highlighted && codeBlock.value) {
-    activateLineNumbers(codeBlock.value);
-  }
-});
-
-const activeLine = ref<HTMLElement | null>(null);
-
-function activateLineNumbers(el: HTMLPreElement) {
-  el.querySelectorAll("[data-lineno]").forEach((td_, index) => {
-    const td = td_ as HTMLElement;
-    const line = index + 1;
-    if (line === app.line) {
-      const tr = td.parentElement as HTMLElement;
-      activeLine.value = tr;
-      tr.classList.add("active");
-      tick().then(() => {
-        tr.scrollIntoView({ block: "start" });
-      });
-    }
-    td.onclick = function setLineNumber() {
-      const line = parseInt(td.dataset.lineno!);
-      app.line = app.line === line ? 0 : line;
-    };
-  });
-}
 
 function strip_root(path: string) {
   const prefix = root_folder.value;
@@ -126,26 +61,91 @@ function strip_root(path: string) {
   return subpath;
 }
 
-watchEffect(() => {
-  if (activeLine.value) {
-    activeLine.value.classList.remove("active");
-  }
-  activeLine.value = document.querySelector(`[data-line="${app.line}"]`);
-  if (activeLine.value) {
-    activeLine.value.classList.add("active");
-  }
-});
+const markdownEl = ref<HTMLElement>();
 
-const cdnBtn = ref<HTMLElement | null>(null);
-onMounted(() => {
-  cdnBtn.value = document.querySelector("#cdn-link");
-});
-
-watchEffect(() => {
-  if (code.value && markdownEl.value && isMarkdown.value) {
+watch([code, markdownEl, isMarkdown], ([code, markdownEl, isMarkdown]) => {
+  if (code && markdownEl && isMarkdown) {
     const baseUrl = repo.value ? `https://github.com/${repo.value}/blob/HEAD` : ''
-    renderMarkdown(code.value, markdownEl.value, baseUrl);
+    renderMarkdown(code, markdownEl, baseUrl);
   }
+})
+
+// reference: https://github.com/logue/vue-codemirror6
+const editor = ref<HTMLElement>()
+const view = shallowRef(new EditorView())
+
+const prefersDark = matchMedia('(prefers-color-scheme: dark)')
+const dark = ref(prefersDark.matches)
+onMounted(() => {
+  const { push, flush } = disposable()
+  push(listen(prefersDark, 'change', ev => { dark.value = ev.matches }))
+  return flush
+})
+
+const extensions = computed(() =>
+  [
+    basicSetup,
+    EditorView.updateListener.of((update) => {
+      if (update.selectionSet) {
+        app.line = update.state.doc.lineAt(update.state.selection.main.head).number
+      }
+    }),
+    dark.value && EditorView.theme({
+      '&': {
+        color: 'var(--fg)',
+        backgroundColor: 'var(--bg)',
+      },
+      '&.cm-focused': {
+        outline: 'none',
+      },
+      '.cm-activeLine': { backgroundColor: 'var(--bg-on)' },
+      '.cm-gutters': {
+        backgroundColor: 'var(--bg)',
+        color: 'var(--fg)',
+        border: 'none'
+      },
+      '.cm-activeLineGutter': { backgroundColor: 'var(--bg)' },
+    }),
+    dark.value && githubDark,
+    wordwrap.value && EditorView.lineWrapping,
+    EditorState.readOnly.of(true),
+    lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
+      lang.value === 'css' ? css() :
+        lang.value === 'json' ? json() :
+          lang.value === 'md' ? markdown() : undefined,
+  ].filter(Boolean) as Extension[]
+)
+watch(extensions, exts =>
+  view.value.dispatch({
+    effects: StateEffect.reconfigure.of(exts)
+  })
+)
+
+function jumpToLine() {
+  try {
+    view.value.dispatch({
+      selection: EditorSelection.cursor(view.value.state.doc.line(app.line).from),
+      scrollIntoView: true,
+    })
+  } catch {}
+}
+
+watch(code, code => {
+  if (view.value.composing) return
+  view.value.dispatch({
+    changes: { from: 0, to: view.value.state.doc.length, insert: code },
+  })
+  nextTick(jumpToLine)
+})
+
+onMounted(() => {
+  view.value = new EditorView({
+    doc: code.value,
+    parent: editor.value,
+    extensions: extensions.value,
+  })
+  nextTick(jumpToLine)
+  return () => view.value.destroy()
 })
 </script>
 
@@ -162,12 +162,12 @@ watchEffect(() => {
       <span class="size">{{ buffer && prettyBytes(buffer.byteLength, { binary: true }) }}</span>
       <span class="size">{{ gzipSize && `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
     </header>
-    <pre ref="codeBlock" class="hljs" :class="{ wordwrap }"></pre>
-    <span v-if="failed" ref="tipEl" class="tip">{{ failed }}</span>
-    <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
-    <Arrow :fromEl="tipEl" :toEl="cdnBtn" />
-    <article v-if="isMarkdown && showMarkdown" ref="markdownEl" class="markdown-body">
-    </article>
+    <div class="editor" ref="editor"></div>
+    <div v-if="failed" class="tip">
+      <span v-if="failed === 'binary'">Cannot open binary file.</span>
+      <span v-else>Something went wrong.</span>
+    </div>
+    <article v-if="isMarkdown && showMarkdown" ref="markdownEl" class="markdown-body"></article>
   </div>
 </template>
 
@@ -193,14 +193,6 @@ h1 {
 .size {
   padding: 6px 8px 4px 0px;
   font-size: 14px;
-}
-
-.editor-container {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  height: 100%;
-  position: relative;
 }
 
 .markdown-btn {
@@ -238,21 +230,6 @@ h1 {
   padding: 2em 2ch;
 }
 
-pre {
-  flex: 1;
-  margin: 0;
-  padding: 4px 0 8px;
-  overflow-y: auto;
-  height: 100%;
-  font-size: 13px;
-  font-family: monospace;
-}
-
-.wordwrap {
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
 .tip {
   position: absolute;
   top: 50%;
@@ -262,5 +239,19 @@ pre {
   white-space: pre-wrap;
   line-height: 1.5;
   text-align: center;
+}
+
+.editor-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.editor {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
 }
 </style>
