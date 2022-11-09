@@ -2,8 +2,10 @@
 import prettyBytes from "pretty-bytes";
 import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
-import { basicSetup, EditorView } from "codemirror"
+import { minimalSetup, EditorView } from "codemirror"
+import { lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
 import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { githubLight } from '@ddietr/codemirror-themes/github-light'
 import { githubDark } from '@ddietr/codemirror-themes/github-dark'
 import { javascript } from "@codemirror/lang-javascript"
 import { css } from "@codemirror/lang-css"
@@ -84,29 +86,41 @@ onMounted(() => {
 
 const extensions = computed(() =>
   [
-    basicSetup,
+    minimalSetup,
+    lineNumbers({
+      domEventHandlers: {
+        click(view, line, event) {
+          app.line = view.state.doc.lineAt(line.from).number
+          nextTick(jumpToLine)
+          return false
+        }
+      }
+    }),
+    highlightActiveLine(),
+    highlightActiveLineGutter(),
     EditorView.updateListener.of((update) => {
       if (update.selectionSet) {
         app.line = update.state.doc.lineAt(update.state.selection.main.head).number
       }
     }),
-    dark.value && EditorView.theme({
+    EditorView.theme({
       '&': {
         color: 'var(--fg)',
         backgroundColor: 'var(--bg)',
       },
-      '&.cm-focused': {
+      '&.cm-editor.cm-focused': {
         outline: 'none',
       },
       '.cm-activeLine': { backgroundColor: 'var(--bg-on)' },
+      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg-on)' },
+      '.cm-lineNumbers .cm-gutterElement': { paddingLeft: '12px', paddingRight: '8px' },
+      '.cm-lineNumbers .cm-gutterElement:hover': { color: 'var(--fg-on)' },
       '.cm-gutters': {
         backgroundColor: 'var(--bg)',
         color: 'var(--fg)',
-        border: 'none'
       },
-      '.cm-activeLineGutter': { backgroundColor: 'var(--bg)' },
     }),
-    dark.value && githubDark,
+    dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
