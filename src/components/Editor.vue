@@ -3,8 +3,9 @@ import prettyBytes from "pretty-bytes";
 import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
 import { minimalSetup, EditorView } from "codemirror"
-import { lineNumbers, highlightActiveLine, highlightActiveLineGutter } from '@codemirror/view'
+import { lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view'
 import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { searchKeymap } from '@codemirror/search'
 import { githubLight } from '@ddietr/codemirror-themes/github-light'
 import { githubDark } from '@ddietr/codemirror-themes/github-dark'
 import { javascript } from "@codemirror/lang-javascript"
@@ -87,6 +88,7 @@ onMounted(() => {
 const extensions = computed(() =>
   [
     minimalSetup,
+    keymap.of(searchKeymap),
     lineNumbers({
       domEventHandlers: {
         click(view, line, event) {
@@ -113,8 +115,8 @@ const extensions = computed(() =>
       '&.cm-editor.cm-focused': {
         outline: 'none',
       },
-      '.cm-activeLine': { backgroundColor: 'var(--bg-on)' },
-      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg-on)' },
+      '.cm-activeLine': { backgroundColor: 'var(--bg-on-transparent)', outline: '1px solid var(--bg-on)' },
+      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg-on-transparent)', outline: '1px solid var(--bg-on)' },
       '.cm-lineNumbers .cm-gutterElement': { paddingLeft: '12px', paddingRight: '8px' },
       '.cm-lineNumbers .cm-gutterElement:hover': { color: 'var(--fg-on)' },
       '.cm-gutters': {

@@ -8,6 +8,7 @@
 
   --bg: #fff;
   --bg-on: #ddd;
+  --bg-on-transparent: #dddddd33;
   --bg-panel: #e3e3e3;
   --bg-panel-on: #eee;
   --fg: #222;
@@ -27,6 +28,7 @@
   :root {
     --bg: #1a1a1a;
     --bg-on: #333;
+    --bg-on-transparent: #33333333;
     --bg-panel: #232323;
     --bg-panel-on: #444;
     --fg: #aaa;
