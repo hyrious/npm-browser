@@ -4,7 +4,7 @@ import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
 import { minimalSetup, EditorView } from "codemirror"
 import { lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view'
-import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { Extension, EditorState, StateEffect, EditorSelection, Text } from "@codemirror/state"
 import { searchKeymap } from '@codemirror/search'
 import { githubLight } from '@ddietr/codemirror-themes/github-light'
 import { githubDark } from '@ddietr/codemirror-themes/github-dark'
@@ -150,8 +150,13 @@ function jumpToLine() {
 
 watch(code, code => {
   if (view.value.composing) return
-  view.value.dispatch({
-    changes: { from: 0, to: view.value.state.doc.length, insert: code },
+  if (view.value) {
+    view.value.destroy()
+  }
+  view.value = new EditorView({
+    doc: code,
+    parent: editor.value,
+    extensions: extensions.value,
   })
   nextTick(jumpToLine)
 })
