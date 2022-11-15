@@ -188,14 +188,21 @@ interface NpmPackageInfo {
 }
 
 async function loadVersions(name: string, setVersion = "") {
+  let no_thanks = false;
   try {
     abortController && abortController.abort();
     abortController = new AbortController();
+    // eager load versions
+    fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.json()).then(data => {
+      if (no_thanks) return;
+      versions.value = data.versions;
+    })
     const res = await fetch_with_mirror_retry(`https://registry.npmjs.org/${name}`, {
       headers: { Accept: "application/vnd.npm.install-v1+json" },
       signal: abortController.signal,
     });
     if (!res.ok) throw new Error(`Failed to fetch ${res.url}: ${await res.text()}`);
+    no_thanks = true;
     const info = await (res.json() as Promise<NpmInstallData>).then((data) => ({
       latest: data["dist-tags"].latest,
       versions: Object.keys(data.versions),
@@ -207,6 +214,7 @@ async function loadVersions(name: string, setVersion = "") {
       packageVersion.value = info.latest;
     }
   } catch (e) {
+    no_thanks = true;
     if (e.name === "AbortError") return;
     statusMessage(e.message);
     throw e;

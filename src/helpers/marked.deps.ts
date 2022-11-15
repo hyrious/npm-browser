@@ -196,7 +196,7 @@ let footnote: Extension = {
 
 // :emoji:
 // @ts-ignore
-import full from "markdown-it-emoji/lib/data/full.json";
+import full from "markdown-it-emoji/lib/data/light.json";
 
 let emoji: Extension = {
   name: "emoji",
@@ -210,7 +210,7 @@ let emoji: Extension = {
       return {
         type: "emoji",
         raw: match[0],
-        text: full[match[1]],
+        text: (full as any)[match[1]],
       };
     }
   },
