@@ -14,6 +14,7 @@ import { json } from "@codemirror/lang-json"
 import { markdown } from "@codemirror/lang-markdown"
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
+import { centerCursor } from "../helpers/center-cursor";
 
 const decoder = new TextDecoder()
 
@@ -92,8 +93,13 @@ const extensions = computed(() =>
     lineNumbers({
       domEventHandlers: {
         click(view, line, event) {
-          app.line = view.state.doc.lineAt(line.from).number
-          nextTick(jumpToLine)
+          const i = view.state.doc.lineAt(line.from).number
+          if (app.line !== i) {
+            app.line = i
+            nextTick(jumpToLine)
+          } else {
+            app.line = 0
+          }
           return false
         }
       }
@@ -105,6 +111,7 @@ const extensions = computed(() =>
         app.line = update.state.doc.lineAt(update.state.selection.main.head).number
       }
     }),
+    centerCursor,
     EditorView.theme({
       '&': {
         color: 'var(--fg)',
