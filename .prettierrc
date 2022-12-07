@@ -1,4 +1,8 @@
 {
   "endOfLine": "auto",
-  "printWidth": 110
+  "printWidth": 110,
+  "singleQuote": true,
+  "quoteProps": "consistent",
+  "trailingComma": "all",
+  "semi": false
 }

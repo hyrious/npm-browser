@@ -4,8 +4,8 @@ import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
 import { minimalSetup, EditorView } from "codemirror"
 import { lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view'
-import { Extension, EditorState, StateEffect, EditorSelection, Text } from "@codemirror/state"
-import { searchKeymap } from '@codemirror/search'
+import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
 import { githubLight } from '@ddietr/codemirror-themes/github-light'
 import { githubDark } from '@ddietr/codemirror-themes/github-dark'
 import { javascript } from "@codemirror/lang-javascript"
@@ -15,6 +15,8 @@ import { markdown } from "@codemirror/lang-markdown"
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
 import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
+import { linkPlugin, path_resolve } from "../helpers/navigate";
+import { events } from "../helpers/events";
 
 const decoder = new TextDecoder()
 
@@ -77,7 +79,9 @@ const dark = ref(prefersDark.matches)
 const extensions = computed(() =>
   [
     minimalSetup,
+    linkPlugin,
     keymap.of(searchKeymap),
+    highlightSelectionMatches(),
     lineNumbers({
       domEventHandlers: {
         click(view, line, event) {
@@ -118,6 +122,8 @@ const extensions = computed(() =>
         backgroundColor: 'var(--bg)',
         color: 'var(--fg)',
       },
+      '.cm-link': { color: 'var(--fg-on)', cursor: 'pointer' },
+      '.cm-link:hover': { textDecoration: 'underline' }
     }),
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
@@ -182,7 +188,33 @@ onMounted(() => {
   push(watchEffect(() => {
     const key = app.packageName + app.path
     app.line ? lineCache.set(key, app.line) : lineCache.delete(key)
-    console.log(lineCache)
+  }))
+
+  push(events.on('try-jump', specifier => {
+    // relative path
+    if (specifier.startsWith('.')) {
+      const path = path_resolve(app.path, specifier)
+      for (const file of files.value) {
+        let resolved: string | undefined
+        const base = path.slice(1)
+        for (const ext of ["", ".ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.tsx", "/index.js", "/index.js"]) {
+          if (file.name === base + ext) {
+            resolved = path + ext
+            break
+          }
+        }
+        if (resolved) {
+          app.path = resolved
+          app.line = lineCache.get(app.packageName + resolved) || 0
+          events.emit('jump', resolved)
+          break
+        }
+      }
+    }
+    // maybe package name
+    else {
+      location.search = `?q=${specifier}`;
+    }
   }))
 
   return flush
