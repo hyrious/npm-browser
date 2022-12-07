@@ -14,7 +14,7 @@ import { json } from "@codemirror/lang-json"
 import { markdown } from "@codemirror/lang-markdown"
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
-import { centerCursor } from "../helpers/center-cursor";
+import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
 
 const decoder = new TextDecoder()
 
@@ -67,24 +67,12 @@ function strip_root(path: string) {
 
 const markdownEl = ref<HTMLElement>();
 
-watch([code, markdownEl, isMarkdown], ([code, markdownEl, isMarkdown]) => {
-  if (code && markdownEl && isMarkdown) {
-    const baseUrl = repo.value ? `https://github.com/${repo.value}/blob/HEAD` : ''
-    renderMarkdown(code, markdownEl, baseUrl);
-  }
-})
-
 // reference: https://github.com/logue/vue-codemirror6
 const editor = ref<HTMLElement>()
 const view = shallowRef(new EditorView())
 
 const prefersDark = matchMedia('(prefers-color-scheme: dark)')
 const dark = ref(prefersDark.matches)
-onMounted(() => {
-  const { push, flush } = disposable()
-  push(listen(prefersDark, 'change', ev => { dark.value = ev.matches }))
-  return flush
-})
 
 const extensions = computed(() =>
   [
@@ -134,19 +122,16 @@ const extensions = computed(() =>
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
+    EditorView.editable.of(false),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
       lang.value === 'css' ? css() :
         lang.value === 'json' ? json() :
           lang.value === 'md' ? markdown() : undefined,
   ].filter(Boolean) as Extension[]
 )
-watch(extensions, exts =>
-  view.value.dispatch({
-    effects: StateEffect.reconfigure.of(exts)
-  })
-)
 
 function jumpToLine() {
+  if (app.line === 0) return;
   try {
     view.value.dispatch({
       selection: EditorSelection.cursor(view.value.state.doc.line(app.line).from),
@@ -155,27 +140,53 @@ function jumpToLine() {
   } catch {}
 }
 
-watch(code, code => {
-  if (view.value.composing) return
-  if (view.value) {
-    view.value.destroy()
-  }
-  view.value = new EditorView({
-    doc: code,
-    parent: editor.value,
-    extensions: extensions.value,
-  })
-  nextTick(jumpToLine)
-})
+function jumpToLineWithCenterCursor() {
+  enable_center_cursor(50);
+  jumpToLine();
+}
 
 onMounted(() => {
+  const { push, flush } = disposable()
+
+  push(listen(prefersDark, 'change', ev => { dark.value = ev.matches }))
+
+  push(watch([code, markdownEl, isMarkdown], ([code, markdownEl, isMarkdown]) => {
+    if (code && markdownEl && isMarkdown) {
+      const baseUrl = repo.value ? `https://github.com/${repo.value}/blob/HEAD` : ''
+      renderMarkdown(code, markdownEl, baseUrl);
+    }
+  }))
+
+  push(watch(extensions, exts => view.value.dispatch({
+    effects: StateEffect.reconfigure.of(exts)
+  })))
+
   view.value = new EditorView({
     doc: code.value,
     parent: editor.value,
     extensions: extensions.value,
   })
   nextTick(jumpToLine)
-  return () => view.value.destroy()
+  push(() => view.value.destroy())
+
+  push(watch(code, code => {
+    if (view.value.composing) return
+    if (view.value) { view.value.destroy() }
+    view.value = new EditorView({
+      doc: code,
+      parent: editor.value,
+      extensions: extensions.value,
+    })
+    nextTick(jumpToLineWithCenterCursor);
+  }))
+
+  push(watchEffect(() => {
+    const key = app.packageName + app.path
+    app.line ? lineCache.set(key, app.line) : lineCache.delete(key)
+    console.log(lineCache)
+  }))
+
+  return flush
 })
 </script>
 
