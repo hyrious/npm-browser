@@ -33,7 +33,7 @@ export function highlight(code: string, lang: string, lineno?: boolean) {
   let resolve!: (value: string) => void;
   const task = new Promise<string>((r) => (resolve = r));
   Tasks.set(id, resolve);
-  hljs.postMessage(<Payload>{ id, code, lang });
+  hljs.postMessage({ id, code, lang } satisfies Payload);
   id++;
   return lineno ? task.then(applyLineNumbers) : task;
 }
