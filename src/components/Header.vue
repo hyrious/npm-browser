@@ -416,18 +416,10 @@ function toggle_wordwrap() {
 <template>
   <header>
     <button class="site-title" title="double click to uninstall" @dblclick="uninstall()">npm&nbsp;i</button>
-    <input
-      v-model="searchText"
-      id="q"
-      ref="searchInput"
-      title="package name"
-      placeholder="vue"
-      autocomplete="off"
-      spellcheck="false"
-      :class="{ inputting: searchText }"
-      :style="{ width: searchText.length + '.5ch' }"
-      @keyup="press_return_to_kick_start_and_handle_arrows($event)"
-    />
+    <button class="site-title-sm" title="double click to uninstall" @dblclick="uninstall">ni</button>
+    <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
+      spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
+      @keyup="press_return_to_kick_start_and_handle_arrows($event)" />
     <transition name="fade">
       <span v-if="showHintOnce">
         <i class="i-mdi-arrow-left-thin"></i>
@@ -435,13 +427,8 @@ function toggle_wordwrap() {
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
-    <select
-      v-model="packageVersion"
-      v-show="versions.length"
-      id="v"
-      title="package version"
-      :style="{ width: packageVersion.length + '.5ch' }"
-    >
+    <select v-model="packageVersion" v-show="versions.length" id="v" title="package version"
+      :style="{ width: packageVersion.length + '.5ch' }">
       <option v-for="v in versions" :value="v">{{ v }}</option>
     </select>
     <span v-show="packageName && !versions.length">
@@ -451,46 +438,27 @@ function toggle_wordwrap() {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button
-      v-show="packageName && packageVersion && path"
-      :class="{ active: showDiff }"
-      title="diff with other version"
-      @click="showDiff = !showDiff"
-    >
+    <button v-show="packageName && packageVersion && path" :class="{ active: showDiff }" title="diff with other version"
+      @click="showDiff = !showDiff">
       <i class="i-mdi-file-compare"></i>
     </button>
-    <aside
-      v-if="showDiff"
-      class="diff-versions"
-      :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
-      @click="diff($event)"
-    >
+    <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
+      @click="diff($event)">
       <button v-for="v in versions" :data-value="v">
         <span :data-value="v">{{ packageVersion }}</span>
         <i class="i-mdi-arrow-left" :data-value="v"></i>
         <span :data-value="v">{{ v }}</span>
       </button>
     </aside>
-    <button
-      v-show="files.length"
-      title="search from the whole package (ctrl/cmd+k)"
-      :class="{ active: showFullTextSearch }"
-      @click="fullTextSearch()"
-    >
+    <button v-show="files.length" title="search from the whole package (ctrl/cmd+k)"
+      :class="{ active: showFullTextSearch }" @click="fullTextSearch()">
       <i class="i-mdi-search"></i>
     </button>
     <aside v-if="showFullTextSearch" class="full-text-search">
       <div class="row">
         <label for="s">Search:</label>
-        <input
-          v-model="fullTextSearchText"
-          :disabled="searchingFullText"
-          id="s"
-          title="code"
-          autocomplete="off"
-          spellcheck="false"
-          @change="fullTextSearch(fullTextSearchText)"
-        />
+        <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
+          spellcheck="false" @change="fullTextSearch(fullTextSearchText)" />
         <button :disabled="searchingFullText" @click="fullTextSearch(fullTextSearchText)">
           <i v-show="searchingFullText" class="i-mdi-loading"></i>
           <span v-show="!searchingFullText">GO</span>
@@ -502,33 +470,19 @@ function toggle_wordwrap() {
             <i class="i-mdi-file"></i>
             <button class="search-result-heading" @click="toggleBlock($event)">{{ block.path }}</button>
           </h4>
-          <button
-            class="search-result-line"
-            v-for="line in block.lines"
-            :title="line.text"
-            @click="jump(line)"
-          >
+          <button class="search-result-line" v-for="line in block.lines" :title="line.text" @click="jump(line)">
             {{ String(line.line).padStart(fullTextSearchLineNumberWidth) }}: {{ line.text }}
           </button>
         </div>
         <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
       </output>
     </aside>
-    <button
-      id="cdn-link"
-      v-show="packageName && packageVersion && path"
-      title="open this file in jsdelivr (press alt/option for unpkg)"
-      @click="jsdelivr($event)"
-    >
+    <button id="cdn-link" v-show="packageName && packageVersion && path"
+      title="open this file in jsdelivr (press alt/option for unpkg)" @click="jsdelivr($event)">
       <i class="i-mdi-link-variant"></i>
     </button>
-    <button
-      class="information"
-      :class="{ active: information }"
-      v-show="packageName && packageVersion"
-      @click="information = !information"
-      title="info"
-    >
+    <button class="information" :class="{ active: information }" v-show="packageName && packageVersion"
+      @click="information = !information" title="info">
       <i class="i-mdi-information-outline"></i>
     </button>
     <div class="information-panel" v-show="information">
@@ -541,19 +495,14 @@ function toggle_wordwrap() {
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>
     </a>
-    <button title="share" @click="share()">
+    <button class="btn-share" title="share" @click="share()">
       <i class="i-mdi-share-variant"></i>
     </button>
   </header>
   <aside class="searching" v-show="searching">
     <ul v-if="searchResult.length > 0">
-      <li
-        v-for="(pkg, i) in searchResult"
-        :key="pkg.name"
-        @click="choose(pkg)"
-        :title="pkg.description"
-        :class="{ active: searchResultIndex === i }"
-      >
+      <li v-for="(pkg, i) in searchResult" :key="pkg.name" @click="choose(pkg)" :title="pkg.description"
+        :class="{ active: searchResultIndex === i }">
         <h3>{{ pkg.name }}</h3>
         <p>{{ pkg.description }}</p>
       </li>
@@ -570,7 +519,8 @@ label {
   color: var(--pre-dim);
 }
 
-.site-title {
+.site-title,
+.site-title-sm {
   padding: 0;
   padding-right: 0.75ch;
 }
@@ -587,7 +537,7 @@ header {
   box-shadow: var(--shadow);
   z-index: 200;
 
-  > span {
+  >span {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -626,7 +576,7 @@ header {
   font-family: var(--sans);
   color: var(--fg-on);
 
-  + span {
+  +span {
     font-family: var(--sans);
     color: var(--fg);
     padding-left: 4px;
@@ -755,7 +705,7 @@ aside {
     }
   }
 
-  > p {
+  >p {
     margin: 0;
     padding: 4px 8px;
     color: var(--fg);
@@ -786,8 +736,8 @@ aside {
     height: 16px;
   }
 
-  > span,
-  > i {
+  >span,
+  >i {
     pointer-events: none;
   }
 }
@@ -878,7 +828,7 @@ aside {
       }
     }
 
-    h4:has(.collapsed) ~ button {
+    h4:has(.collapsed)~button {
       display: none;
     }
 
@@ -907,12 +857,22 @@ aside {
   gap: 8px;
 }
 
+.site-title-sm {
+  display: none;
+}
+
 @media (max-width: 720px) {
   header {
+
     .btn,
     button,
     .hint {
       display: none;
+    }
+
+    .site-title-sm,
+    .btn-share {
+      display: inline-flex;
     }
   }
 }
