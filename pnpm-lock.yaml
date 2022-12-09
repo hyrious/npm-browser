@@ -5,7 +5,6 @@ specifiers:
   '@codemirror/lang-javascript': ^6.1.1
   '@codemirror/lang-json': ^6.0.1
   '@codemirror/lang-markdown': ^6.0.4
-  '@codemirror/merge': ^0.1.2
   '@codemirror/search': ^6.2.2
   '@codemirror/state': ^6.1.2
   '@codemirror/view': ^6.4.1
@@ -25,6 +24,7 @@ specifiers:
   '@vitejs/plugin-vue': ^3.2.0
   '@wopjs/dom': ^0.1.3
   codemirror: ^6.0.1
+  diff2html: ^3.4.22
   esbuild: ^0.15.13
   escape-goat: ^4.0.0
   github-slugger: ^2.0.0
@@ -54,7 +54,6 @@ dependencies:
   '@codemirror/lang-javascript': 6.1.1
   '@codemirror/lang-json': 6.0.1
   '@codemirror/lang-markdown': 6.0.4
-  '@codemirror/merge': 0.1.2
   '@codemirror/search': 6.2.2
   '@codemirror/state': 6.1.2
   '@codemirror/view': 6.4.1
@@ -64,6 +63,7 @@ dependencies:
   '@hyrious/github-markdown-css': 0.1.1
   '@wopjs/dom': 0.1.3
   codemirror: 6.0.1
+  diff2html: 3.4.22
   escape-goat: 4.0.0
   github-slugger: 2.0.0
   idb-keyval: 6.2.0
@@ -240,13 +240,6 @@ packages:
       '@codemirror/state': 6.1.2
       '@codemirror/view': 6.4.1
       crelt: 1.0.5
-    dev: false
-
-  /@codemirror/merge/0.1.2:
-    resolution: {integrity: sha512-USujAPP7rHAeCy2oy3FBntyFf45mi2kHAlkpYdCaPW/kFpLBuuGB02psn+BV3oEM7QjMJRxrOIn54jbYJMvAKA==}
-    dependencies:
-      '@codemirror/state': 6.1.2
-      '@codemirror/view': 6.4.1
     dev: false
 
   /@codemirror/search/6.2.2:
@@ -837,6 +830,10 @@ packages:
     resolution: {integrity: sha512-3ywhZXVKT3taJmjqo0I0/MBpumO8a93lKbiBYV7cVcCBegiDxkApa/UuHDGKFITqso1LT8MWmWSzOwupB4S5RQ==}
     dev: false
 
+  /abbrev/1.1.1:
+    resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
+    dev: false
+
   /acorn-jsx/5.3.2_acorn@7.4.1:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -991,6 +988,21 @@ packages:
   /destr/1.1.1:
     resolution: {integrity: sha512-QqkneF8LrYmwATMdnuD2MLI3GHQIcBnG6qFC2q9bSH430VTCDAVjcspPmUaKhPGtAtPAftIUFqY1obQYQuwmbg==}
     dev: true
+
+  /diff/5.1.0:
+    resolution: {integrity: sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==}
+    engines: {node: '>=0.3.1'}
+    dev: false
+
+  /diff2html/3.4.22:
+    resolution: {integrity: sha512-n7b0cfjqG+NLAmxdlSRMXIGoeoK+OhCNxd/6InjjMxy3v5Gk1L5Ms5r4jziFiRBoNaB6L8lLyZ8KQ8Kv+DOgnw==}
+    engines: {node: '>=12'}
+    dependencies:
+      diff: 5.1.0
+      hogan.js: 3.0.2
+    optionalDependencies:
+      highlight.js: 11.6.0
+    dev: false
 
   /duplexer/0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -1345,7 +1357,14 @@ packages:
   /highlight.js/11.6.0:
     resolution: {integrity: sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==}
     engines: {node: '>=12.0.0'}
-    dev: true
+
+  /hogan.js/3.0.2:
+    resolution: {integrity: sha512-RqGs4wavGYJWE07t35JQccByczmNUXQT0E12ZYV1VKYu5UiAU9lsos/yBAcf840+zrUQQxgVduCR5/B8nNtibg==}
+    hasBin: true
+    dependencies:
+      mkdirp: 0.3.0
+      nopt: 1.0.10
+    dev: false
 
   /https-proxy-agent/5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
@@ -1525,6 +1544,11 @@ packages:
       brace-expansion: 2.0.1
     dev: true
 
+  /mkdirp/0.3.0:
+    resolution: {integrity: sha512-OHsdUcVAQ6pOtg5JYWpCBo9W/GySVuwvP9hueRMW7UqshC0tbfzLv8wjySTPm3tfUZ/21CE9E1pJagOA91Pxew==}
+    deprecated: Legacy versions of mkdirp are no longer supported. Please update to mkdirp 1.x. (Note that the API surface has changed to use Promises in 1.x.)
+    dev: false
+
   /mlly/0.5.16:
     resolution: {integrity: sha512-LaJ8yuh4v0zEmge/g3c7jjFlhoCPfQn6RCjXgm9A0Qiuochq4BcuOxVfWmdnCoLTlg2MV+hqhOek+W2OhG0Lwg==}
     dependencies:
@@ -1556,6 +1580,13 @@ packages:
   /node-fetch-native/0.1.8:
     resolution: {integrity: sha512-ZNaury9r0NxaT2oL65GvdGDy+5PlSaHTovT6JV5tOW07k1TQmgC0olZETa4C9KZg0+6zBr99ctTYa3Utqj9P/Q==}
     dev: true
+
+  /nopt/1.0.10:
+    resolution: {integrity: sha512-NWmpvLSqUrgrAC9HCuxEvb+PSloHpqVu+FqcO4eeF2h5qYRhA7ev6KvelyQAKtegUbC6RypJnlEOhd8vloNKYg==}
+    hasBin: true
+    dependencies:
+      abbrev: 1.1.1
+    dev: false
 
   /normalize-path/3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}

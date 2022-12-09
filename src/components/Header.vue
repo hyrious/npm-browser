@@ -256,7 +256,7 @@ function diff(ev: MouseEvent) {
     const name = packageName.value;
     const from = el.dataset.value;
     const to = packageVersion.value;
-    const url = new URL("https://hyrious.me/tool/diff-npm.html");
+    const url = new URL("diff.html", location.href);
     url.searchParams.set("a", `${name}@${from}${subpath.value}`);
     url.searchParams.set("b", `${name}@${to}${subpath.value}`);
     url.searchParams.set("s", "1");

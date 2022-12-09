@@ -1,10 +1,12 @@
 <!-- derived from https://github.com/vuejs/repl/blob/main/src/SplitPane.vue -->
 <script setup lang="ts">
+const props = withDefaults(defineProps<{ defaultSplit: number }>(), { defaultSplit: 25 })
+
 const container = ref();
 
 const state = reactive({
   dragging: false,
-  split: 25,
+  split: props.defaultSplit,
 });
 
 const boundSplit = computed(() => {
@@ -38,14 +40,8 @@ function dragEnd() {
 </script>
 
 <template>
-  <div
-    ref="container"
-    class="split-pane"
-    :class="{ dragging: state.dragging, 'show-right': showRight }"
-    @pointermove="dragMove"
-    @pointerup="dragEnd"
-    @pointerleave="dragEnd"
-  >
+  <div ref="container" class="split-pane" :class="{ dragging: state.dragging, 'show-right': showRight }"
+    @pointermove="dragMove" @pointerup="dragEnd" @pointerleave="dragEnd">
     <div class="left" :style="{ width: boundSplit + '%' }">
       <slot name="left"></slot>
       <div class="dragger" @pointerdown.prevent="dragStart"></div>

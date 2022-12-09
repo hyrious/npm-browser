@@ -1,0 +1,25 @@
+@import 'sanitize.css';
+@import 'diff2html/bundles/css/diff2html.min.css';
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('./assets/Mona-Sans.woff2') format('woff2 supports variations'),
+    url('./assets/Mona-Sans.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+}
+
+@font-face {
+  font-family: 'Cascadia Mono';
+  src: url('./assets/CascadiaMono.woff2') format('woff2 supports variations'),
+    url('./assets/CascadiaMono.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  font-family: 'Mona Sans', sans-serif;
+}
