@@ -17,6 +17,7 @@ import { renderMarkdown } from "../helpers/marked";
 import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
 import { linkPlugin, path_resolve } from "../helpers/navigate";
 import { events } from "../helpers/events";
+import { gzipSize as gzipSizeFn } from "../helpers/gzip-size"
 
 const decoder = new TextDecoder()
 
@@ -48,15 +49,7 @@ const lang = computed(() => {
   return ext;
 })
 
-const gzipSizeFn = ref<(data: ArrayBuffer) => number>();
-import("../helpers/gzip-size").then((mod) => {
-  gzipSizeFn.value = mod.default;
-});
-const gzipSize = computed(() => {
-  if (buffer.value && gzipSizeFn.value) {
-    return gzipSizeFn.value(buffer.value);
-  }
-});
+const gzipSize = ref(0);
 
 function strip_root(path: string) {
   const prefix = root_folder.value;
@@ -155,6 +148,11 @@ onMounted(() => {
 
   push(listen(prefersDark, 'change', ev => { dark.value = ev.matches }))
 
+  push(watch(buffer, (buffer) => {
+    if (buffer) gzipSizeFn(buffer).then(size => { gzipSize.value = size });
+    else gzipSize.value = 0;
+  }))
+
   push(watch([code, markdownEl, isMarkdown], ([code, markdownEl, isMarkdown]) => {
     if (code && markdownEl && isMarkdown) {
       const baseUrl = repo.value ? `https://github.com/${repo.value}/blob/HEAD` : ''
@@ -231,8 +229,8 @@ onMounted(() => {
           <i class="i-mdi-language-markdown"></i>
         </button>
       </h1>
-      <span class="size">{{ buffer && prettyBytes(buffer.byteLength, { binary: true }) }}</span>
-      <span class="size">{{ gzipSize && `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
+      <span v-if="buffer" class="size">{{ prettyBytes(buffer.byteLength, { binary: true }) }}</span>
+      <span v-if="gzipSize" class="size">{{ `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
     </header>
     <div v-show="code" class="editor" ref="editor"></div>
     <span v-if="failed === 'binary'" class="tip">Cannot open binary file.</span>
