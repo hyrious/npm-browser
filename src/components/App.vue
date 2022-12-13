@@ -1,5 +1,10 @@
 <script setup lang="ts">
-  const AsyncEditor = defineAsyncComponent(() => import('./Editor.vue'))
+import Loading from './Loading.vue';
+
+const AsyncEditor = defineAsyncComponent({
+  loader: () => import('./Editor.vue'),
+  loadingComponent: Loading,
+})
 </script>
 
 <template>
@@ -15,5 +20,3 @@
   </SplitPane>
   <Footer></Footer>
 </template>
-
-<style lang="scss" scoped></style>

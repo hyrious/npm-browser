@@ -48,6 +48,7 @@ async function fetchPackage(name: string, version: string) {
   fetching.value = true;
   root.value = null;
   let buffer: ArrayBuffer;
+  let url = `https://registry.npmjs.org/${name}/-/${name.split("/").pop()}-${version}.tgz`
 
   try {
     const cached = await get(name, version);
@@ -55,16 +56,13 @@ async function fetchPackage(name: string, version: string) {
       buffer = cached.buffer;
     } else {
       abortController = new AbortController();
-      buffer = await fetch_with_mirror_retry(
-        `https://registry.npmjs.org/${name}/-/${name.split("/").pop()}-${version}.tgz`,
-        { signal: abortController.signal }
-      ).then((r) => r.arrayBuffer());
+      buffer = await fetch_with_mirror_retry(url, { signal: abortController.signal }).then((r) => r.arrayBuffer());
       await set(name, version, new Uint8Array(buffer));
     }
   } catch (e) {
     fetching.value = false;
     if (e.name === "AbortError") return;
-    statusMessage(e.message);
+    statusMessage(url + ': ' + e.message);
     throw e;
   }
 
@@ -348,7 +346,7 @@ ul {
   font-weight: normal;
   cursor: pointer;
 
-  > span {
+  >span {
     padding-right: 0.25rem;
   }
 

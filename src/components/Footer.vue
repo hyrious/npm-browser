@@ -8,8 +8,11 @@ import { statusText } from "../stores/status";
 
 <style lang="scss" scoped>
 footer {
-  position: sticky;
-  top: 100vh;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg);
   border-top: 1px solid var(--border);
   padding: 0.5rem 1rem;
   font-size: 14px;
