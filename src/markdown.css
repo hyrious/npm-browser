@@ -1,6 +1,6 @@
 /* simplified from https://github.com/hyrious/marked-cli/blob/main/src/style.css */
-@import "@hyrious/github-markdown-css";
-@import "katex/dist/katex.css";
+@import '@hyrious/github-markdown-css';
+@import 'katex/dist/katex.css';
 
 .mermaid {
   text-align: center;
@@ -22,6 +22,17 @@
   }
 }
 
+.markdown-body {
+  --color-canvas-default: var(--bg);
+  --color-canvas-subtle: var(--bg);
+  --color-border-default: var(--pre-bg);
+}
+
+.markdown-body code,
+.markdown-body tt {
+  white-space: pre;
+}
+
 .color-fg-accent {
   color: var(--color-accent-fg) !important;
 }
@@ -38,6 +49,7 @@
   background-color: var(--bg);
 }
 
-.markdown-body .highlight pre, .markdown-body pre {
+.markdown-body .highlight pre,
+.markdown-body pre {
   background-color: var(--pre-bg);
 }
