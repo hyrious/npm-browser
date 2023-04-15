@@ -256,14 +256,26 @@ function diff(ev: MouseEvent) {
     const name = packageName.value;
     const from = el.dataset.value;
     const to = packageVersion.value;
-    const url = new URL("https://hyrious.me/tool/diff-npm.html");
-    url.searchParams.set("a", `${name}@${from}${subpath.value}`);
-    url.searchParams.set("b", `${name}@${to}${subpath.value}`);
-    url.searchParams.set("s", "1");
-    url.searchParams.set("f", "l");
     showDiff.value = false;
-    window.open(url.toString(), "_blank");
+    const url = (path.value ? diffOne : diffAll)([
+      `${name}@${from}`, 
+      `${name}@${to}`,
+    ]);
+    window.open(url, "_blank");
   }
+}
+
+function diffAll([a, b]: string[]) {
+  return `https://hyrious.me/npm-diff/?a=${a}&b=${b}`;
+}
+
+function diffOne([a, b]: string[]) {
+  const url = new URL("https://hyrious.me/tool/diff-npm.html");
+  url.searchParams.set("a", `${a}${subpath.value}`);
+  url.searchParams.set("b", `${b}${subpath.value}`);
+  url.searchParams.set("s", "1");
+  url.searchParams.set("f", "l");
+  return url.toString();
 }
 
 const TEXT_EXTS = [
@@ -438,7 +450,7 @@ function toggle_wordwrap() {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button v-show="packageName && packageVersion && path" :class="{ active: showDiff }" title="diff with other version"
+    <button v-show="packageName && packageVersion" :class="{ active: showDiff }" title="diff with other version"
       @click="showDiff = !showDiff">
       <i class="i-mdi-file-compare"></i>
     </button>
