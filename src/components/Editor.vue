@@ -195,7 +195,7 @@ onMounted(() => {
       for (const file of files.value) {
         let resolved: string | undefined
         const base = path.slice(1)
-        for (const ext of ["", ".ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.tsx", "/index.js", "/index.js"]) {
+        for (const ext of ["", ".ts", ".d.ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.d.ts", "/index.tsx", "/index.js", "/index.js"]) {
           if (file.name === base + ext) {
             resolved = path + ext
             break
