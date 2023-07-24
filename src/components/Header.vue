@@ -258,7 +258,7 @@ function diff(ev: MouseEvent) {
     const to = packageVersion.value;
     showDiff.value = false;
     const url = (path.value ? diffOne : diffAll)([
-      `${name}@${from}`, 
+      `${name}@${from}`,
       `${name}@${to}`,
     ]);
     window.open(url, "_blank");
@@ -353,10 +353,6 @@ async function jump(location: { path: string; line: number }) {
   path.value = "/" + root_folder.value + "/" + location.path;
   line.value = location.line;
   await nextTick();
-  const activeLine = document.querySelector("[data-line].active");
-  if (activeLine) {
-    activeLine.scrollIntoView({ block: "start" });
-  }
   events.emit("jump", path.value);
 }
 

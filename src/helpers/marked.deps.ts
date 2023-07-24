@@ -1,4 +1,5 @@
 import { marked, Renderer } from 'marked'
+import { markedHighlight } from 'marked-highlight'
 import { htmlEscape } from 'escape-goat'
 import renderMathInElement from 'katex/contrib/auto-render'
 import Slugger from 'github-slugger'
@@ -220,23 +221,28 @@ let emoji: Extension = {
   },
 }
 
-marked.use({ extensions: [footnoteList, footnote, emoji], renderer, walkTokens })
-marked.setOptions({
-  highlight(code, lang, callback) {
-    highlight(code, lang).then((html) => callback!(null, html))
-  },
+marked.use(
+  markedHighlight({
+    async: true,
+    highlight,
+  }),
+)
+marked.use({
+  langPrefix: 'language-',
+  mangle: false,
+  headerIds: false,
+  extensions: [footnoteList, footnote, emoji],
+  renderer,
+  walkTokens,
 })
 
-export function update(source: string, to: HTMLElement, base_url: string) {
+export async function update(source: string, to: HTMLElement, base_url: string) {
   slugger.reset()
 
   set_base_url(base_url)
 
-  marked.parse(source, (err, html) => {
-    if (err) {
-      to.innerText = err
-      return
-    }
+  try {
+    const html = await marked.parse(source, { async: true })
 
     to.innerHTML = html
 
@@ -250,5 +256,7 @@ export function update(source: string, to: HTMLElement, base_url: string) {
         throwOnError: false,
       })
     })
-  })
+  } catch (err) {
+    to.innerText = err + ''
+  }
 }

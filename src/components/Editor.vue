@@ -188,6 +188,10 @@ onMounted(() => {
     app.line ? lineCache.set(key, app.line) : lineCache.delete(key)
   }))
 
+  push(events.on('jump', (path) => {
+    nextTick(jumpToLineWithCenterCursor)
+  }))
+
   push(events.on('try-jump', specifier => {
     // relative path
     if (specifier.startsWith('.')) {
