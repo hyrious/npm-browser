@@ -1,6 +1,6 @@
 /* simplified from https://github.com/hyrious/marked-cli/blob/main/src/style.css */
 @import '@hyrious/github-markdown-css';
-@import 'katex/dist/katex.css';
+@import 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
 
 .mermaid {
   text-align: center;
