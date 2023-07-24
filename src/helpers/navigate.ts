@@ -20,7 +20,7 @@ class LinkWidget extends WidgetType {
   }
   navigate(ev: MouseEvent) {
     ev.preventDefault()
-    events.emit('try-jump', this.url)
+    events.emit('try-jump', { url: this.url, ctrl: ev.ctrlKey || ev.metaKey })
   }
 }
 

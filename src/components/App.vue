@@ -1,11 +1,3 @@
-<script setup lang="ts">
-import Loading from './Loading.vue';
-
-const AsyncEditor = defineAsyncComponent({
-  loader: () => import('./Editor.vue'),
-  loadingComponent: Loading,
-})
-</script>
 
 <template>
   <Header></Header>
@@ -14,7 +6,7 @@ const AsyncEditor = defineAsyncComponent({
       <Explorer />
     </template>
     <template #right>
-      <AsyncEditor />
+      <Editor />
       <QuickOpen />
     </template>
   </SplitPane>

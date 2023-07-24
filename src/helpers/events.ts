@@ -4,5 +4,5 @@ export const events = observable<{
   'search': string
   'jump': string
   'jsdelivr': { ev: MouseEvent | KeyboardEvent; path: string }
-  'try-jump': string
+  'try-jump': { url: string; ctrl: boolean }
 }>()

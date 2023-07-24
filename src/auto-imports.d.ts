@@ -21,6 +21,7 @@ declare global {
   const desc: typeof import('./stores/repo')['desc']
   const effectScope: typeof import('vue')['effectScope']
   const files: typeof import('./stores/code')['files']
+  const filesMap: typeof import('./stores/code')['filesMap']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const h: typeof import('vue')['h']
@@ -101,6 +102,7 @@ declare module 'vue' {
     readonly desc: UnwrapRef<typeof import('./stores/repo')['desc']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly files: UnwrapRef<typeof import('./stores/code')['files']>
+    readonly filesMap: UnwrapRef<typeof import('./stores/code')['filesMap']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -175,6 +177,7 @@ declare module '@vue/runtime-core' {
     readonly desc: UnwrapRef<typeof import('./stores/repo')['desc']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly files: UnwrapRef<typeof import('./stores/code')['files']>
+    readonly filesMap: UnwrapRef<typeof import('./stores/code')['filesMap']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>

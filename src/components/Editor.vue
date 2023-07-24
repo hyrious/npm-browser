@@ -192,30 +192,34 @@ onMounted(() => {
     nextTick(jumpToLineWithCenterCursor)
   }))
 
-  push(events.on('try-jump', specifier => {
+  push(events.on('try-jump', ({ url: specifier, ctrl }) => {
     // relative path
     if (specifier.startsWith('.')) {
       const path = path_resolve(app.path, specifier)
-      for (const file of files.value) {
-        let resolved: string | undefined
-        const base = path.slice(1)
-        for (const ext of ["", ".ts", ".d.ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.d.ts", "/index.tsx", "/index.js", "/index.js"]) {
-          if (file.name === base + ext) {
-            resolved = path + ext
-            break
+      const base = path.slice(1)
+      const filesMap_ = filesMap.value
+      for (const ext of ["", ".ts", ".d.ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.d.ts", "/index.tsx", "/index.js", "/index.js"]) {
+        const key = base + ext
+        if (filesMap_.has(key)) {
+          const resolved = path + ext
+          if (ctrl) {
+            open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved, '_blank')
+          } else {
+            app.path = resolved
+            app.line = lineCache.get(app.packageName + resolved) || 0
+            events.emit('jump', resolved)
           }
-        }
-        if (resolved) {
-          app.path = resolved
-          app.line = lineCache.get(app.packageName + resolved) || 0
-          events.emit('jump', resolved)
           break
         }
       }
     }
     // maybe package name
     else {
-      location.search = `?q=${specifier}`;
+      if (ctrl) {
+        open(location.origin + location.pathname + `?q=${specifier}`, '_blank')
+      } else {
+        location.search = `?q=${specifier}`;
+      }
     }
   }))
 
