@@ -213,7 +213,7 @@ function fold_all() {
     </h3>
     <TransitionGroup name="list" tag="ul" class="cached" v-if="history.length > 0">
       <li v-for="item in history" :key="item" class="history-item">
-        <button title="open" @click="choose(item)">{{ item }}</button>
+        <button :title="item" @click="choose(item)">{{ item }}</button>
         <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
           <i class="i-mdi-close"></i>
         </button>
@@ -247,6 +247,10 @@ ul {
 
 .size {
   flex: 1;
+  padding-left: 16px;
+}
+
+.history-title {
   padding-left: 16px;
 }
 
@@ -297,7 +301,7 @@ ul {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  margin: 0 -8px;
+  margin: 0 -4px;
 
   button {
     border: 0;
@@ -314,6 +318,7 @@ ul {
 
   &:hover .history-delete-btn {
     opacity: 1;
+    background-color: var(--bg-on);
   }
 }
 
@@ -321,7 +326,7 @@ ul {
   border: 0;
   position: absolute;
   top: 0;
-  right: 8px;
+  right: 0;
   bottom: 0;
   font-weight: normal;
   cursor: pointer;
@@ -338,11 +343,8 @@ ul {
 
 .history-delete-btn {
   position: absolute;
-  top: 0;
-  right: 4px;
-  bottom: 0;
+  inset: 0 4px 0 auto;
   margin: auto;
-  flex-shrink: 0;
   width: 24px;
   height: 24px;
   opacity: 0;
