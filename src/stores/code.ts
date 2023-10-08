@@ -31,4 +31,4 @@ export const wordwrap = ref(false)
 export const lineCache = new Map<string, number>()
 
 // for debugging
-Object.assign(window, { files })
+Object.assign(window, { files, filesMap })

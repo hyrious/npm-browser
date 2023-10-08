@@ -6,7 +6,7 @@ import { disposable, wait } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
-import { normalize_git_repo } from "../helpers/utils";
+import { get_git_repo, hostedFromMani } from "../helpers/utils";
 import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
@@ -138,44 +138,23 @@ onMounted(() => {
 });
 
 function open_github(json: any) {
-  let repo = json.repository;
-  let normalized = "";
-  if (typeof repo === "string") normalized = normalize_git_repo(repo);
-  if (typeof repo === "object" && repo.type === "git") normalized = normalize_git_repo(repo.url);
-  if (normalized) {
-    const url = "https://github.com/" + normalized;
-    open(url, "_blank");
-  }
+  const repo = get_git_repo(json)
+  if (repo)
+    open(repo, "_blank");
+  else
+    open('https://www.npmjs.com/package/' + packageName.value, "_blank");
 }
 
+// https://github.com/npm/cli/blob/latest/lib/commands/docs.js
 function open_homepage(json: any) {
-  if (typeof json.homepage === "string") {
-    open(json.homepage, "_blank");
-  } else if (typeof json.repository === "object") {
-    let { url } = json.repository;
-    if (typeof url === "string") {
-      if (url.startsWith("git+")) {
-        url = url.slice(4);
-      }
-      if (url.endsWith(".git")) {
-        url = url.slice(0, -4);
-      }
-      if (url.startsWith("http")) {
-        open(url, "_blank");
-      }
-    }
-  } else if (typeof json.repository === "string") {
-    try {
-      new URL(json.repository);
-      open(json.repository, "_blank");
-    } catch {
-      const url = "https://github.com/" + json.repository;
-      open(url, "_blank");
-    }
-  } else if (packageName.value.includes("/")) {
-    const url = "https://github.com/" + packageName.value.slice(1);
-    open(url, "_blank");
-  }
+  if (json.homepage)
+    return open(json.homepage, "_blank");
+
+  const info = hostedFromMani(json)
+  if (info)
+    return open(info.docs(), "_blank")
+
+  open_github(json)
 }
 
 function choose(nameVersion: string) {
@@ -247,7 +226,7 @@ function fold_all() {
 <style lang="scss" scoped>
 h3 {
   margin: 0;
-  padding: 6px 16px 4px;
+  padding: 6px 8px 4px 0;
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
@@ -260,7 +239,7 @@ h3 {
 ul {
   flex: 1;
   margin: 0;
-  padding: 0 16px 40px;
+  padding: 0 8px 40px 12px;
   list-style-type: none;
   overflow-y: auto;
   height: 100%;
@@ -268,6 +247,7 @@ ul {
 
 .size {
   flex: 1;
+  padding-left: 16px;
 }
 
 .fold-all {

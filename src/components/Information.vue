@@ -7,7 +7,8 @@ const weeklyDownloads = computed(() => `https://img.shields.io/npm/dw/${packageN
 const bundlephobia = computed(
   () => `https://img.shields.io/bundlephobia/minzip/${packageName.value}/${packageVersion.value}`
 );
-const stars = computed(() => `https://img.shields.io/github/stars/${repo.value}`);
+const short_repo = computed(() => repo.value?.match(/github\.com\/([^/]+)\/([^/]+)(?:\.git)?/)?.slice(1, 3).join("/"));
+const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.value}`);
 
 </script>
 
@@ -16,14 +17,11 @@ const stars = computed(() => `https://img.shields.io/github/stars/${repo.value}`
   <a :href="'https://www.npmjs.com/package/' + packageName" target="_blank" rel="noopener noreferrer">
     <img :src="weeklyDownloads" alt="" />
   </a>
-  <a
-    :href="'https://bundlephobia.com/package/' + packageName + '@' + packageVersion"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
+  <a :href="'https://bundlephobia.com/package/' + packageName + '@' + packageVersion" target="_blank"
+    rel="noopener noreferrer">
     <img :src="bundlephobia" alt="" />
   </a>
-  <a v-if="repo" :title="repo" :href="'https://github.com/' + repo" target="_blank" rel="noopener noreferrer">
+  <a v-if="repo" :title="repo" :href="repo" target="_blank" rel="noopener noreferrer">
     <img :src="stars" :alt="repo" />
   </a>
 </template>

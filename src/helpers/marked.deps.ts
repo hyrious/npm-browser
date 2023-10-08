@@ -1,4 +1,11 @@
-import { marked, Renderer } from 'marked'
+import {
+  marked,
+  MarkedExtension,
+  Renderer,
+  RendererObject,
+  TokenizerAndRendererExtension,
+  Tokens,
+} from 'marked'
 import { markedHighlight } from 'marked-highlight'
 import { htmlEscape } from 'escape-goat'
 import renderMathInElement from 'katex/contrib/auto-render'
@@ -34,7 +41,7 @@ const is_image = (url: string) => {
   return image_exts.some((ext) => url.endsWith(ext))
 }
 
-let renderer: marked.RendererObject = {
+let renderer: RendererObject = {
   // github slugger
   heading(text, level, raw) {
     if ((this as any).options.headerIds) {
@@ -96,13 +103,13 @@ let renderer: marked.RendererObject = {
   },
 }
 
-let walkTokens: marked.MarkedOptions['walkTokens'] = (token) => {
+let walkTokens: MarkedExtension['walkTokens'] = (token) => {
   // Replace the first **Note** inside a blockquote element.
   if (token.type === 'blockquote') {
-    let first: marked.Tokens.HTML
-    token.tokens.forEach((t) => {
+    let first: Tokens.HTML
+    token.tokens?.forEach((t) => {
       if (t.type === 'paragraph') {
-        if ((first = t.tokens[0] as any) && (first as any).type === 'strong') {
+        if ((first = t.tokens?.[0] as any) && (first as any).type === 'strong') {
           if (first.text === 'Note') {
             first.type = 'html'
             ;(first as any).tokens = undefined
@@ -120,13 +127,8 @@ let walkTokens: marked.MarkedOptions['walkTokens'] = (token) => {
   }
 }
 
-type Extension =
-  | marked.TokenizerExtension
-  | marked.RendererExtension
-  | (marked.TokenizerExtension & marked.RendererExtension)
-
 // Footnote[^1]
-let footnoteList: Extension = {
+let footnoteList: TokenizerAndRendererExtension = {
   name: 'footnoteList',
   level: 'block',
   start(src) {
@@ -154,7 +156,7 @@ let footnoteList: Extension = {
   },
 }
 
-let footnote: Extension = {
+let footnote: TokenizerAndRendererExtension = {
   name: 'footnote',
   level: 'inline',
   start(src) {
@@ -199,7 +201,7 @@ let footnote: Extension = {
 // @ts-ignore
 import full from 'markdown-it-emoji/lib/data/full.json'
 
-let emoji: Extension = {
+let emoji: TokenizerAndRendererExtension = {
   name: 'emoji',
   level: 'inline',
   start(src) {
@@ -226,15 +228,13 @@ marked.use(
     async: true,
     highlight,
   }),
+  {
+    gfm: true,
+    extensions: [footnoteList, footnote, emoji],
+    renderer,
+    walkTokens,
+  },
 )
-marked.use({
-  langPrefix: 'language-',
-  mangle: false,
-  headerIds: false,
-  extensions: [footnoteList, footnote, emoji],
-  renderer,
-  walkTokens,
-})
 
 export async function update(source: string, to: HTMLElement, base_url: string) {
   slugger.reset()

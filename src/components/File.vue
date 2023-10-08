@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import prettyBytes from "pretty-bytes";
 import { FileEntry } from "../helpers/construct";
 import { events } from "../helpers/events";
 import FileIcon from "./FileIcon.vue";
@@ -18,6 +19,8 @@ const path = computed(() => props.node.path);
 const folder = computed(() => props.node.children);
 const selected = computed(() => props.node.path === app.path);
 const collapsed = computed(() => props.node.collapsed);
+
+const size = computed(() => !folder.value && filesMap.value.get(path.value.slice(1))?.buffer.byteLength)
 
 function select(ev: MouseEvent) {
   if (ev.metaKey || ev.ctrlKey) {
@@ -42,6 +45,7 @@ function select(ev: MouseEvent) {
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
+      <small v-if="size">{{ prettyBytes(size, { binary: true }) }}</small>
     </div>
     <ul v-if="!collapsed && props.node.children">
       <File v-for="child in props.node.children" :node="child" />
@@ -79,12 +83,19 @@ div {
 }
 
 label {
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.selected > label {
+small {
+  color: var(--pre-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.selected>label,
+.selected>small {
   color: var(--fg-on);
 }
 

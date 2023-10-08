@@ -6,6 +6,7 @@ import { files, wordwrap } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
 import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
+import { github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
 const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore());
 
@@ -257,11 +258,16 @@ function diff(ev: MouseEvent) {
     const from = el.dataset.value;
     const to = packageVersion.value;
     showDiff.value = false;
-    const url = (path.value ? diffOne : diffAll)([
-      `${name}@${from}`,
-      `${name}@${to}`,
-    ]);
-    window.open(url, "_blank");
+    if (el.dataset.github) {
+      const url = github_compare(repo.value, from, to)
+      url && window.open(url, "_blank");
+    } else {
+      const url = (path.value ? diffOne : diffAll)([
+        `${name}@${from}`,
+        `${name}@${to}`,
+      ]);
+      window.open(url, "_blank");
+    }
   }
 }
 
@@ -452,11 +458,18 @@ function toggle_wordwrap() {
     </button>
     <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
       @click="diff($event)">
-      <button v-for="v in versions" :data-value="v">
-        <span :data-value="v">{{ packageVersion }}</span>
-        <i class="i-mdi-arrow-left" :data-value="v"></i>
-        <span :data-value="v">{{ v }}</span>
-      </button>
+      <ul>
+        <li v-for="v in versions" :data-value="v">
+          <button :data-value="v">
+            <span :data-value="v">{{ packageVersion }}</span>
+            <i class="i-mdi-arrow-left" :data-value="v"></i>
+            <span :data-value="v">{{ v }}</span>
+          </button>
+          <button v-if="repo" :data-value="v" data-github="1">
+            <i class="i-mdi-github"></i>
+          </button>
+        </li>
+      </ul>
     </aside>
     <button v-show="files.length" title="search from the whole package (ctrl/cmd+k)"
       :class="{ active: showFullTextSearch }" @click="fullTextSearch()">
@@ -728,24 +741,38 @@ aside {
   display: flex;
   flex-flow: column nowrap;
 
+  li {
+    display: flex;
+    padding: 0;
+    align-items: center;
+  }
+
   button {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 12px;
+    padding: 4px 0 4px 12px;
 
     &:hover {
       background-color: var(--bg-on);
+    }
+
+    &:first-child {
+      flex: 1;
+    }
+
+    &:last-child {
+      padding-right: 12px;
     }
   }
 
   i {
     width: 16px;
     height: 16px;
+    pointer-events: none;
   }
 
-  >span,
-  >i {
+  span {
     pointer-events: none;
   }
 }

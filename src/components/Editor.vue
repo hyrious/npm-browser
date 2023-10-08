@@ -57,6 +57,8 @@ function strip_root(path: string) {
   if (subpath.startsWith("/" + prefix)) {
     subpath = subpath.slice(prefix.length + 1);
   }
+  if (subpath[0] === '/')
+    subpath = subpath.slice(1);
   return subpath;
 }
 
@@ -231,7 +233,7 @@ onMounted(() => {
   <div class="editor-container">
     <header>
       <h1>
-        <span>{{ strip_root(app.path) }}</span>
+        <span class="path">{{ strip_root(app.path) }}</span>
         <button v-show="isMarkdown" class="markdown-btn" :class="{ active: showMarkdown }" title="render it"
           @click="showMarkdown = !showMarkdown">
           <i class="i-mdi-language-markdown"></i>

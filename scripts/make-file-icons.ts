@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { Agent, get } from 'https'
 import { join } from 'path'
-import createHttpsProxyAgent from 'https-proxy-agent'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 
 function makeCacheDir(name: string) {
   const dir = join('node_modules', '.cache', name)
@@ -11,7 +11,7 @@ function makeCacheDir(name: string) {
 
 let agent: Agent | undefined
 if (process.env.http_proxy) {
-  agent = createHttpsProxyAgent(process.env.http_proxy)
+  agent = new HttpsProxyAgent(process.env.http_proxy)
 }
 
 const fetchCache = makeCacheDir('fetch')
