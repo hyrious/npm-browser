@@ -1,7 +1,7 @@
-@import "sanitize.css";
-@import "sanitize.css/forms.css";
-@import "./hljs.css";
-@import "./markdown.css";
+@import 'sanitize.css';
+@import 'sanitize.css/forms.css';
+@import './hljs.css';
+@import './markdown.css';
 
 :root {
   color-scheme: light dark;
@@ -77,4 +77,10 @@ option {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Hide CodeMirror active line when selection is not empty */
+.cm-editor:has(.cm-selectionBackground) .cm-activeLine {
+  background-color: var(--bg-on-transparent);
+  outline: none;
 }

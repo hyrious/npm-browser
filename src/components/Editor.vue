@@ -41,7 +41,10 @@ const code = computed(() => {
 const lang = computed(() => {
   const path = app.path
   const i = path.lastIndexOf('.')
-  if (i < 0) return 'text'
+  if (i < 0) {
+    if (code.value?.startsWith('#!/usr/bin/env node')) return 'js'
+    else return 'text'
+  }
   let ext = path.slice(i + 1)
   if (ext === "map") ext = "json";
   if (ext === "cjs" || ext === "mjs") ext = "js";
@@ -100,25 +103,22 @@ const extensions = computed(() =>
     }),
     centerCursor,
     EditorView.theme({
-      '&': {
-        color: 'var(--fg)',
-        backgroundColor: 'var(--bg)',
-      },
+      '&': { color: 'var(--fg)', backgroundColor: 'var(--bg)' },
       '&.cm-editor': { height: '100%' },
       '.cm-scroller': { overflow: 'auto' },
-      '&.cm-editor.cm-focused': {
-        outline: 'none',
-      },
-      '.cm-activeLine': { backgroundColor: 'var(--bg-on-transparent)', outline: '1px solid var(--bg-on)' },
-      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg-on-transparent)', outline: '1px solid var(--bg-on)' },
+      '&.cm-editor.cm-focused': { outline: 'none' },
+      '.cm-content': { cursor: 'text' },
+      '.cm-activeLine': { backgroundColor: 'var(--bg-on)', outline: '1px solid var(--bg-on)' },
+      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg)', outline: '1px solid var(--bg)' },
       '.cm-lineNumbers .cm-gutterElement': { paddingLeft: '12px', paddingRight: '8px' },
       '.cm-lineNumbers .cm-gutterElement:hover': { color: 'var(--fg-on)' },
-      '.cm-gutters': {
-        backgroundColor: 'var(--bg)',
-        color: 'var(--fg)',
-      },
-      '.cm-link': { color: 'var(--fg-on)', cursor: 'pointer' },
-      '.cm-link:hover': { textDecoration: 'underline' }
+      '.cm-gutters': { backgroundColor: 'var(--bg)', color: 'var(--fg)' },
+      '.cm-link': { cursor: 'pointer' },
+      '.cm-link:hover': { textDecoration: 'underline' },
+      '.cm-search.cm-panel': { display: 'flex', alignItems: 'center' },
+      '.cm-search.cm-panel label': { display: 'inline-flex', alignItems: 'center' },
+      '.cm-panels': { backgroundColor: 'var(--bg)', color: 'var(--fg)' },
+      '.cm-panels.cm-panels-bottom': { borderTop: '1px solid var(--border)' }
     }),
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
