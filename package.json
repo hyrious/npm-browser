@@ -12,6 +12,7 @@
     "file-icons": "esbuild-dev scripts/make-file-icons.ts"
   },
   "dependencies": {
+    "@codemirror/lang-cpp": "^6.0.2",
     "@codemirror/lang-css": "^6.2.1",
     "@codemirror/lang-javascript": "^6.2.1",
     "@codemirror/lang-json": "^6.0.1",
@@ -32,7 +33,7 @@
     "js-untar": "^2.0.0",
     "katex": "^0.16.9",
     "markdown-it-emoji": "^2.0.2",
-    "marked": "^9.1.2",
+    "marked": "^9.1.5",
     "marked-highlight": "^2.0.6",
     "modern-normalize": "^2.0.0",
     "pako": "^2.1.0",
@@ -40,13 +41,13 @@
     "pretty-bytes": "^6.1.1",
     "sanitize.css": "^13.0.0",
     "vue": "^3.3.7",
-    "vue-i18n": "^9.5.0"
+    "vue-i18n": "^9.6.4"
   },
   "devDependencies": {
     "@hyrious/esbuild-dev": "^0.10.4",
     "@hyrious/utils": "^0.0.6",
-    "@iconify-json/mdi": "^1.1.54",
-    "@intlify/unplugin-vue-i18n": "^1.4.0",
+    "@iconify-json/mdi": "^1.1.55",
+    "@intlify/unplugin-vue-i18n": "^1.5.0",
     "@types/hosted-git-info": "^3.0.4",
     "@types/katex": "^0.16.5",
     "@types/node": "^18.18.4",
@@ -56,12 +57,12 @@
     "esbuild": "^0.18.16",
     "highlight.js": "^11.9.0",
     "https-proxy-agent": "^7.0.2",
-    "sass": "^1.69.4",
+    "sass": "^1.69.5",
     "unocss": "^0.57.1",
-    "unplugin-auto-import": "^0.16.6",
+    "unplugin-auto-import": "^0.16.7",
     "unplugin-vue-components": "^0.25.2",
     "vite": "^4.5.0",
-    "vite-plugin-inspect": "^0.7.40"
+    "vite-plugin-inspect": "^0.7.41"
   },
   "pnpm": {
     "patchedDependencies": {

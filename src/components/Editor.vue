@@ -12,6 +12,7 @@ import { javascript } from "@codemirror/lang-javascript"
 import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
 import { markdown } from "@codemirror/lang-markdown"
+import { cpp } from '@codemirror/lang-cpp'
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
 import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
@@ -125,8 +126,9 @@ const extensions = computed(() =>
     EditorState.readOnly.of(true),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
       lang.value === 'css' ? css() :
-        lang.value === 'json' ? json() :
-          lang.value === 'md' ? markdown() : undefined,
+        lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
+          lang.value === 'md' ? markdown() :
+            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() : undefined,
   ].filter(Boolean) as Extension[]
 )
 
