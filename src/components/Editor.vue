@@ -33,9 +33,11 @@ const code = computed(() => {
     if (is_binary(buffer.value)) {
       failed.value = "binary"
     } else {
+      failed.value = ""
       return decoder.decode(buffer.value)
     }
   } else {
+    failed.value = ""
     return ""
   }
 })
