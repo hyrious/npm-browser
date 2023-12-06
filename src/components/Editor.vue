@@ -131,7 +131,6 @@ const extensions = computed(() =>
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
-    EditorView.editable.of(false),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
       lang.value === 'css' ? css() :
         lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
