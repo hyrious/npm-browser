@@ -13,6 +13,8 @@ import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
 import { markdown } from "@codemirror/lang-markdown"
 import { cpp } from '@codemirror/lang-cpp'
+import { yaml } from '@codemirror/legacy-modes/mode/yaml'
+import { StreamLanguage } from '@codemirror/language'
 import { is_binary } from "../helpers/is-binary";
 import { renderMarkdown } from "../helpers/marked";
 import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
@@ -93,7 +95,8 @@ const extensions = computed(() =>
           } else {
             app.line = 0
           }
-          return false
+          app.lineTo = -1
+          return true
         }
       }
     }),
@@ -101,7 +104,9 @@ const extensions = computed(() =>
     highlightActiveLineGutter(),
     EditorView.updateListener.of((update) => {
       if (update.selectionSet) {
-        app.line = update.state.doc.lineAt(update.state.selection.main.head).number
+        const { main } = update.state.selection
+        app.line = update.state.doc.lineAt(main.from).number
+        app.lineTo = update.state.doc.lineAt(main.to).number
       }
     }),
     centerCursor,
@@ -126,19 +131,23 @@ const extensions = computed(() =>
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
+    EditorView.editable.of(false),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
       lang.value === 'css' ? css() :
         lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
           lang.value === 'md' ? markdown() :
-            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() : undefined,
+            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
+              lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
   ].filter(Boolean) as Extension[]
 )
 
 function jumpToLine() {
   if (app.line === 0) return;
   try {
+    const { from } = view.value.state.doc.line(app.line)
+    const { to } = app.lineTo > 0 ? view.value.state.doc.line(app.lineTo) : { to: -1 }
     view.value.dispatch({
-      selection: EditorSelection.cursor(view.value.state.doc.line(app.line).from),
+      selection: to > 0 ? EditorSelection.range(from, to) : EditorSelection.cursor(from),
       scrollIntoView: true,
     })
   } catch {}
@@ -191,7 +200,7 @@ onMounted(() => {
 
   push(watchEffect(() => {
     const key = app.packageName + app.path
-    app.line ? lineCache.set(key, app.line) : lineCache.delete(key)
+    app.line ? lineCache.set(key, [app.line, app.lineTo]) : lineCache.delete(key)
   }))
 
   push(events.on('jump', (path) => {
@@ -211,8 +220,8 @@ onMounted(() => {
           if (ctrl) {
             open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved, '_blank')
           } else {
-            app.path = resolved
-            app.line = lineCache.get(app.packageName + resolved) || 0
+            app.path = resolved;
+            [app.line, app.lineTo] = lineCache.get(app.packageName + resolved) || [0, -1]
             events.emit('jump', resolved)
           }
           break

@@ -28,7 +28,7 @@ export const root_folder = computed(() => {
 
 export const wordwrap = ref(false)
 
-export const lineCache = new Map<string, number>()
+export const lineCache = new Map<string, [number, number]>()
 
 // for debugging
 Object.assign(window, { files, filesMap })

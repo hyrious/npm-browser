@@ -1,23 +1,25 @@
-import { PluginValue, ViewPlugin, ViewUpdate } from "@codemirror/view"
+import { PluginValue, ViewPlugin, ViewUpdate } from '@codemirror/view'
 
 // Only enable this plugin 800ms after the editor is initialized.
-let enabled = Date.now();
-let enable_time = 800;
+let enabled = Date.now()
+let enable_time = 800
 
 export function enable_center_cursor(duration: number) {
-  enabled = Date.now();
-  enable_time = duration;
+  enabled = Date.now()
+  enable_time = duration
 }
 
 // https://discuss.codemirror.net/t/cm6-scroll-to-middle/2924/4
 class CenterCursorPlugin implements PluginValue {
   update(update: ViewUpdate) {
-    if (update.transactions.some(tr => tr.scrollIntoView) && Date.now() - enabled < enable_time) {
+    if (update.transactions.some((tr) => tr.scrollIntoView) && Date.now() - enabled < enable_time) {
       let { view } = update
       view.requestMeasure({
         read() {
+          const { from, to } = view.state.selection.main
+          const mid = ((from + to) / 2) | 0
           return {
-            cursor: view.coordsAtPos(view.state.selection.main.head),
+            cursor: view.coordsAtPos(mid),
             scroller: view.scrollDOM.getBoundingClientRect(),
           }
         },

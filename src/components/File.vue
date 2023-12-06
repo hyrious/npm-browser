@@ -32,7 +32,7 @@ function select(ev: MouseEvent) {
     props.node.collapsed = !collapsed.value;
   } else if (app.path !== path.value) {
     app.path = path.value;
-    app.line = lineCache.get(app.packageName + app.path) || 0;
+    [app.line, app.lineTo] = lineCache.get(app.packageName + app.path) || [0, -1];
   } else {
     app.path = "";
   }
