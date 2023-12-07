@@ -144,7 +144,7 @@ function jumpToLine() {
   if (app.line === 0) return;
   try {
     const { from } = view.value.state.doc.line(app.line)
-    const { to } = app.lineTo > 0 ? view.value.state.doc.line(app.lineTo) : { to: -1 }
+    const { to } = app.lineTo > app.line ? view.value.state.doc.line(app.lineTo) : { to: -1 }
     view.value.dispatch({
       selection: to > 0 ? EditorSelection.range(from, to) : EditorSelection.cursor(from),
       scrollIntoView: true,
@@ -211,19 +211,22 @@ onMounted(() => {
     if (specifier.startsWith('.')) {
       const path = path_resolve(app.path, specifier)
       const base = path.slice(1)
+      const bases = base.endsWith('.js') ? [base, base.slice(0, -3)] : [base]
       const filesMap_ = filesMap.value
-      for (const ext of ["", ".ts", ".d.ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.d.ts", "/index.tsx", "/index.js", "/index.js"]) {
-        const key = base + ext
-        if (filesMap_.has(key)) {
-          const resolved = path + ext
-          if (ctrl) {
-            open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved, '_blank')
-          } else {
-            app.path = resolved;
-            [app.line, app.lineTo] = lineCache.get(app.packageName + resolved) || [0, -1]
-            events.emit('jump', resolved)
+      search: for (const base of bases) {
+        for (const ext of ["", ".ts", ".d.ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.d.ts", "/index.tsx", "/index.js", "/index.js"]) {
+          const key = base + ext
+          if (filesMap_.has(key)) {
+            const resolved = '/' + base + ext
+            if (ctrl) {
+              open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved, '_blank')
+            } else {
+              app.path = resolved;
+              [app.line, app.lineTo] = lineCache.get(app.packageName + resolved) || [0, -1]
+              events.emit('jump', resolved)
+            }
+            break search
           }
-          break
         }
       }
     }

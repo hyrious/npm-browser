@@ -8,7 +8,7 @@ import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
 import { github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
-const { packageName, packageVersion, path, line } = storeToRefs(useApplicationStore());
+const { packageName, packageVersion, path, line, lineTo } = storeToRefs(useApplicationStore());
 
 const showHintOnce = ref(!packageName.value);
 const searchInput = ref();
@@ -259,7 +259,7 @@ function diff(ev: MouseEvent) {
     const to = packageVersion.value;
     showDiff.value = false;
     if (el.dataset.github) {
-      const url = github_compare(repo.value, from, to)
+      const url = repo.value && github_compare(repo.value, from, to)
       url && window.open(url, "_blank");
     } else {
       const url = (path.value ? diffOne : diffAll)([
@@ -358,8 +358,8 @@ async function fullTextSearch(search?: string) {
 async function jump(location: { path: string; line: number }) {
   path.value = "/" + root_folder.value + "/" + location.path;
   line.value = location.line;
+  lineTo.value = -1;
   await nextTick();
-  events.emit("jump", path.value);
 }
 
 function toggleBlock(ev: MouseEvent) {
