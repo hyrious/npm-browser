@@ -57,7 +57,7 @@ function to_tag(repo: string, v: string) {
   if (repo.includes('sveltejs/svelte') && +v[0] > 3) {
     return 'svelte@' + v
   }
-  if (repo.includes('codemirror/')) {
+  if (repo.includes('codemirror/') || repo.includes('markdown-it/')) {
     return v
   }
   // TODO: add more special cases

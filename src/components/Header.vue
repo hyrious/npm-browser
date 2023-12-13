@@ -194,8 +194,8 @@ async function loadVersions(name: string, setVersion = "") {
     abortController && abortController.abort();
     abortController = new AbortController();
     // eager load versions
-    fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.json()).then(data => {
-      if (no_thanks) return;
+    fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.ok && r.json()).then(data => {
+      if (!data || no_thanks) return;
       versions.value = data.versions;
     })
     const res = await fetch_with_mirror_retry(`https://registry.npmjs.org/${name}`, {

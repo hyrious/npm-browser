@@ -199,13 +199,19 @@ let footnote: TokenizerAndRendererExtension = {
 
 // :emoji:
 // @ts-ignore
-import full from 'markdown-it-emoji/lib/data/full.json'
+import full from 'markdown-it-emoji/lib/data/full.mjs'
+// @ts-ignore
+import shortcuts from 'markdown-it-emoji/lib/data/shortcuts.mjs'
 
 let emoji: TokenizerAndRendererExtension = {
   name: 'emoji',
   level: 'inline',
   start(src) {
-    return src.match(/:[a-zA-Z0-9_\-\+]+:/)?.index
+    let index = src.match(/:[a-zA-Z0-9_\-\+]+:/)?.index
+    if (index == null)
+      for (const id in shortcuts)
+        for (const pat of shortcuts[id]) if ((index = src.indexOf(pat)) >= 0) return index
+    return index
   },
   tokenizer(src, tokens) {
     const match = /^:([a-zA-Z0-9_\-\+]+):/.exec(src)
