@@ -211,15 +211,17 @@ function fold_all() {
         <i class="i-mdi-trash-can-outline"></i>
       </button>
     </h3>
-    <TransitionGroup name="list" tag="ul" class="cached" v-if="history.length > 0">
-      <li v-for="item in history" :key="item" class="history-item">
-        <button :title="item" @click="choose(item)">{{ item }}</button>
-        <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
-          <i class="i-mdi-close"></i>
-        </button>
-      </li>
-    </TransitionGroup>
-    <p class="no-history" v-else>Empty.</p>
+    <Transition>
+      <TransitionGroup name="list" tag="ul" class="cached" v-if="history.length > 0">
+        <li v-for="item in history" :key="item" class="history-item">
+          <button :title="item" @click="choose(item)">{{ item }}</button>
+          <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+            <i class="i-mdi-close"></i>
+          </button>
+        </li>
+      </TransitionGroup>
+      <p class="no-history" v-else>Empty.</p>
+    </Transition>
   </template>
 </template>
 
@@ -365,9 +367,34 @@ i {
 }
 
 .no-history {
+  position: absolute;
+  top: 28px;
+  transform-origin: center center;
   margin: 0;
   padding: 0 16px;
   line-height: 1.5;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: all 0.2s ease;
+}
+
+.v-enter-from {
+  left: -100%;
+}
+
+.v-enter-to {
+  left: 0%;
+}
+
+.v-leave-from {
+  transform: scale(1);
+}
+
+.v-leave-to {
+  transform: scale(0.8);
+  opacity: 0;
 }
 
 .list-move,
