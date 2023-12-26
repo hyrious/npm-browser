@@ -5,7 +5,7 @@ import { events } from './events'
 // https://discuss.codemirror.net/t/avoid-replacing-match-in-matchdecorator-decorator-to-add-link-icon-after-urls
 
 class LinkWidget extends WidgetType {
-  constructor(readonly start: number, readonly end: number, readonly url: string) {
+  constructor(readonly start: number, readonly end: number, readonly url: string, readonly json: boolean) {
     super()
   }
   eq(other: LinkWidget): boolean {
@@ -14,7 +14,7 @@ class LinkWidget extends WidgetType {
   toDOM(): HTMLElement {
     const a = document.createElement('a')
     a.textContent = this.url
-    a.className = 'cm-link ͼ1d'
+    a.className = 'cm-link ' + (this.json ? 'ͼ1c' : 'ͼ1d')
     a.onclick = this.navigate.bind(this)
     return a
   }
@@ -25,13 +25,14 @@ class LinkWidget extends WidgetType {
 }
 
 const linkDecorator = new MatchDecorator({
-  regexp: /\brequire\((?:'([^']+)'|"([^"]+)")\)|\b(?:from|import)\s*(?:'([^']+)'|"([^"]+)")/g,
+  regexp:
+    /\brequire\((?:'([^']+)'|"([^"]+)")\)|\b(?:from|import)\s*(?:'([^']+)'|"([^"]+)")|^\s+"([^"]+)":\s"(?:[\^~\d]|npm:|\*)/g,
   decorate(add, from, to, match, view) {
     const start = from + match[0].match(/['"]/)!.index! + 1
-    const url = match[1] || match[2] || match[3] || match[4]
+    const url = match[1] || match[2] || match[3] || match[4] || match[5]
     const end = start + url.length
-    if (url.startsWith('node:')) return
-    add(start, end, Decoration.replace({ widget: new LinkWidget(start, end, url) }))
+    if (url.startsWith('node:') || (match[5] && url === 'version')) return
+    add(start, end, Decoration.replace({ widget: new LinkWidget(start, end, url, !!match[5]) }))
   },
 })
 

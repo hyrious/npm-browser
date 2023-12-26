@@ -15,14 +15,14 @@ const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.v
 <template v-if="packageName && packageVersion">
   <p v-if="desc" class="desc">{{ desc }}</p>
   <a :href="'https://www.npmjs.com/package/' + packageName" target="_blank" rel="noopener noreferrer">
-    <img :src="weeklyDownloads" alt="" />
+    <img loading="lazy" :src="weeklyDownloads" alt="" />
   </a>
   <a :href="'https://bundlephobia.com/package/' + packageName + '@' + packageVersion" target="_blank"
     rel="noopener noreferrer">
-    <img :src="bundlephobia" alt="" />
+    <img loading="lazy" :src="bundlephobia" alt="" />
   </a>
   <a v-if="repo" :title="repo" :href="repo" target="_blank" rel="noopener noreferrer">
-    <img :src="stars" :alt="repo" />
+    <img loading="lazy" :src="stars" :alt="repo" />
   </a>
 </template>
 
