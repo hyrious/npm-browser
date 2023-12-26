@@ -232,7 +232,7 @@ let emoji: TokenizerAndRendererExtension = {
 marked.use(
   markedHighlight({
     async: true,
-    highlight,
+    highlight: (code, lang) => highlight(code, lang),
   }),
   {
     gfm: true,
