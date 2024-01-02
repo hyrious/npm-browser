@@ -356,10 +356,13 @@ async function fullTextSearch(search?: string) {
 }
 
 async function jump(location: { path: string; line: number }) {
-  path.value = "/" + root_folder.value + "/" + location.path;
+  const next_path = "/" + root_folder.value + "/" + location.path
+  const goto = next_path === path.value
+  path.value = next_path;
   line.value = location.line;
   lineTo.value = -1;
   await nextTick();
+  if (goto) events.emit("jump", next_path + ':' + line.value);
 }
 
 function toggleBlock(ev: MouseEvent) {
