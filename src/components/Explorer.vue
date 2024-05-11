@@ -8,6 +8,7 @@ import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
 import { get_git_repo, hostedFromMani } from "../helpers/utils";
 import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
+import { extractPackage } from "../helpers/untar";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
 const root = ref<FileEntry | null>(null);
@@ -43,7 +44,6 @@ watchEffect(() => {
   debouncedFetchPackage(packageName.value, packageVersion.value);
 });
 
-const extractPackageP = import("../helpers/untar");
 async function fetchPackage(name: string, version: string) {
   fetching.value = true;
   root.value = null;
@@ -70,7 +70,6 @@ async function fetchPackage(name: string, version: string) {
 
   try {
     let totalSize = 0;
-    const { default: extractPackage } = await extractPackageP;
     const nodes = await extractPackage(buffer, (file) => {
       statusMessage("Extracting " + file.name);
       totalSize += file.buffer.byteLength;
