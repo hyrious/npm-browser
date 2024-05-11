@@ -2,7 +2,7 @@
 import { storeToRefs } from "pinia";
 import { listen } from "@wopjs/dom";
 import { $ as querySelector } from "@hyrious/utils";
-import { files, wordwrap } from "../stores/code";
+import { files, wordwrap, format } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
 import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
@@ -428,6 +428,10 @@ function uninstall() {
 function toggle_wordwrap() {
   wordwrap.value = !wordwrap.value;
 }
+
+function toggle_format() {
+  format.value = !format.value;
+}
 </script>
 
 <template>
@@ -515,6 +519,7 @@ function toggle_wordwrap() {
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="toggle_wordwrap">word-wrap</button>
+      <button :class="{ active: format }" @click="toggle_format">format</button>
     </div>
     <a class="btn" href="https://github.com/hyrious/npm-browser" target="_blank" title="hyrious/npm-browser">
       <i class="i-mdi-github"></i>

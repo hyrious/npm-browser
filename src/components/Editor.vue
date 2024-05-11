@@ -12,6 +12,7 @@ import { javascript } from "@codemirror/lang-javascript"
 import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
 import { markdown } from "@codemirror/lang-markdown"
+import { html } from "@codemirror/lang-html"
 import { cpp } from '@codemirror/lang-cpp'
 import { yaml } from '@codemirror/legacy-modes/mode/yaml'
 import { StreamLanguage } from '@codemirror/language'
@@ -21,6 +22,7 @@ import { centerCursor, enable_center_cursor } from "../helpers/center-cursor";
 import { linkPlugin, path_resolve } from "../helpers/navigate";
 import { events } from "../helpers/events";
 import { gzipSize as gzipSizeFn } from "../helpers/gzip-size"
+import { format as prettier_format, cancel as prettier_cancel } from '../helpers/prettier'
 
 const decoder = new TextDecoder()
 
@@ -43,6 +45,45 @@ const code = computed(() => {
     return ""
   }
 })
+
+const formatted = ref("")
+watch([code, format], ([code, format]) => {
+  formatted.value = code || ""
+  if (format) schedule_format()
+})
+
+const on_format = (value: string) => { formatted.value = value }
+function schedule_format() {
+  let code = formatted.value
+  if (code) {
+    if (lang.value === "js" || lang.value === "jsx") {
+      prettier_format(code, "js", on_format)
+      return;
+    }
+    if (lang.value === "ts" || lang.value === "tsx") {
+      prettier_format(code, "ts", on_format)
+      return;
+    }
+    if (lang.value === "css") {
+      prettier_format(code, "css", on_format)
+      return;
+    }
+    if (lang.value === "json" || lang.value === "map" || lang.value === "gyp") {
+      prettier_format(code, "json", on_format)
+      return;
+    }
+    if (lang.value === "md") {
+      prettier_format(code, "md", on_format)
+      return;
+    }
+    if (lang.value === "html") {
+      prettier_format(code, "html", on_format)
+      return;
+    }
+  }
+  prettier_cancel();
+}
+
 const lang = computed(() => {
   const path = app.path
   const i = path.lastIndexOf('.')
@@ -132,11 +173,12 @@ const extensions = computed(() =>
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
-      lang.value === 'css' ? css() :
-        lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
-          lang.value === 'md' ? markdown() :
-            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
-              lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
+    lang.value === 'css' ? css() :
+    lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
+    lang.value === 'md' ? markdown() :
+    lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
+    lang.value === 'html' ? html() :
+    lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
   ].filter(Boolean) as Extension[]
 )
 
@@ -179,14 +221,14 @@ onMounted(() => {
   })))
 
   view.value = new EditorView({
-    doc: code.value,
+    doc: formatted.value,
     parent: editor.value,
     extensions: extensions.value,
   })
   nextTick(jumpToLine)
   push(() => view.value.destroy())
 
-  push(watch(code, code => {
+  push(watch(formatted, code => {
     if (view.value.composing) return
     if (view.value) { view.value.destroy() }
     view.value = new EditorView({

@@ -15,6 +15,7 @@
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.2",
     "@codemirror/lang-css": "^6.2.1",
+    "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-markdown": "^6.2.5",
@@ -41,6 +42,7 @@
     "modern-normalize": "^2.0.0",
     "pako": "^2.1.0",
     "pinia": "^2.1.7",
+    "prettier": "^3.2.5",
     "pretty-bytes": "^6.1.1",
     "sanitize.css": "^13.0.0",
     "vue": "^3.4.27",
