@@ -427,7 +427,7 @@ function install_console() {
   let name = packageName.value
   let version = packageVersion.value
   console.log(`Installing ${name}@${version} …`);
-  import(`https://esm.sh/${name}@${version}?dev`).then((module) => {
+  import(/* @vite-ignore */ `https://esm.sh/${name}@${version}?dev`).then((module) => {
     (window as any)[name] = module
     console_loading.value = false
     console.log(`Installed ${name}@${version}:`, module);
