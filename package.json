@@ -59,7 +59,6 @@
     "@types/pako": "^2.0.3",
     "@unocss/preset-icons": "^0.60.0",
     "@vitejs/plugin-vue": "^5.0.4",
-    "esbuild": "^0.21.1",
     "highlight.js": "^11.9.0",
     "https-proxy-agent": "^7.0.4",
     "sass": "^1.77.1",
