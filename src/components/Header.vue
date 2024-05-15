@@ -421,6 +421,20 @@ function jsdelivr(ev: MouseEvent | KeyboardEvent, path?: string) {
   open(url, "_blank");
 }
 
+const console_loading = ref(false);
+function install_console() {
+  console_loading.value = true
+  let name = packageName.value
+  let version = packageVersion.value
+  console.log(`Installing ${name}@${version} …`);
+  import(`https://esm.sh/${name}@${version}?dev`).then((module) => {
+    (window as any)[name] = module
+    console_loading.value = false
+    console.log(`Installed ${name}@${version}:`, module);
+    console.log(`You can access it from window["${name}"]`)
+  });
+}
+
 function uninstall() {
   location.href = location.origin + location.pathname;
 }
@@ -516,6 +530,10 @@ function toggle_format() {
     <div class="information-panel" v-show="information">
       <Information />
     </div>
+    <button class="install" v-show="packageName && packageVersion" @click="install_console()"
+      title="import this module in console">
+      <i :class="console_loading ? 'i-mdi-loading' : 'i-mdi-console'"></i>
+    </button>
     <span class="splitter"></span>
     <div class="controls">
       <button :class="{ active: wordwrap }" @click="toggle_wordwrap">word-wrap</button>
