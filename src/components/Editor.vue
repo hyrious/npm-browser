@@ -299,9 +299,9 @@ onMounted(() => {
       <span v-if="buffer" class="size">{{ prettyBytes(buffer.byteLength, { binary: true }) }}</span>
       <span v-if="gzipSize" class="size">{{ `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
     </header>
-    <div v-show="code" class="editor" ref="editor"></div>
+    <div v-show="buffer" class="editor" ref="editor"></div>
     <span v-if="failed === 'binary'" class="tip">Cannot open binary file.</span>
-    <span v-else-if="!code" class="tip">Select a file to view its source code.</span>
+    <span v-else-if="!buffer" class="tip">Select a file to view its source code.</span>
     <article v-if="isMarkdown && showMarkdown" ref="markdownEl" class="markdown-body"></article>
   </div>
 </template>

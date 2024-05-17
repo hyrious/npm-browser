@@ -45,7 +45,7 @@ function select(ev: MouseEvent) {
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
-      <small v-if="size">{{ prettyBytes(size, { binary: true }) }}</small>
+      <small v-if="typeof size === 'number'">{{ prettyBytes(size, { binary: true }) }}</small>
     </div>
     <ul v-if="!collapsed && props.node.children">
       <File v-for="child in props.node.children" :node="child" />
@@ -57,6 +57,7 @@ function select(ev: MouseEvent) {
 li {
   position: relative;
   line-height: 25px;
+  content-visibility: auto;
 }
 
 div {

@@ -31,7 +31,8 @@ const fix_relative_url = (html: string, index: number) => {
 }
 const fix_redirect = (url: string) => {
   if (url.includes('/blob/HEAD/') && is_image(url)) {
-    url = url.replace(/^https:\/\/github.com/, 'https://cdn.jsdelivr.net/gh')
+    url = url.replace(/^https:\/\/github\.com\/https:\/\/github\.com/, 'https://github.com')
+    url = url.replace(/^https:\/\/github\.com/, 'https://cdn.jsdelivr.net/gh')
     url = url.replace('/blob/HEAD/', '/')
   }
   return url
