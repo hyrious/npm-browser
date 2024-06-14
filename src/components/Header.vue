@@ -10,7 +10,11 @@ import { github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
 const { packageName, packageVersion, path, line, lineTo } = storeToRefs(useApplicationStore());
 
-const showHintOnce = ref(!packageName.value);
+let lastPackageName = packageName.value;
+let lastPackageVersion = packageVersion.value;
+let lastVersions: string[] = [];
+
+const showHintOnce = ref(!lastPackageName);
 const searchInput = ref();
 const searchText = ref("");
 const searching = ref(false);
@@ -89,11 +93,16 @@ watch(searchText, (name) => {
 function choose(pkg: { name: string }) {
   skip = true;
   searching.value = false;
-  packageName.value = searchText.value = pkg.name;
+  lastPackageName = packageName.value = searchText.value = pkg.name;
   searchResult.value = [];
 }
 
+let skipLoadVersions = false;
 watch(packageName, (name) => {
+  if (skipLoadVersions) {
+    skipLoadVersions = false;
+    return;
+  }
   if (name) {
     versions.value = [];
     debouncedLoadVersions(packageName.value);
@@ -196,7 +205,7 @@ async function loadVersions(name: string, setVersion = "") {
     // eager load versions
     fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.ok && r.json()).then(data => {
       if (!data || no_thanks) return;
-      versions.value = data.versions;
+      lastVersions = versions.value = data.versions;
     })
     const res = await fetch_with_mirror_retry(`https://registry.npmjs.org/${name}`, {
       headers: { Accept: "application/vnd.npm.install-v1+json" },
@@ -208,11 +217,11 @@ async function loadVersions(name: string, setVersion = "") {
       latest: data["dist-tags"].latest,
       versions: Object.keys(data.versions),
     }));
-    versions.value = info.versions.reverse();
+    lastVersions = versions.value = info.versions.reverse();
     if (setVersion && info.versions.some((v) => v === setVersion)) {
-      packageVersion.value = setVersion;
+      lastPackageVersion = packageVersion.value = setVersion;
     } else {
-      packageVersion.value = info.latest;
+      lastPackageVersion = packageVersion.value = info.latest;
     }
   } catch (e) {
     no_thanks = true;
@@ -286,7 +295,10 @@ function diffOne([a, b]: string[]) {
 
 const TEXT_EXTS = [
   ".js",
+  ".mjs",
   ".ts",
+  ".mts",
+  ".cts",
   ".jsx",
   ".tsx",
   ".css",
@@ -372,7 +384,7 @@ function toggleBlock(ev: MouseEvent) {
   }
 }
 
-function press_return_to_kick_start_and_handle_arrows(ev: KeyboardEvent) {
+function on_search_keyup(ev: KeyboardEvent) {
   if (ev.key === "Enter" && !ev.ctrlKey && !ev.shiftKey && !ev.altKey && !ev.metaKey) {
     ev.preventDefault();
     ev.stopPropagation();
@@ -383,8 +395,14 @@ function press_return_to_kick_start_and_handle_arrows(ev: KeyboardEvent) {
     } else {
       choose(searchResult.value[index]);
     }
-  } else {
+  } else if (ev.key.startsWith("Arrow")) {
     handle_arrows(ev);
+  } else if (ev.key === "Escape") {
+    skip = skipLoadVersions = true;
+    searching.value = false;
+    searchText.value = packageName.value = lastPackageName;
+    packageVersion.value = lastPackageVersion;
+    versions.value = lastVersions;
   }
 }
 
@@ -454,7 +472,7 @@ function toggle_format() {
     <button class="site-title-sm" title="double click to uninstall" @dblclick="uninstall">ni</button>
     <input v-model="searchText" id="q" ref="searchInput" title="package name" placeholder="vue" autocomplete="off"
       spellcheck="false" :class="{ inputting: searchText }" :style="{ width: searchText.length + '.5ch' }"
-      @keyup="press_return_to_kick_start_and_handle_arrows($event)" />
+      @keyup="on_search_keyup($event)" />
     <transition name="fade">
       <span v-if="showHintOnce">
         <i class="i-mdi-arrow-left-thin"></i>

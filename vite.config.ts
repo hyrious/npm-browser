@@ -1,4 +1,3 @@
-import VueI18n from '@intlify/unplugin-vue-i18n/vite'
 import Vue from '@vitejs/plugin-vue'
 import path from 'path'
 import Unocss from 'unocss/vite'
@@ -21,7 +20,7 @@ export default defineConfig({
     Unocss(),
 
     AutoImport({
-      imports: ['vue', 'vue-i18n', 'vue/macros'],
+      imports: ['vue', 'vue/macros'],
       dts: 'src/auto-imports.d.ts',
       dirs: ['src/stores'],
       vueTemplate: true,
@@ -30,19 +29,9 @@ export default defineConfig({
     Components({
       dts: 'src/components.d.ts',
     }),
-
-    VueI18n({
-      runtimeOnly: true,
-      compositionOnly: true,
-      include: [path.resolve(__dirname, 'locales/**')],
-    }),
   ],
 
   build: {
     sourcemap: true,
-  },
-
-  ssr: {
-    noExternal: [/vue-i18n/],
   },
 })

@@ -264,6 +264,7 @@ export async function update(source: string, to: HTMLElement, base_url: string) 
       })
     })
   } catch (err) {
+    console.error(err)
     to.innerText = err + ''
   }
 }

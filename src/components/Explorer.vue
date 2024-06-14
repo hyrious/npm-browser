@@ -14,9 +14,10 @@ const { packageName, packageVersion, path } = storeToRefs(useApplicationStore())
 const root = ref<FileEntry | null>(null);
 const history = ref<string[]>([]);
 const fetching = ref(false);
-const nameVersion = computed(
-  () => packageName.value && packageVersion.value && `${packageName.value}@${packageVersion.value}`
-);
+
+let lastNameVersion = ""
+const nameVersion = computed(() => packageName.value && packageVersion.value && `${packageName.value}@${packageVersion.value}` || lastNameVersion);
+
 const size = ref(0);
 const sizePretty = computed(() => nameVersion.value && prettyBytes(size.value));
 const packedSize = ref(0);
@@ -187,7 +188,7 @@ function fold_all() {
 </script>
 
 <template>
-  <header v-if="nameVersion && !fetching && size > 0">
+  <header v-if="nameVersion && size > 0">
     <h3 :title="nameVersion + ' ' + sizePretty">
       <span class="size">{{ sizePretty }} (gzip: {{ packedSizePretty }})</span>
       <button class="fold-all" title="fold all" @click="fold_all()">
