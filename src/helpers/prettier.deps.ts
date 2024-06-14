@@ -1,10 +1,11 @@
 import { format, Options } from 'prettier'
-import babel from 'prettier/plugins/babel'
-import estree from 'prettier/plugins/estree'
-import typescript from 'prettier/plugins/typescript'
-import markdown from 'prettier/plugins/markdown'
-import postcss from 'prettier/plugins/postcss'
-import html_ from 'prettier/plugins/html'
+
+const babel = () => import('prettier/plugins/babel')
+const estree = () => import('prettier/plugins/estree')
+const typescript = () => import('prettier/plugins/typescript')
+const markdown = () => import('prettier/plugins/markdown')
+const postcss = () => import('prettier/plugins/postcss')
+const html_ = () => import('prettier/plugins/html')
 
 const options: Options = {
   printWidth: 110,
@@ -13,11 +14,25 @@ const options: Options = {
   semi: false,
 }
 
-export const js = (code: string) => format(code, { parser: 'babel', plugins: [babel, estree], ...options })
-export const ts = (code: string) =>
-  format(code, { parser: 'typescript', plugins: [typescript, estree], ...options })
-export const md = (code: string) => format(code, { parser: 'markdown', plugins: [markdown], ...options })
-export const css = (code: string) => format(code, { parser: 'css', plugins: [postcss], ...options })
-export const json = (code: string) =>
-  format(code, { parser: 'json-stringify', plugins: [babel, estree], ...options })
-export const html = (code: string) => format(code, { parser: 'html', plugins: [html_], ...options })
+const all = async (...deps: Promise<any>[]) => {
+  const res = await Promise.all(deps)
+  return res.map((mod) => mod.default)
+}
+
+export const js = async (code: string) =>
+  format(code, { parser: 'babel', plugins: await all(babel(), estree()), ...options })
+
+export const ts = async (code: string) =>
+  format(code, { parser: 'typescript', plugins: await all(typescript(), estree()), ...options })
+
+export const md = async (code: string) =>
+  format(code, { parser: 'markdown', plugins: [await markdown()], ...options })
+
+export const css = async (code: string) =>
+  format(code, { parser: 'css', plugins: [await postcss()], ...options })
+
+export const json = async (code: string) =>
+  format(code, { parser: 'json-stringify', plugins: await all(babel(), estree()), ...options })
+
+export const html = async (code: string) =>
+  format(code, { parser: 'html', plugins: [await html_()], ...options })
