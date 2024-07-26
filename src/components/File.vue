@@ -56,6 +56,7 @@ function select(ev: MouseEvent) {
 <style lang="scss" scoped>
 li {
   position: relative;
+  padding: 0 0 0 12px;
   line-height: 25px;
   content-visibility: auto;
 }
@@ -63,7 +64,6 @@ li {
 div {
   display: flex;
   align-items: center;
-  margin: 0 -4px;
   padding: 0 4px;
   gap: 4px;
 
@@ -110,7 +110,7 @@ i {
 ul {
   list-style-type: none;
   margin: 0;
-  padding: 0 0 0 16px;
+  padding: 0 0 0 8px;
 }
 
 @media (max-width: 720px) {

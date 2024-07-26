@@ -1,47 +1,8 @@
-import HostedGitInfo from 'hosted-git-info'
+import repoUrlFromPackage from 'repo-url-from-package'
 
-// https://github.com/npm/cli/blob/latest/lib/commands/repo.js
 export function get_git_repo(mani: any) {
-  const r = mani.repository
-  // prettier-ignore
-  const rurl = !r ? null
-    : typeof r === 'string' ? r
-    : typeof r === 'object' && typeof r.url === 'string' ? r.url
-    : null
-
-  if (!rurl) return null
-
-  const info = hostedFromMani(mani)
-  const url = info ? info.browse(mani.repository.directory) : unknownHostedUrl(rurl)
-
+  const { url } = repoUrlFromPackage(mani)
   return url
-}
-
-export function hostedFromMani(mani: any): HostedGitInfo | null {
-  const r = mani.repository
-  // prettier-ignore
-  const rurl = !r ? null
-    : typeof r === 'string' ? r
-    : typeof r === 'object' && typeof r.url === 'string' ? r.url
-    : null
-
-  return (rurl && HostedGitInfo.fromUrl(rurl.replace(/^git\+/, ''))) || null
-}
-
-const unknownHostedUrl = (url: string) => {
-  try {
-    const { protocol, hostname, pathname } = new URL(url)
-
-    if (!protocol || !hostname) {
-      return null
-    }
-
-    const proto = /(git\+)http:$/.test(protocol) ? 'http:' : 'https:'
-    const path = pathname.replace(/\.git$/, '')
-    return `${proto}//${hostname}${path}`
-  } catch (e) {
-    return null
-  }
 }
 
 export function github_compare(repo: string, from: string, to: string) {

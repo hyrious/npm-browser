@@ -8,37 +8,25 @@
 
 @media (prefers-color-scheme: dark) {
   .markdown-body {
-    --color-accent-fg: #58a6ff;
-    --color-attention-fg: #d29922;
     --pre-bg: #2a2a2a;
   }
 }
 
 @media (prefers-color-scheme: light) {
   .markdown-body {
-    --color-accent-fg: #0969da;
-    --color-attention-fg: #9a6700;
     --pre-bg: #efefef;
   }
 }
 
 .markdown-body {
-  --color-canvas-default: var(--bg);
-  --color-canvas-subtle: var(--bg);
-  --color-border-default: var(--pre-bg);
+  --bgColor-muted: var(--bg-panel);
+  --bgColor-default: var(--bg);
+  --borderColor-default: var(--pre-bg);
 }
 
 .markdown-body code,
 .markdown-body tt {
   white-space: pre;
-}
-
-.color-fg-accent {
-  color: var(--color-accent-fg) !important;
-}
-
-.color-fg-attention {
-  color: var(--color-attention-fg) !important;
 }
 
 .mr-2 {

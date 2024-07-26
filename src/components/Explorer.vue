@@ -6,7 +6,7 @@ import { disposable, wait } from "@hyrious/utils";
 import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
-import { get_git_repo, hostedFromMani } from "../helpers/utils";
+import { get_git_repo } from "../helpers/utils";
 import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
 import { extractPackage } from "../helpers/untar";
 
@@ -145,14 +145,9 @@ function open_github(json: any) {
     open('https://www.npmjs.com/package/' + packageName.value, "_blank");
 }
 
-// https://github.com/npm/cli/blob/latest/lib/commands/docs.js
 function open_homepage(json: any) {
   if (json.homepage)
     return open(json.homepage, "_blank");
-
-  const info = hostedFromMani(json)
-  if (info)
-    return open(info.docs(), "_blank")
 
   open_github(json)
 }
@@ -241,10 +236,14 @@ h3 {
 ul {
   flex: 1;
   margin: 0;
-  padding: 0 8px 40px 12px;
+  padding: 0 0 40px 0;
   list-style-type: none;
   overflow-y: auto;
   height: 100%;
+
+  >li {
+    padding-right: 8px;
+  }
 }
 
 .size {
