@@ -171,7 +171,7 @@
   font-size: 12px;
   font-family: var(--mono);
   white-space: nowrap;
-  cursor: pointer;
+  cursor: default;
 }
 .hljs-line-number:hover {
   color: var(--fg-on);

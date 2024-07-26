@@ -209,7 +209,7 @@ function fold_all() {
     <Transition>
       <TransitionGroup name="list" tag="ul" class="cached" v-if="history.length > 0">
         <li v-for="item in history" :key="item" class="history-item">
-          <button :title="item" @click="choose(item)">{{ item }}</button>
+          <button class="package" :title="item" @click="choose(item)">{{ item }}</button>
           <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
             <i class="i-mdi-close"></i>
           </button>
@@ -302,14 +302,18 @@ ul {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  margin: 0 -4px;
+  padding-right: 0;
 
   button {
     border: 0;
     padding: 4px 8px;
     text-align: left;
     flex: 1;
-    cursor: pointer;
+    cursor: default;
+
+    &.package {
+      padding-left: 16px;
+    }
   }
 
   button:hover {
@@ -338,7 +342,6 @@ ul {
 
   &:hover {
     color: var(--fg-on);
-    background-color: var(--bg-on);
   }
 }
 

@@ -173,12 +173,12 @@ const extensions = computed(() =>
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
     lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
-    lang.value === 'css' ? css() :
-    lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
-    lang.value === 'md' ? markdown() :
-    lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
-    lang.value === 'html' ? html() :
-    lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
+      lang.value === 'css' ? css() :
+        lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
+          lang.value === 'md' ? markdown() :
+            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
+              lang.value === 'html' ? html() :
+                lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
   ].filter(Boolean) as Extension[]
 )
 
@@ -337,7 +337,7 @@ h1 {
   border: 0;
   position: relative;
   left: 4px;
-  cursor: pointer;
+  cursor: default;
 
   i {
     position: absolute;

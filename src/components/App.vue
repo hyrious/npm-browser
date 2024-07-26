@@ -1,4 +1,3 @@
-
 <template>
   <Header></Header>
   <SplitPane>
