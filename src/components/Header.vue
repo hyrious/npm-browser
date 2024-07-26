@@ -4,7 +4,7 @@ import { listen } from "@wopjs/dom";
 import { $ as querySelector } from "@hyrious/utils";
 import { files, wordwrap, format } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
-import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
+import { fetchRegistry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
 import { github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
@@ -66,7 +66,7 @@ async function search(str: string) {
   try {
     abortController && abortController.abort();
     abortController = new AbortController();
-    const ret = await fetch_with_mirror_retry(api, { signal: abortController.signal }).then((r) => r.json());
+    const ret = await fetchRegistry(api, { signal: abortController.signal }).then((r) => r.json());
     searchResult.value = ret.objects.map((e: any) => e.package);
   } catch (e) {
     if (e.name === "AbortError") return;
@@ -207,7 +207,7 @@ async function loadVersions(name: string, setVersion = "") {
       if (!data || no_thanks) return;
       lastVersions = versions.value = data.versions;
     })
-    const res = await fetch_with_mirror_retry(`https://registry.npmjs.org/${name}`, {
+    const res = await fetchRegistry(`https://registry.npmjs.org/${name}`, {
       headers: { Accept: "application/vnd.npm.install-v1+json" },
       signal: abortController.signal,
     });

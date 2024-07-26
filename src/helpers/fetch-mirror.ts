@@ -1,6 +1,6 @@
 const mirrors: string[] = ['https://registry.npmmirror.com']
 
-export function fetch_with_mirror_retry(input: RequestInfo | URL, init?: RequestInit) {
+export function fetchRegistry(input: RequestInfo | URL, init?: RequestInit) {
   let url: string = input as string
   if (input instanceof URL) {
     url = input.href
@@ -8,15 +8,31 @@ export function fetch_with_mirror_retry(input: RequestInfo | URL, init?: Request
 
   if (url.startsWith('https://registry.npmjs.org/')) {
     const end = url.slice(27)
-    let p = fetch(input, addTimeout(init))
-    for (let index = 0; index < mirrors.length; ++index) {
-      const mirror = mirrors[index]
-      p = p.catch(() => fetch(`${mirror}/${end}`, addTimeout(init, 2000 + index * 1000)))
+    const search = new URL(location.href).searchParams
+
+    let p: Promise<Response>
+    if (search.has('registry')) {
+      const prefix = normalize(search.get('registry'))
+      p = fetch(`${prefix}/${end}`, init)
+    } else {
+      p = fetch(input, addTimeout(init))
+      for (let index = 0; index < mirrors.length; ++index) {
+        const mirror = mirrors[index]
+        p = p.catch(() => fetch(`${mirror}/${end}`, addTimeout(init, 2000 + index * 1000)))
+      }
     }
+
     return p
   }
 
   return fetch(input, init)
+}
+
+function normalize(url: string | null): string {
+  if (!url) return 'https://registry.npmjs.org'
+  if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url
+  if (url.endsWith('/')) url = url.slice(0, -1)
+  return url
 }
 
 function addTimeout(init: RequestInit | undefined, timeout = 2000): RequestInit {

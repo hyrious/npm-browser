@@ -7,7 +7,7 @@ import { construct, FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
 import { get_git_repo } from "../helpers/utils";
-import { fetch_with_mirror_retry } from "../helpers/fetch-mirror";
+import { fetchRegistry } from "../helpers/fetch-mirror";
 import { extractPackage } from "../helpers/untar";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
@@ -57,7 +57,7 @@ async function fetchPackage(name: string, version: string) {
       buffer = cached.buffer;
     } else {
       abortController = new AbortController();
-      buffer = await fetch_with_mirror_retry(url, { signal: abortController.signal }).then((r) => r.arrayBuffer());
+      buffer = await fetchRegistry(url, { signal: abortController.signal }).then((r) => r.arrayBuffer());
       await set(name, version, new Uint8Array(buffer));
     }
   } catch (e) {

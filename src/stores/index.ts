@@ -9,7 +9,7 @@ export const useApplicationStore = defineStore('app', () => {
   const lineTo = ref(-1)
 
   const fromQuery = () => {
-    const search = new URLSearchParams(location.search)
+    const search = new URL(location.href).searchParams
     const query = parse(search.get('q') || location.hash.slice(1))
     if (query) {
       packageName.value = query.name
