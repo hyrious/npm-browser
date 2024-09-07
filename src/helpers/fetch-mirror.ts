@@ -1,6 +1,6 @@
 const mirrors: string[] = ['https://registry.npmmirror.com']
 
-export function fetchRegistry(input: RequestInfo | URL, init?: RequestInit) {
+export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit) {
   let url: string = input as string
   if (input instanceof URL) {
     url = input.href
@@ -13,7 +13,28 @@ export function fetchRegistry(input: RequestInfo | URL, init?: RequestInit) {
     let p: Promise<Response>
     if (search.has('registry')) {
       const prefix = normalize(search.get('registry'))
-      p = fetch(`${prefix}/${end}`, init)
+      if (prefix === 'https://npm.pkg.github.com') {
+        let token = sessionStorage.getItem('ghtoken')
+        if (!token) {
+          token = prompt('Enter the GitHub Token:')
+          if (!token) return Promise.reject(new Error('No GitHub Token, failed to fetch ' + url))
+          sessionStorage.setItem('ghtoken', token)
+        }
+        let headers = new Headers(init?.headers)
+        headers.set('Authorization', `Bearer ${token}`)
+        init = { ...init, headers }
+        // The tarball URL is different from the official one.
+        let path = end
+        if (path.endsWith('.tgz')) {
+          let version = path.match(/\-([-\w\d\.]+)\.tgz$/)![1]
+          let meta = await fetchRegistry(url.slice(0, url.indexOf('/-/'))).then((r) => r.json())
+          p = fetch(`https://netlify.hyrious.me/proxy/${meta.versions[version].dist.tarball}`, init)
+        } else {
+          p = fetch(`https://netlify.hyrious.me/proxy/${prefix}/${end}`, init)
+        }
+      } else {
+        p = fetch(`${prefix}/${end}`, init)
+      }
     } else {
       p = fetch(input, addTimeout(init))
       for (let index = 0; index < mirrors.length; ++index) {

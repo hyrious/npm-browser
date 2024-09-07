@@ -58,7 +58,7 @@ async function fetchPackage(name: string, version: string) {
     } else {
       abortController = new AbortController();
       buffer = await fetchRegistry(url, { signal: abortController.signal }).then((r) => r.arrayBuffer());
-      await set(name, version, new Uint8Array(buffer));
+      customRegistry || await set(name, version, new Uint8Array(buffer));
     }
   } catch (e) {
     fetching.value = false;

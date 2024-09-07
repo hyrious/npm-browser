@@ -1,6 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { parse } from '../helpers/query'
 
+export const customRegistry = new URL(location.href).searchParams.get('registry')
+
 export const useApplicationStore = defineStore('app', () => {
   const packageName = ref('')
   const packageVersion = ref('')
