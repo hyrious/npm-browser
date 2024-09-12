@@ -4,10 +4,10 @@ import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
 import { minimalSetup, EditorView } from "codemirror"
 import { lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view'
-import { Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
+import { type Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
-import { githubLight } from '@ddietr/codemirror-themes/github-light'
-import { githubDark } from '@ddietr/codemirror-themes/github-dark'
+import { githubLight } from '@ddietr/codemirror-themes/github-light.js'
+import { githubDark } from '@ddietr/codemirror-themes/github-dark.js'
 import { javascript } from "@codemirror/lang-javascript"
 import { css } from "@codemirror/lang-css"
 import { json } from "@codemirror/lang-json"
@@ -191,7 +191,7 @@ function jumpToLine() {
       selection: to > 0 ? EditorSelection.range(from, to) : EditorSelection.cursor(from),
       scrollIntoView: true,
     })
-  } catch {}
+  } catch { }
 }
 
 function jumpToLineWithCenterCursor() {

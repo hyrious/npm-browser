@@ -5,7 +5,7 @@ let id = 0
 
 export function format(code: string, lang: string, then: (formatted: string) => void) {
   if (mod) {
-    if (lang in mod && typeof (mod as any)[lang] === 'function') {
+    if (lang in mod && typeof mod[lang] === 'function') {
       const formatFn = mod[lang as 'js']
       const taskId = ++id
       formatFn(code).then(flush.bind(null, taskId, then))

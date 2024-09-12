@@ -1,4 +1,4 @@
-import untar, { File } from 'js-untar'
+import { default as untar, type File } from 'js-untar'
 import type { Data } from 'pako'
 import { inflate } from './gzip'
 

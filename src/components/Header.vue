@@ -2,6 +2,7 @@
 import { storeToRefs } from "pinia";
 import { listen } from "@wopjs/dom";
 import { $ as querySelector } from "@hyrious/utils";
+import { default as semiver } from "semiver";
 import { files, wordwrap, format } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
 import { fetchRegistry } from "../helpers/fetch-mirror";
@@ -203,7 +204,7 @@ async function loadVersions(name: string, setVersion = "") {
     abortController && abortController.abort();
     abortController = new AbortController();
     // eager load versions
-    fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.ok && r.json()).then(data => {
+    customRegistry || fetch(`https://data.jsdelivr.com/v1/package/npm/${name}`).then(r => r.ok && r.json()).then(data => {
       if (!data || no_thanks) return;
       lastVersions = versions.value = data.versions;
     })
@@ -217,7 +218,7 @@ async function loadVersions(name: string, setVersion = "") {
       latest: data["dist-tags"].latest,
       versions: Object.keys(data.versions),
     }));
-    lastVersions = versions.value = info.versions.reverse();
+    lastVersions = versions.value = info.versions.sort(semiver).reverse();
     if (setVersion && info.versions.some((v) => v === setVersion)) {
       lastPackageVersion = packageVersion.value = setVersion;
     } else {
@@ -236,7 +237,7 @@ async function share() {
     let url = location.href;
     await navigator.clipboard?.writeText(url);
     alert("Shareable URL has been copied to clipboard.");
-  } catch {}
+  } catch { }
 }
 
 async function npmInstall() {
@@ -446,7 +447,7 @@ function install_console() {
   let version = packageVersion.value
   console.log(`Installing ${name}@${version} …`);
   import(/* @vite-ignore */ `https://esm.sh/${name}@${version}?dev`).then((module) => {
-    (window as any)[name] = module
+    globalThis[name] = module
     console_loading.value = false
     console.log(`Installed ${name}@${version}:`, module);
     console.log(`You can access it from window["${name}"]`)
@@ -491,8 +492,8 @@ function toggle_format() {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button v-show="packageName && packageVersion" :class="{ active: showDiff }" title="diff with other version"
-      @click="showDiff = !showDiff">
+    <button v-if="!customRegistry" v-show="packageName && packageVersion" :class="{ active: showDiff }"
+      title="diff with other version" @click="showDiff = !showDiff">
       <i class="i-mdi-file-compare"></i>
     </button>
     <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
@@ -548,7 +549,7 @@ function toggle_format() {
     <div class="information-panel" v-show="information">
       <Information />
     </div>
-    <button class="install" v-show="packageName && packageVersion" @click="install_console()"
+    <button v-if="!customRegistry" class="install" v-show="packageName && packageVersion" @click="install_console()"
       title="import this module in console">
       <i :class="console_loading ? 'i-mdi-loading' : 'i-mdi-console'"></i>
     </button>

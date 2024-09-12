@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import prettyBytes from "pretty-bytes";
-import { FileEntry } from "../helpers/construct";
+import type { FileEntry } from "../helpers/construct";
 import { events } from "../helpers/events";
 import FileIcon from "./FileIcon.vue";
 

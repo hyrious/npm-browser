@@ -1,18 +1,4 @@
 {
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
-  "compilerOptions": {
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext", "dom"],
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    "types": [],
-    "useUnknownInCatchVariables": false,
-    "resolveJsonModule": true
-  }
+  "extends": "@hyrious/configs/tsconfig.casual.json"
 }

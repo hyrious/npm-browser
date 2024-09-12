@@ -1,4 +1,4 @@
-import { format, Options } from 'prettier'
+import { format, type Options } from 'prettier'
 
 const babel = () => import('prettier/plugins/babel')
 const estree = () => import('prettier/plugins/estree')

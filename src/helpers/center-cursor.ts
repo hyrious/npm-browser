@@ -1,4 +1,4 @@
-import { PluginValue, ViewPlugin, ViewUpdate } from '@codemirror/view'
+import { type PluginValue, ViewPlugin, ViewUpdate } from '@codemirror/view'
 
 // Only enable this plugin 800ms after the editor is initialized.
 let enabled = Date.now()

@@ -3,7 +3,7 @@ import { storeToRefs } from "pinia";
 import prettyBytes from "pretty-bytes";
 import { listen, querySelector } from "@wopjs/dom";
 import { disposable, wait } from "@hyrious/utils";
-import { construct, FileEntry } from "../helpers/construct";
+import { construct, type FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
 import { get_git_repo } from "../helpers/utils";

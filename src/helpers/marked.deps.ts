@@ -39,9 +39,7 @@ export async function update(source: string, to: HTMLElement, base_url: string) 
   }
 }
 
-// @ts-ignore
 import full from 'markdown-it-emoji/lib/data/full.mjs'
-// @ts-ignore
 import shortcuts from 'markdown-it-emoji/lib/data/shortcuts.mjs'
 
 const safe_prefixes = ['#', 'http://', 'https://']
@@ -95,7 +93,7 @@ marked.use(
             return {
               type: 'emoji',
               raw: match[0],
-              text: (full as any)[match[1]],
+              text: full[match[1]],
             }
           }
         },

@@ -5,10 +5,15 @@ import { events } from './events'
 // https://discuss.codemirror.net/t/avoid-replacing-match-in-matchdecorator-decorator-to-add-link-icon-after-urls
 
 class LinkWidget extends WidgetType {
-  constructor(readonly start: number, readonly end: number, readonly url: string, readonly json: boolean) {
+  constructor(
+    readonly start: number,
+    readonly end: number,
+    readonly url: string,
+    readonly json: boolean,
+  ) {
     super()
   }
-  eq(other: LinkWidget): boolean {
+  override eq(other: LinkWidget): boolean {
     return other.start === this.start && other.end === this.end && other.url === this.url
   }
   toDOM(): HTMLElement {
