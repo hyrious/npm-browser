@@ -1,12 +1,10 @@
-import { createPinia } from "pinia";
-import { createApp } from "vue";
+import './bus';
 
-import "uno.css";
-import "./style.css";
-import App from "./components/App.vue";
+import { createApp, createSSRApp } from 'vue';
+import App from './App.vue';
 
-const pinna = createPinia();
-const app = createApp(App);
+function main() {
+  return import.meta.env.SSR ? createSSRApp(App) : createApp(App);
+}
 
-app.use(pinna);
-app.mount("#app");
+export { main as createApp };

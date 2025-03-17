@@ -1,0 +1,8 @@
+{
+  "include": ["src/cli.ts", "src/server.ts", "src/node/*"],
+  "extends": "@hyrious/configs/tsconfig.casual.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "verbatimModuleSyntax": false
+  }
+}

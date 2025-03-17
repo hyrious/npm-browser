@@ -1,4 +1,7 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
-  "extends": "@hyrious/configs/tsconfig.casual.json"
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.browser.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

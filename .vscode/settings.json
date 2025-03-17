@@ -1,8 +1,8 @@
 {
-  "prettier.enable": true,
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[vue]": {
-    "editor.defaultFormatter": "Vue.volar"
+  "eslint.enable": true,
+  "[typescript][vue]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "include": ["src"],
+  "exclude": ["src/cli.ts", "src/server.ts", "src/node/*"],
+  "extends": "@hyrious/configs/tsconfig.casual.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "verbatimModuleSyntax": false
+  }
+}

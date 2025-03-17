@@ -1,86 +1,42 @@
 @import 'sanitize.css';
-@import 'sanitize.css/forms.css';
-@import './hljs.css';
-@import './markdown.css';
 
-:root {
-  color-scheme: light dark;
-
+html {
   --bg: #fff;
-  --bg-on: #ddd;
-  --bg-on-transparent: #dddddd33;
-  --bg-panel: #e3e3e3;
-  --bg-panel-on: #eee;
-  --fg: #222;
-  --fg-on: #000;
-  --pre: #222;
-  --pre-dim: #777;
-  --pre-val: #870;
-  --border: #ddd;
-  --shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-  --highlight: #3ca877;
-
-  --mono: Noto Sans Mono, monospace;
-  --sans: Noto Sans, sans-serif;
+  --fg: #555;
+  --fg2: #000;
+  --pre: #8882;
+  --border: #8888;
+  --sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --mono: Noto Sans Mono, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1a1a;
-    --bg-on: #333;
-    --bg-on-transparent: #33333333;
-    --bg-panel: #232323;
-    --bg-panel-on: #444;
+  html {
+    --bg: #191919;
+    --fg2: #ddd;
     --fg: #aaa;
-    --fg-on: #ddd;
-    --pre: #ccc;
-    --pre-dim: #999;
-    --pre-val: #cb8;
-    --border: #383838;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    --highlight: #22863a;
   }
 }
 
-html,
-body,
-#app {
+body {
+  font: 16px/20px var(--sans);
+  color: var(--fg);
+  background: var(--bg);
+}
+
+html, body, #app {
   height: 100%;
 }
 
-body,
-option {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--sans);
-  line-height: 1.25;
+code, kbd, samp, pre {
+  font: 13px/18px var(--mono)
 }
 
-#app {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  overflow: hidden;
+a {
+  color: inherit;
 }
 
-@media (max-width: 720px) {
-  #app {
-    overflow: auto;
-  }
-}
-
-.i-mdi-loading {
-  animation: rotate 0.5s linear infinite;
-}
-
-@keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Hide CodeMirror active line when selection is not empty */
-.cm-editor:has(.cm-selectionBackground) .cm-activeLine {
-  background-color: var(--bg-on-transparent);
-  outline: none;
+i {
+  display: inline-block;
+  pointer-events: none;
 }

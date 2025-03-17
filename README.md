@@ -1,10 +1,10 @@
-## [<samp>NPM Browser</samp>](https://hyrious.me/npm-browser)
+# [<samp>NPM Browser</samp>](https://hyrious.me/npm-browser)
 
 <samp>Download and view NPM packages in your browser</samp>
 
-### Usage
+## Usage
 
-**URL Pattern**:
+### URL Pattern
 
 ```yml
 https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
@@ -16,7 +16,7 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
   <samp>https://hyrious.me/npm-browser/?q=@github/textarea-autosize@0.3.0/package/dist/index.js:72</samp>
 
 **Useful Functions**:
-  
+
 - Goto some package's homepage/github_repo:\
   Press <kbd>.</kbd> / <kbd>,</kbd>
 - Quick open a file:\
@@ -30,15 +30,12 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
 - Diff the viewing file with some older version of the package:\
   Click the :page_facing_up: icon, and choose one version to diff
 
-### Develop
+### CLI
 
-PR/issues are welcome!
-
-```bash
-pnpm dev
-pnpm build
+```console
+$ npx @hyrious/npm-browser [path/to/project]
 ```
 
-### License
+## License
 
 MIT @ [hyrious](https://github.com/hyrious)
