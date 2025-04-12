@@ -33,5 +33,6 @@ const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.v
   line-height: 1.5;
   font-family: var(--sans);
   flex-basis: 100%;
+  user-select: text;
 }
 </style>

@@ -3,7 +3,7 @@ import * as idb from "idb-keyval";
 const NPM_PACKAGES = idb.createStore("npm", "packages");
 
 export function get(name: string, version: string) {
-  return idb.get<Uint8Array>(`${name}@${version}`, NPM_PACKAGES);
+  return idb.get<Uint8Array<ArrayBuffer>>(`${name}@${version}`, NPM_PACKAGES);
 }
 
 export function set(name: string, version: string, tgz: Uint8Array) {

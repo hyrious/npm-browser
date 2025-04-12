@@ -75,7 +75,6 @@ marked.use(
   markedAlert(),
   {
     gfm: true,
-    useNewRenderer: true,
     extensions: [
       {
         name: 'emoji',

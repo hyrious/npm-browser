@@ -1,5 +1,7 @@
 import { get_git_repo } from '../helpers/utils'
 
+export const publishTime = ref(0)
+
 const decoder = new TextDecoder()
 export const pkg = computed(() => {
   const f = files.value.find((e) => trim_root(e.name) === 'package.json')

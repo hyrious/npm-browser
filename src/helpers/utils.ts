@@ -24,3 +24,7 @@ function to_tag(repo: string, v: string) {
   // TODO: add more special cases
   return 'v' + v
 }
+
+export function format_date(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}

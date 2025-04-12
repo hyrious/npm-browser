@@ -36,11 +36,7 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
         p = fetch(`${prefix}/${end}`, init)
       }
     } else {
-      p = fetch(input, addTimeout(init))
-      for (let index = 0; index < mirrors.length; ++index) {
-        const mirror = mirrors[index]
-        p = p.catch(() => fetch(`${mirror}/${end}`, addTimeout(init, 2000 + index * 1000)))
-      }
+      p = fetchHeuristic(input, init, (m: string) => `${m}/${end}`)
     }
 
     return p
@@ -49,33 +45,93 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
   return fetch(input, init)
 }
 
+function fetchHeuristic(input: RequestInfo | URL, init: RequestInit | undefined, getMirrorURL: (mirror: string) => string): Promise<Response> {
+  const mirror = sessionStorage.getItem('mirror')
+  const n = mirror ? Number.parseInt(mirror) : -2
+  if (n === -1) {
+    // Offcial then fallbacks to mirrors
+    return fetchSequence([input, ...mirrors.map(getMirrorURL)], init, i => {
+      sessionStorage.setItem('mirror', String(i - 1))
+    })
+  } else if (n >= 0 && mirrors[n]) {
+    // Mirrors[n] then fallbacks to official
+    const imap: number[] = [n, -1]
+    const sequence: (RequestInfo | URL)[] = [getMirrorURL(mirrors[n]), input]
+    for (let i = 0; i < mirrors.length; i++) {
+      if (i !== n) {
+        imap.push(i)
+        sequence.push(getMirrorURL(mirrors[i]));
+      }
+    }
+    return fetchSequence(sequence, init, i => {
+      sessionStorage.setItem('mirror', String(imap[i]))
+    })
+  } else {
+    // Race fetch, then remember the faster one
+    return fetchParallel([input, ...mirrors.map(getMirrorURL)], init, i => {
+      sessionStorage.setItem('mirror', String(i - 1))
+    })
+  }
+}
+
+function fetchParallel(sequence: (RequestInfo | URL)[], init: RequestInit | undefined, done: (i: number) => void): Promise<Response> {
+  init?.signal?.throwIfAborted()
+  const abortControllers = sequence.map(() => new AbortController());
+  init?.signal?.addEventListener('abort', () => abortControllers.forEach(a => a.abort()))
+
+  let resolve!: (res: Response) => void, reject!: (err: unknown) => void
+  const promise = new Promise<Response>((c, e) => {
+    resolve = c
+    reject = e
+  })
+
+  let lastError: unknown, finished = false
+  const tasks: Promise<unknown>[] = []
+  for (let i = 0; i < sequence.length; i++) {
+    const url = sequence[i]
+    tasks.push(fetch(url, { ...init, signal: abortControllers[i].signal }).then(response => {
+      abortControllers.forEach((a, j) => {
+        if (i !== j) a.abort()
+      })
+      done(i)
+      resolve(response)
+      finished = true
+      lastError = void 0
+    }, err => {
+      lastError = err
+    }))
+  }
+
+  Promise.allSettled(tasks).then(() => {
+    if (!finished) reject(lastError)
+  })
+
+  return promise
+}
+
+async function fetchSequence(sequence: (RequestInfo | URL)[], init: RequestInit | undefined, done: (i: number) => void): Promise<Response> {
+  let i = 0, response: Response | undefined, lastError: unknown
+  for (const url of sequence) {
+    try {
+      response = await fetch(url, init)
+      if (response.ok) {
+        done(i)
+        return response
+      }
+    } catch (err) {
+      lastError = err
+    }
+    i++
+  }
+  if (response) return response
+  throw lastError
+}
+
 function normalize(url: string | null): string {
   if (!url) return 'https://registry.npmjs.org'
+  if (url === 'npmmirror') return 'https://registry.npmmirror.com'
+  if (url === 'github') return 'https://npm.pkg.github.com'
   if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url
   if (url.endsWith('/')) url = url.slice(0, -1)
   return url
-}
-
-function addTimeout(init: RequestInit | undefined, timeout = 2000): RequestInit {
-  if (init && init.signal) {
-    init.signal = combineSignal(init.signal, AbortSignal.timeout(timeout))
-  } else if (init) {
-    init.signal = AbortSignal.timeout(timeout)
-  } else {
-    init = { signal: AbortSignal.timeout(timeout) }
-  }
-  return init
-}
-
-function combineSignal(a: AbortSignal, b: AbortSignal) {
-  const controller = new AbortController()
-  const signal = controller.signal
-  const onabort = () => {
-    controller.abort()
-    a.removeEventListener('abort', onabort)
-    b.removeEventListener('abort', onabort)
-  }
-  a.addEventListener('abort', onabort)
-  b.addEventListener('abort', onabort)
-  return signal
 }

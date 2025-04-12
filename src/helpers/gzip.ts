@@ -24,7 +24,7 @@ export function inflate(data: Data) {
     writer.close()
     return new Response(ds.readable).arrayBuffer().then(arrayBufferToUint8Array)
   } else {
-    return import('pako').then(({ inflate }) => inflate(data))
+    return import('pako').then(({ inflate }) => inflate(data) as Uint8Array<ArrayBuffer>)
   }
 }
 
@@ -36,6 +36,6 @@ export function gzip(data: Data) {
     writer.close()
     return new Response(cs.readable).arrayBuffer().then(arrayBufferToUint8Array)
   } else {
-    return import('pako').then(({ gzip }) => gzip(data))
+    return import('pako').then(({ gzip }) => gzip(data) as Uint8Array<ArrayBuffer>)
   }
 }

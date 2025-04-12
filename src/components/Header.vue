@@ -7,7 +7,7 @@ import { files, wordwrap, format } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
 import { fetchRegistry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
-import { github_compare } from "../helpers/utils";
+import { format_date, github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
 const { packageName, packageVersion, path, line, lineTo } = storeToRefs(useApplicationStore());
 
@@ -45,12 +45,23 @@ const fullTextSearchResultPretty = computed(() => {
 const fullTextSearchLineNumberWidth = ref(0);
 const searchResultIndex = ref(-1);
 const information = ref(false);
+const versionsInfo = ref<NpmInstallData['versions']>({})
+const packageVersionInfo = computed(() => {
+  const info = versionsInfo.value[packageVersion.value]
+  if (info) {
+    return [
+      'Published at ' + format_date(new Date(info.publish_time)),
+      info.deprecated
+    ].filter(Boolean).join(' - ')
+  }
+  return 'package version'
+})
 
 const DEBOUNCE_SEARCH = 500;
 let timer = 0;
 function debouncedSearch(str: string) {
   clearTimeout(timer);
-  if ((str = str.trim())) {
+  if ((str = str.trim()).length > 1) {
     timer = setTimeout(search, DEBOUNCE_SEARCH, str);
     searching.value = true;
     searchResult.value = [];
@@ -196,6 +207,8 @@ interface NpmPackageInfo {
   version: string;
   dependencies?: { [name: string]: string };
   dist: { tarball: string; fileCount?: number };
+  publish_time: number;
+  deprecated?: string;
 }
 
 async function loadVersions(name: string, setVersion = "") {
@@ -214,11 +227,13 @@ async function loadVersions(name: string, setVersion = "") {
     });
     if (!res.ok) throw new Error(`Failed to fetch ${res.url}: ${await res.text()}`);
     no_thanks = true;
-    const info = await (res.json() as Promise<NpmInstallData>).then((data) => ({
+    const data: NpmInstallData = await res.json()
+    const info = {
       latest: data["dist-tags"].latest,
       versions: Object.keys(data.versions),
-    }));
+    };
     lastVersions = versions.value = info.versions.sort(semiver).reverse();
+    versionsInfo.value = data.versions;
     if (setVersion && info.versions.some((v) => v === setVersion)) {
       lastPackageVersion = packageVersion.value = setVersion;
     } else {
@@ -481,7 +496,7 @@ function toggle_format() {
       </span>
     </transition>
     <label v-show="versions.length" for="v">@</label>
-    <select v-model="packageVersion" v-show="versions.length" id="v" title="package version"
+    <select v-model="packageVersion" v-show="versions.length" id="v" :title="packageVersionInfo"
       :style="{ width: packageVersion.length + '.5ch' }">
       <option v-for="v in versions" :value="v">{{ v }}</option>
     </select>
@@ -505,7 +520,7 @@ function toggle_format() {
             <i class="i-mdi-arrow-left" :data-value="v"></i>
             <span :data-value="v">{{ v }}</span>
           </button>
-          <button v-if="repo" :data-value="v" data-github="1">
+          <button v-if="repo" :data-value="v" data-github="1" :title="repo">
             <i class="i-mdi-github"></i>
           </button>
         </li>
@@ -931,7 +946,7 @@ aside {
   z-index: 9999;
   padding: 8px;
   user-select: none;
-  pointer-events: 0;
+  pointer-events: all;
   display: flex;
   flex-flow: row wrap;
   gap: 8px;

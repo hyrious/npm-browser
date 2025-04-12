@@ -120,6 +120,18 @@ const view = shallowRef(new EditorView())
 const prefersDark = matchMedia('(prefers-color-scheme: dark)')
 const dark = ref(prefersDark.matches)
 
+function language_of(language: string) {
+  switch (language) {
+    case "js": case "ts": case "jsx": case "tsx": return javascript()
+    case "css": return css()
+    case "json": case "map": case "gyp": return json()
+    case "md": return markdown()
+    case "c": case "cpp": case "h": case "hpp": case "cxx": case "cc": return cpp()
+    case "html": return html()
+    case "yml": case "yaml": return StreamLanguage.define(yaml)
+  }
+}
+
 const extensions = computed(() =>
   [
     minimalSetup,
@@ -158,27 +170,22 @@ const extensions = computed(() =>
       '&.cm-editor.cm-focused': { outline: 'none' },
       '.cm-content': { cursor: 'text' },
       '.cm-activeLine': { backgroundColor: 'var(--bg-on)', outline: '1px solid var(--bg-on)' },
-      '.cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg)', outline: '1px solid var(--bg)' },
-      '.cm-lineNumbers .cm-gutterElement': { paddingLeft: '12px', paddingRight: '8px' },
+      '.cm-lineNumbers .cm-gutterElement': { color: 'var(--fg)', paddingLeft: '12px', paddingRight: '8px' },
       '.cm-lineNumbers .cm-gutterElement:hover': { color: 'var(--fg-on)' },
+      '.cm-lineNumbers .cm-activeLineGutter': { color: 'var(--fg-on)', backgroundColor: 'var(--bg)', outline: '1px solid var(--bg)' },
       '.cm-gutters': { backgroundColor: 'var(--bg)', color: 'var(--fg)' },
       '.cm-link': { cursor: 'pointer' },
       '.cm-link:hover': { textDecoration: 'underline' },
       '.cm-search.cm-panel': { display: 'flex', alignItems: 'center' },
       '.cm-search.cm-panel label': { display: 'inline-flex', alignItems: 'center' },
       '.cm-panels': { backgroundColor: 'var(--bg)', color: 'var(--fg)' },
-      '.cm-panels.cm-panels-bottom': { borderTop: '1px solid var(--border)' }
+      '.cm-panels.cm-panels-bottom': { borderTop: '1px solid var(--border)' },
+      '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--fg-on)' },
     }),
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
-    lang.value === "js" || lang.value === "ts" || lang.value === "jsx" || lang.value === "tsx" ? javascript() :
-      lang.value === 'css' ? css() :
-        lang.value === 'json' || lang.value === 'map' || lang.value === 'gyp' ? json() :
-          lang.value === 'md' ? markdown() :
-            lang.value === 'c' || lang.value === 'cpp' || lang.value === 'h' || lang.value === 'hpp' || lang.value === 'cxx' || lang.value === 'cc' ? cpp() :
-              lang.value === 'html' ? html() :
-                lang.value === 'yml' || lang.value === 'yaml' ? StreamLanguage.define(yaml) : void 0,
+    language_of(lang.value),
   ].filter(Boolean) as Extension[]
 )
 
