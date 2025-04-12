@@ -52,6 +52,7 @@ declare global {
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
   const pkg: typeof import('./stores/repo')['pkg']
   const provide: typeof import('vue')['provide']
+  const publishTime: typeof import('./stores/repo')['publishTime']
   const reactive: typeof import('vue')['reactive']
   const readonly: typeof import('vue')['readonly']
   const ref: typeof import('vue')['ref']
@@ -142,6 +143,7 @@ declare module 'vue' {
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly pkg: UnwrapRef<typeof import('./stores/repo')['pkg']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
+    readonly publishTime: UnwrapRef<typeof import('./stores/repo')['publishTime']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
