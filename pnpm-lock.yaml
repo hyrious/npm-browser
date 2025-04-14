@@ -118,8 +118,8 @@ importers:
         version: 3.5.13
     devDependencies:
       '@hyrious/configs':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: ^0.1.4
+        version: 0.1.4
       '@hyrious/esbuild-dev':
         specifier: ^0.10.12
         version: 0.10.12(esbuild@0.25.2)
@@ -157,8 +157,8 @@ importers:
         specifier: ^19.1.2
         version: 19.1.2
       unplugin-vue-components:
-        specifier: ^28.4.1
-        version: 28.4.1(@babel/parser@7.27.0)(vue@3.5.13)
+        specifier: ^28.5.0
+        version: 28.5.0(@babel/parser@7.27.0)(vue@3.5.13)
       vite:
         specifier: ^6.2.6
         version: 6.2.6(@types/node@22.14.1)(jiti@2.4.2)(sass@1.86.3)
@@ -391,8 +391,8 @@ packages:
     resolution: {integrity: sha512-VEPdHzwelZ12hEX18BHduqxMZGolcUsrbeokHYxOUIm8X2+M7nx5QPtPeQgRxR9XjhdLv4/7DD5BWOlSrJ3k7Q==}
     engines: {node: '>=12.0.0'}
 
-  '@hyrious/configs@0.1.3':
-    resolution: {integrity: sha512-ed0o41zvsUpLCNo7IeltITZQd0e12HvK3DnRCX36evGYA+d/44bKFT6rzWufQaDLyyME7XJd8C6MqdUdM/K5zA==}
+  '@hyrious/configs@0.1.4':
+    resolution: {integrity: sha512-EZGGqeBaSl+pngsRVYMyFBgYWFmlSw76UjsZLP8hHwNb0VMufhf4OtULWx5UHM228wJBC3vVZq0Tvqz0zikM8g==}
 
   '@hyrious/esbuild-dev@0.10.12':
     resolution: {integrity: sha512-HIwBLedJvveHLJjuw4Vv737DF4aMMyIx5xt1f/6Glg2rBm3fmNNIFK1g2SXav4lZFLwx+EVRuq/5wYJ0u0jp7A==}
@@ -1285,8 +1285,8 @@ packages:
     resolution: {integrity: sha512-8U/MtpkPkkk3Atewj1+RcKIjb5WBimZ/WSLhhR3w6SsIj8XJuKTacSP8g+2JhfSGw0Cb125Y+2zA/IzJZDVbhA==}
     engines: {node: '>=18.12.0'}
 
-  unplugin-vue-components@28.4.1:
-    resolution: {integrity: sha512-niGSc0vJD9ueAnsqcfAldmtpkppZ09B6p2G1dL7X5S8KPdgbk1P+txPwaaDCe7N+eZh2VG1aAypLXkuJs3OSUg==}
+  unplugin-vue-components@28.5.0:
+    resolution: {integrity: sha512-o7fMKU/uI8NiP+E0W62zoduuguWqB0obTfHFtbr1AP2uo2lhUPnPttWUE92yesdiYfo9/0hxIrj38FMc1eaySg==}
     engines: {node: '>=14'}
     peerDependencies:
       '@babel/parser': ^7.15.8
@@ -1571,7 +1571,7 @@ snapshots:
 
   '@highlightjs/cdn-assets@11.11.1': {}
 
-  '@hyrious/configs@0.1.3': {}
+  '@hyrious/configs@0.1.4': {}
 
   '@hyrious/esbuild-dev@0.10.12(esbuild@0.25.2)':
     dependencies:
@@ -2507,7 +2507,7 @@ snapshots:
       pathe: 2.0.3
       picomatch: 4.0.2
 
-  unplugin-vue-components@28.4.1(@babel/parser@7.27.0)(vue@3.5.13):
+  unplugin-vue-components@28.5.0(@babel/parser@7.27.0)(vue@3.5.13):
     dependencies:
       chokidar: 3.6.0
       debug: 4.4.0

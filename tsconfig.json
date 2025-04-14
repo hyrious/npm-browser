@@ -1,4 +1,7 @@
 {
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
-  "extends": "@hyrious/configs/tsconfig.casual.json"
+  "extends": "@hyrious/configs/tsconfig.casual.json",
+  "compilerOptions": {
+    "verbatimModuleSyntax": true
+  }
 }

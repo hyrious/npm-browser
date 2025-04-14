@@ -469,6 +469,10 @@ function install_console() {
   });
 }
 
+function package_size() {
+  window.open(`https://hyrious.me/pkg-size/#${packageName.value}`, '_blank')
+}
+
 function uninstall() {
   location.href = location.origin + location.pathname;
 }
@@ -567,6 +571,9 @@ function toggle_format() {
     <button v-if="!customRegistry" class="install" v-show="packageName && packageVersion" @click="install_console()"
       title="import this module in console">
       <i :class="console_loading ? 'i-mdi-loading' : 'i-mdi-console'"></i>
+    </button>
+    <button v-show="packageName" title="install size (with dependencies)" @click="package_size()">
+      <i class="i-mdi-package-variant"></i>
     </button>
     <span class="splitter"></span>
     <div class="controls">
