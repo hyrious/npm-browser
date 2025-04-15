@@ -48,7 +48,7 @@ const information = ref(false);
 const versionsInfo = ref<NpmInstallData['versions']>({})
 const packageVersionInfo = computed(() => {
   const info = versionsInfo.value[packageVersion.value]
-  if (info) {
+  if (info && info.publish_time) {
     return [
       'Published at ' + format_date(new Date(info.publish_time)),
       info.deprecated
@@ -207,7 +207,7 @@ interface NpmPackageInfo {
   version: string;
   dependencies?: { [name: string]: string };
   dist: { tarball: string; fileCount?: number };
-  publish_time: number;
+  publish_time?: number;
   deprecated?: string;
 }
 

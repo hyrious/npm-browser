@@ -26,7 +26,7 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
         // The tarball URL is different from the official one.
         let path = end
         if (path.endsWith('.tgz')) {
-          let version = path.match(/\-([-\w\d\.]+)\.tgz$/)![1]
+          let version = extractTgzVersion(path)
           let meta = await fetchRegistry(url.slice(0, url.indexOf('/-/'))).then((r) => r.json())
           p = fetch(`https://netlify.hyrious.me/proxy/${meta.versions[version].dist.tarball}`, init)
         } else {
@@ -43,6 +43,20 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
   }
 
   return fetch(input, init)
+}
+
+// path = '@foo/bar/-/bar-1.0.0.tgz'.
+// path = '@foo-foo/bar-bar/-/bar-bar-1.0.0.tgz'.
+function extractTgzVersion(path: string): string {
+  const i = path.indexOf('/-/')
+  if (i >= 0) {
+    const name = path.slice(0, i).split('/').pop()!
+    const basename = path.slice(i + 3, -4) // 'bar-bar-1.0.0'
+    if (basename.startsWith(name + '-')) {
+      return basename.slice(name.length + 1)
+    }
+  }
+  throw new Error('Invalid tarball path: ' + path)
 }
 
 function fetchHeuristic(input: RequestInfo | URL, init: RequestInit | undefined, getMirrorURL: (mirror: string) => string): Promise<Response> {
