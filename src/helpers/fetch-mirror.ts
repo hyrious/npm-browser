@@ -59,12 +59,16 @@ function extractTgzVersion(path: string): string {
   throw new Error('Invalid tarball path: ' + path)
 }
 
-function fetchHeuristic(input: RequestInfo | URL, init: RequestInit | undefined, getMirrorURL: (mirror: string) => string): Promise<Response> {
+function fetchHeuristic(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  getMirrorURL: (mirror: string) => string,
+): Promise<Response> {
   const mirror = sessionStorage.getItem('mirror')
   const n = mirror ? Number.parseInt(mirror) : -2
   if (n === -1) {
     // Offcial then fallbacks to mirrors
-    return fetchSequence([input, ...mirrors.map(getMirrorURL)], init, i => {
+    return fetchSequence([input, ...mirrors.map(getMirrorURL)], init, (i) => {
       sessionStorage.setItem('mirror', String(i - 1))
     })
   } else if (n >= 0 && mirrors[n]) {
@@ -74,24 +78,28 @@ function fetchHeuristic(input: RequestInfo | URL, init: RequestInit | undefined,
     for (let i = 0; i < mirrors.length; i++) {
       if (i !== n) {
         imap.push(i)
-        sequence.push(getMirrorURL(mirrors[i]));
+        sequence.push(getMirrorURL(mirrors[i]))
       }
     }
-    return fetchSequence(sequence, init, i => {
+    return fetchSequence(sequence, init, (i) => {
       sessionStorage.setItem('mirror', String(imap[i]))
     })
   } else {
     // Race fetch, then remember the faster one
-    return fetchParallel([input, ...mirrors.map(getMirrorURL)], init, i => {
+    return fetchParallel([input, ...mirrors.map(getMirrorURL)], init, (i) => {
       sessionStorage.setItem('mirror', String(i - 1))
     })
   }
 }
 
-function fetchParallel(sequence: (RequestInfo | URL)[], init: RequestInit | undefined, done: (i: number) => void): Promise<Response> {
+function fetchParallel(
+  sequence: (RequestInfo | URL)[],
+  init: RequestInit | undefined,
+  done: (i: number) => void,
+): Promise<Response> {
   init?.signal?.throwIfAborted()
-  const abortControllers = sequence.map(() => new AbortController());
-  init?.signal?.addEventListener('abort', () => abortControllers.forEach(a => a.abort()))
+  const abortControllers = sequence.map(() => new AbortController())
+  init?.signal?.addEventListener('abort', () => abortControllers.forEach((a) => a.abort()))
 
   let resolve!: (res: Response) => void, reject!: (err: unknown) => void
   const promise = new Promise<Response>((c, e) => {
@@ -99,21 +107,27 @@ function fetchParallel(sequence: (RequestInfo | URL)[], init: RequestInit | unde
     reject = e
   })
 
-  let lastError: unknown, finished = false
+  let lastError: unknown,
+    finished = false
   const tasks: Promise<unknown>[] = []
   for (let i = 0; i < sequence.length; i++) {
     const url = sequence[i]
-    tasks.push(fetch(url, { ...init, signal: abortControllers[i].signal }).then(response => {
-      abortControllers.forEach((a, j) => {
-        if (i !== j) a.abort()
-      })
-      done(i)
-      resolve(response)
-      finished = true
-      lastError = void 0
-    }, err => {
-      lastError = err
-    }))
+    tasks.push(
+      fetch(url, { ...init, signal: abortControllers[i].signal }).then(
+        (response) => {
+          abortControllers.forEach((a, j) => {
+            if (i !== j) a.abort()
+          })
+          done(i)
+          resolve(response)
+          finished = true
+          lastError = void 0
+        },
+        (err) => {
+          lastError = err
+        },
+      ),
+    )
   }
 
   Promise.allSettled(tasks).then(() => {
@@ -123,8 +137,14 @@ function fetchParallel(sequence: (RequestInfo | URL)[], init: RequestInit | unde
   return promise
 }
 
-async function fetchSequence(sequence: (RequestInfo | URL)[], init: RequestInit | undefined, done: (i: number) => void): Promise<Response> {
-  let i = 0, response: Response | undefined, lastError: unknown
+async function fetchSequence(
+  sequence: (RequestInfo | URL)[],
+  init: RequestInit | undefined,
+  done: (i: number) => void,
+): Promise<Response> {
+  let i = 0,
+    response: Response | undefined,
+    lastError: unknown
   for (const url of sequence) {
     try {
       response = await fetch(url, init)

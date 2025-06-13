@@ -9,6 +9,7 @@ import { fetchRegistry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
 import { format_date, github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
+import { is_maybe_minified } from "../helpers/is-maybe-minified";
 const { packageName, packageVersion, path, line, lineTo } = storeToRefs(useApplicationStore());
 
 let lastPackageName = packageName.value;
@@ -329,6 +330,7 @@ const TEXT_EXTS = [
   ".svg",
   ".txt",
 ];
+let signalStopSerach = false;
 async function fullTextSearch(search?: string) {
   if (search === undefined) {
     const show = (showFullTextSearch.value = !showFullTextSearch.value);
@@ -350,24 +352,82 @@ async function fullTextSearch(search?: string) {
   const result: Line[] = [];
   const decoder = new TextDecoder();
   let maxWidth = 2;
+
+  // https://github.com/microsoft/vscode/blob/-/src/vs/workbench/services/search/common/getFileResults.ts
+  function getFileResults(path: string, text: string, search: string) {
+    const lineRanges: { start: number; end: number }[] = [];
+    const readLine = (i: number) => text.slice(lineRanges[i].start, lineRanges[i].end);
+
+    let prevLineEnd = 0;
+    let match: RegExpExecArray | null;
+    const lineEndRegex = /\r?\n/g;
+    while ((match = lineEndRegex.exec(text))) {
+      lineRanges.push({ start: prevLineEnd, end: match.index });
+      prevLineEnd = match.index + match[0].length;
+    }
+    if (prevLineEnd < text.length) {
+      lineRanges.push({ start: prevLineEnd, end: text.length });
+    }
+
+    const matchLength = search.length;
+    const pattern = makeSearchPattern(search);
+    const patternIndecies: number[] = [];
+    let limit = 10000;
+    while (limit-- > 0 && (match = pattern.exec(text))) {
+      patternIndecies.push(match.index);
+    }
+
+    if (patternIndecies.length > 0) {
+      let startLine = 0;
+      for (const matchIndex of patternIndecies) {
+        while (Boolean(lineRanges[startLine + 1]) && matchIndex > lineRanges[startLine].end) {
+          startLine++;
+        }
+        let endLine = startLine;
+        while (Boolean(lineRanges[endLine + 1]) && matchIndex + matchLength > lineRanges[endLine].end) {
+          endLine++;
+        }
+
+        let previewText = '';
+        for (let matchLine = startLine; matchLine <= endLine; matchLine++) {
+          previewText += readLine(matchLine) + '\n';
+        }
+
+        result.push({ path, line: startLine + 1, text: previewText })
+        if (signalStopSerach) {
+          searchingFullText.value = signalStopSerach = false;
+          fullTextSearchResult.value = result;
+          return;
+        }
+      }
+    }
+  }
+  function makeSearchPattern(search: string): RegExp {
+    search = search.replace(/[\\\{\}\*\+\?\|\^\$\.\[\]\(\)]/g, '\\$&');
+    return new RegExp(search, 'gmiu');
+  }
+
   // ref: https://github.com/frejs/fre/blob/master/src/schedule.ts
   const threshold = 5;
   let deadline = 0;
   for (const file of files.value) {
-    // skip minified files
-    if (file.name.includes(".min.")) continue;
+    // skip minified or mapping files
+    if (file.name.includes(".min.") || file.name.endsWith(".map")) continue;
     // skip binary files
     if (!TEXT_EXTS.some((ext) => file.name.endsWith(ext))) continue;
     if (is_binary(file.buffer)) continue;
 
+    if (signalStopSerach) {
+      searchingFullText.value = signalStopSerach = false;
+      fullTextSearchResult.value = result;
+      return;
+    }
+
     const path = file.name.replace(/^\w+\//, "");
     const text = decoder.decode(file.buffer);
-    text.split(/\r?\n/).forEach((line, i) => {
-      if (line.includes(fullTextSearchText.value)) {
-        maxWidth = Math.max(maxWidth, `${i + 1}`.length);
-        result.push({ path, line: i + 1, text: line });
-      }
-    });
+    if (is_maybe_minified(text)) continue;
+
+    getFileResults(path, text, fullTextSearchText.value)
 
     let now = performance.now();
     if (now >= deadline) {
@@ -381,6 +441,9 @@ async function fullTextSearch(search?: string) {
   fullTextSearchResult.value = result;
 
   searchingFullText.value = false;
+}
+function stopFullTextSearch() {
+  signalStopSerach = true;
 }
 
 async function jump(location: { path: string; line: number }) {
@@ -539,9 +602,9 @@ function toggle_format() {
         <label for="s">Search:</label>
         <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
           spellcheck="false" @change="fullTextSearch(fullTextSearchText)" />
-        <button :disabled="searchingFullText" @click="fullTextSearch(fullTextSearchText)">
+        <button @click="searchingFullText ? stopFullTextSearch() : fullTextSearch(fullTextSearchText)">
           <i v-show="searchingFullText" class="i-mdi-loading"></i>
-          <span v-show="!searchingFullText">GO</span>
+          &nbsp;<span>{{ searchingFullText ? "STOP" : "GO" }}</span>
         </button>
       </div>
       <output>
@@ -554,7 +617,9 @@ function toggle_format() {
             {{ String(line.line).padStart(fullTextSearchLineNumberWidth) }}: {{ line.text }}
           </button>
         </div>
-        <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">404 Not found :/</p>
+        <p v-show="fullTextSearchResult && fullTextSearchResult.length === 0">
+          {{ searchingFullText ? "Searching..." : "404 Not found :/" }}
+        </p>
       </output>
     </aside>
     <button id="cdn-link" v-show="packageName && packageVersion && path"

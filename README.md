@@ -16,7 +16,7 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
   <samp>https://hyrious.me/npm-browser/?q=@github/textarea-autosize@0.3.0/package/dist/index.js:72</samp>
 
 **Useful Functions**:
-  
+
 - Goto some package's homepage/github_repo:\
   Press <kbd>.</kbd> / <kbd>,</kbd>
 - Quick open a file:\

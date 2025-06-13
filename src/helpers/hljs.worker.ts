@@ -1,44 +1,44 @@
 /// <reference lib="webworker" />
 
-export {};
-import { htmlEscape } from "escape-goat"
-import hljs from "@highlightjs/cdn-assets/es/highlight.js";
-import powershell from "@highlightjs/cdn-assets/es/languages/powershell.min.js";
+export {}
+import { escapeHTML } from 'fast-escape-html'
+import hljs from '@highlightjs/cdn-assets/es/highlight.js'
+import powershell from '@highlightjs/cdn-assets/es/languages/powershell.min.js'
 
-hljs.registerLanguage("powershell", powershell);
+hljs.registerLanguage('powershell', powershell)
 
 // https://github.com/AlexxNB/highlightjs-svelte/blob/master/src/svelte.js
-hljs.registerLanguage("svelte", (hljs) => ({
-  subLanguage: "xml",
+hljs.registerLanguage('svelte', (hljs) => ({
+  subLanguage: 'xml',
   contains: [
-    hljs.COMMENT("<!--", "-->", {
+    hljs.COMMENT('<!--', '-->', {
       relevance: 10,
     }),
     {
       begin: /^(\s*)(<script((\s*lang=".*")|(\s*context="module"))?>)/gm,
       end: /^(\s*)(<\/script>)/gm,
-      subLanguage: "javascript",
+      subLanguage: 'javascript',
       excludeBegin: true,
       excludeEnd: true,
       contains: [
         {
           begin: /^(\s*)(\$:)/gm,
           end: /(\s*)/gm,
-          className: "keyword",
+          className: 'keyword',
         },
       ],
     },
     {
       begin: /^(\s*)(<style.*>)/gm,
       end: /^(\s*)(<\/style>)/gm,
-      subLanguage: "css",
+      subLanguage: 'css',
       excludeBegin: true,
       excludeEnd: true,
     },
     {
       begin: /\{/gm,
       end: /\}/gm,
-      subLanguage: "javascript",
+      subLanguage: 'javascript',
       contains: [
         {
           begin: /[\{]/,
@@ -47,66 +47,66 @@ hljs.registerLanguage("svelte", (hljs) => ({
         },
         {
           begin: /([#:\/@])(if|else|each|const|await|then|catch|debug|html)/gm,
-          className: "keyword",
+          className: 'keyword',
           relevance: 10,
         },
       ],
     },
   ],
-}));
+}))
 
 // https://github.com/highlightjs/highlightjs-vue/blob/master/vue.js
-hljs.registerLanguage("vue", (hljs) => ({
-  subLanguage: "xml",
+hljs.registerLanguage('vue', (hljs) => ({
+  subLanguage: 'xml',
   contains: [
-    hljs.COMMENT("<!--", "-->", {
+    hljs.COMMENT('<!--', '-->', {
       relevance: 10,
     }),
     {
       begin: /^(\s*)(<script>)/gm,
       end: /^(\s*)(<\/script>)/gm,
-      subLanguage: "javascript",
+      subLanguage: 'javascript',
       excludeBegin: true,
       excludeEnd: true,
     },
     {
       begin: /^(?:\s*)(?:<script\s+lang=(["'])ts\1>)/gm,
       end: /^(\s*)(<\/script>)/gm,
-      subLanguage: "typescript",
+      subLanguage: 'typescript',
       excludeBegin: true,
       excludeEnd: true,
     },
     {
       begin: /^(\s*)(<style(\s+scoped)?>)/gm,
       end: /^(\s*)(<\/style>)/gm,
-      subLanguage: "css",
+      subLanguage: 'css',
       excludeBegin: true,
       excludeEnd: true,
     },
     {
       begin: /^(?:\s*)(?:<style(?:\s+scoped)?\s+lang=(["'])(?:s[ca]ss)\1(?:\s+scoped)?>)/gm,
       end: /^(\s*)(<\/style>)/gm,
-      subLanguage: "scss",
+      subLanguage: 'scss',
       excludeBegin: true,
       excludeEnd: true,
     },
     {
       begin: /^(?:\s*)(?:<style(?:\s+scoped)?\s+lang=(["'])stylus\1(?:\s+scoped)?>)/gm,
       end: /^(\s*)(<\/style>)/gm,
-      subLanguage: "stylus",
+      subLanguage: 'stylus',
       excludeBegin: true,
       excludeEnd: true,
     },
   ],
-}));
+}))
 
-addEventListener("message", ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {
-  const { id, code, lang } = data;
+addEventListener('message', ({ data }: MessageEvent<{ id: number; code: string; lang?: string }>) => {
+  const { id, code, lang } = data
   try {
-    const { value } = hljs.highlight(code, { language: lang || "js", ignoreIllegals: true });
-    postMessage({ id, value });
+    const { value } = hljs.highlight(code, { language: lang || 'js', ignoreIllegals: true })
+    postMessage({ id, value })
   } catch (error) {
-    console.error(error);
-    postMessage({ id, value: htmlEscape(code) });
+    console.error(error)
+    postMessage({ id, value: escapeHTML(code) })
   }
-});
+})

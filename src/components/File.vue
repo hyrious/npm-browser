@@ -20,7 +20,13 @@ const folder = computed(() => props.node.children);
 const selected = computed(() => props.node.path === app.path);
 const collapsed = computed(() => props.node.collapsed);
 
-const size = computed(() => !folder.value && filesMap.value.get(path.value.slice(1))?.buffer.byteLength)
+const size = computed(() => {
+  if (folder.value) {
+    return props.node.children?.reduce((acc, child) => acc + (filesMap.value.get(child.path.slice(1))?.buffer.byteLength || 0), 0);
+  } else {
+    return filesMap.value.get(path.value.slice(1))?.buffer.byteLength;
+  }
+})
 
 function select(ev: MouseEvent) {
   if (ev.metaKey || ev.ctrlKey) {

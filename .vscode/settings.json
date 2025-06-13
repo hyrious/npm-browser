@@ -1,8 +1,13 @@
 {
+  "eslint.enable": false,
   "prettier.enable": true,
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[vue]": {
+    "editor.formatOnSave": true,
     "editor.defaultFormatter": "Vue.volar"
-  }
+  },
+  "editor.gotoLocation.multipleDefinitions": "goto"
 }

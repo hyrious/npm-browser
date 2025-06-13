@@ -1,5 +1,5 @@
 import { marked, Renderer } from 'marked'
-import { htmlEscape } from 'escape-goat'
+import { escapeHTML } from 'fast-escape-html'
 import { markedHighlight } from 'marked-highlight'
 import { gfmHeadingId, resetHeadings } from 'marked-gfm-heading-id'
 import markedLinkifyIt from 'marked-linkify-it'
@@ -129,7 +129,7 @@ marked.use(
       code({ text, lang, escaped }) {
         if (lang === 'math') {
           const code = text.replace(/\n$/, '') + '\n'
-          return '<p>$$ ' + (escaped ? code : htmlEscape(code)) + ' $$</p>'
+          return '<p>$$ ' + (escaped ? code : escapeHTML(code)) + ' $$</p>'
         }
         return false
       },

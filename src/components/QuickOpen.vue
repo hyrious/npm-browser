@@ -162,22 +162,11 @@ function select(i?: number) {
 <template>
   <section v-if="open" class="quick-open">
     <header>
-      <input
-        id="ctrl_p"
-        v-model="pattern"
-        autocomplete="off"
-        spellcheck="false"
-        @keydown="listen_keyboard($event)"
-      />
+      <input id="ctrl_p" v-model="pattern" autocomplete="off" spellcheck="false" @keydown="listen_keyboard($event)" />
     </header>
     <ul>
-      <li
-        v-for="(file, i) in filtered"
-        :key="file.path"
-        :class="{ active: keyboardIndex === i }"
-        :data-score="file.score"
-        @click="select(i)"
-      >
+      <li v-for="(file, i) in filtered" :key="file.path" :class="{ active: keyboardIndex === i }"
+        :data-score="file.score" @click="select(i)">
         <h4>
           <TextWithStops :text="file.name" :stops="file.name_stops" />
         </h4>

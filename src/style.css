@@ -70,7 +70,8 @@ option {
 }
 
 .i-mdi-loading {
-  animation: rotate 0.5s linear infinite;
+  animation: rotate 1s linear infinite;
+  animation-timing-function: cubic-bezier(0.53, 0.21, 0.29, 0.67);
 }
 
 @keyframes rotate {

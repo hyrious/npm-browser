@@ -38,14 +38,8 @@ function dragEnd() {
 </script>
 
 <template>
-  <div
-    ref="container"
-    class="split-pane"
-    :class="{ dragging: state.dragging, 'show-right': showRight }"
-    @pointermove="dragMove"
-    @pointerup="dragEnd"
-    @pointerleave="dragEnd"
-  >
+  <div ref="container" class="split-pane" :class="{ dragging: state.dragging, 'show-right': showRight }"
+    @pointermove="dragMove" @pointerup="dragEnd" @pointerleave="dragEnd">
     <div class="left" :style="{ width: boundSplit + '%' }">
       <slot name="left"></slot>
       <div class="dragger" @pointerdown.prevent="dragStart"></div>
