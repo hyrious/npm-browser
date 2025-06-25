@@ -44,6 +44,7 @@ const fullTextSearchResultPretty = computed(() => {
   return result;
 });
 const fullTextSearchLineNumberWidth = ref(0);
+const searchingProgress = ref(0);
 const searchResultIndex = ref(-1);
 const information = ref(false);
 const versionsInfo = ref<NpmInstallData['versions']>({})
@@ -332,22 +333,23 @@ const TEXT_EXTS = [
 ];
 let signalStopSerach = false;
 async function fullTextSearch(search?: string) {
+  nextTick(() => nextTick(() => {
+    const searchInput = document.querySelector("#s");
+    searchInput && (searchInput as HTMLElement).focus();
+  }));
+
   if (search === undefined) {
-    const show = (showFullTextSearch.value = !showFullTextSearch.value);
-    return (
-      show &&
-      nextTick(() => {
-        const searchInput = document.querySelector("#s");
-        searchInput && (searchInput as HTMLElement).focus();
-      })
-    );
+    showFullTextSearch.value = !showFullTextSearch.value;
+    return
   }
 
   if (search === "") {
+    signalStopSerach = true;
     fullTextSearchResult.value = null;
     return;
   }
 
+  const searchTerm = fullTextSearchText.value;
   searchingFullText.value = true;
   const result: Line[] = [];
   const decoder = new TextDecoder();
@@ -409,8 +411,12 @@ async function fullTextSearch(search?: string) {
 
   // ref: https://github.com/frejs/fre/blob/master/src/schedule.ts
   const threshold = 5;
-  let deadline = 0;
+  let i = 0, deadline = 0;
+  const len = files.value.length;
+  searchingProgress.value = 0;
   for (const file of files.value) {
+    searchingProgress.value = Math.round(i * 100 / len);
+    i++;
     // skip minified or mapping files
     if (file.name.includes(".min.") || file.name.endsWith(".map")) continue;
     // skip binary files
@@ -427,7 +433,7 @@ async function fullTextSearch(search?: string) {
     const text = decoder.decode(file.buffer);
     if (is_maybe_minified(text)) continue;
 
-    getFileResults(path, text, fullTextSearchText.value)
+    getFileResults(path, text, searchTerm);
 
     let now = performance.now();
     if (now >= deadline) {
@@ -599,13 +605,9 @@ function toggle_format() {
     </button>
     <aside v-if="showFullTextSearch" class="full-text-search">
       <div class="row">
-        <label for="s">Search:</label>
-        <input v-model="fullTextSearchText" :disabled="searchingFullText" id="s" title="code" autocomplete="off"
+        <progress class="progress" v-if="searchingFullText" :value="searchingProgress" max="100"></progress>
+        <input v-model="fullTextSearchText" id="s" title="code" autocomplete="off" placeholder="Search code..."
           spellcheck="false" @change="fullTextSearch(fullTextSearchText)" />
-        <button @click="searchingFullText ? stopFullTextSearch() : fullTextSearch(fullTextSearchText)">
-          <i v-show="searchingFullText" class="i-mdi-loading"></i>
-          &nbsp;<span>{{ searchingFullText ? "STOP" : "GO" }}</span>
-        </button>
       </div>
       <output>
         <div class="search-result-block" v-for="block in fullTextSearchResultPretty">
@@ -915,16 +917,19 @@ aside {
     align-items: center;
     gap: 4px;
     padding: 8px;
+    position: relative;
 
     label {
       font-size: 14px;
     }
 
     input {
+      width: 100%;
       padding: 2px 4px;
       border: revert;
       background: revert;
       font-size: 14px;
+      text-decoration: none;
     }
 
     button {
@@ -935,6 +940,33 @@ aside {
       font-family: var(--sans);
       color: var(--fg-on);
       font-size: 14px;
+    }
+  }
+
+  .progress {
+    display: block;
+    appearance: none;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background-position: 0 0;
+
+    &::-webkit-progress-bar {
+      background-color: transparent;
+      background-position: inherit;
+    }
+
+    &::-webkit-progress-inner-element {
+      background-position: inherit;
+    }
+
+    &::-webkit-progress-value {
+      background-image: linear-gradient(to right, var(--fg), var(--fg-on), var(--fg));
+      background-size: 200% 200%;
+      background-position: inherit;
+      transition: width 0.2s;
     }
   }
 

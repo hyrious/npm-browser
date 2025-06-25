@@ -1,4 +1,4 @@
-const Threshold = 1000
+const Threshold = 2000
 
 export function is_maybe_minified(code: string): boolean {
   let prev = 0,
@@ -9,6 +9,7 @@ export function is_maybe_minified(code: string): boolean {
     if (match.index! - prev > Threshold) {
       return true
     }
+    prev = match.index! + match[0].length
   }
   return false
 }
