@@ -31,7 +31,7 @@ class LinkWidget extends WidgetType {
 
 const linkDecorator = new MatchDecorator({
   regexp:
-    /\brequire\((?:'([^']+)'|"([^"]+)")\)|\b(?:from|import)\s*(?:'([^']+)'|"([^"]+)")|^\s+"([^"]+)":\s"(?:[\^~\d]|npm:|\*)/g,
+    /\brequire\((?:'([^']+)'|"([^"]+)")\)|\b(?:from|import)\s*(?:'([^']+)'|"([^"]+)")|^\s+"([^"]+)":\s"(?:[\^~<>\d]|npm:|\*)/g,
   decorate(add, from, to, match, view) {
     const start = from + match[0].match(/['"]/)!.index! + 1
     const url = match[1] || match[2] || match[3] || match[4] || match[5]
