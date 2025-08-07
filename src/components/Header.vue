@@ -288,7 +288,7 @@ function diff(ev: MouseEvent) {
     if (el.dataset.github) {
       const url = repo.value && github_compare(repo.value, from, to)
       url && window.open(url, "_blank");
-    } else if (path.value) {
+    } else if (path.value && !(ev.metaKey || ev.ctrlKey || ev.altKey)) {
       diffView.value = [`${name}@${from}${subpath.value}`, `${name}@${to}${subpath.value}`];
       diffViewLoading.value = true
     } else {
