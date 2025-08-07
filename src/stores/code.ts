@@ -30,7 +30,10 @@ export const wordwrap = ref(false)
 
 export const format = ref(false)
 
+export const diffView = ref<readonly [a: string, b: string] | false>(false)
+export const diffViewLoading = ref(false)
+
 export const lineCache = new Map<string, [number, number]>()
 
 // for debugging
-Object.assign(window, { files, filesMap })
+Object.assign(window, { files, filesMap, diffView })

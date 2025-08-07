@@ -21,6 +21,8 @@ declare global {
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
   const desc: typeof import('./stores/repo')['desc']
+  const diffView: typeof import('./stores/code')['diffView']
+  const diffViewLoading: typeof import('./stores/code')['diffViewLoading']
   const effectScope: typeof import('vue')['effectScope']
   const files: typeof import('./stores/code')['files']
   const filesMap: typeof import('./stores/code')['filesMap']
@@ -114,6 +116,8 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly desc: UnwrapRef<typeof import('./stores/repo')['desc']>
+    readonly diffView: UnwrapRef<typeof import('./stores/code')['diffView']>
+    readonly diffViewLoading: UnwrapRef<typeof import('./stores/code')['diffViewLoading']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly files: UnwrapRef<typeof import('./stores/code')['files']>
     readonly filesMap: UnwrapRef<typeof import('./stores/code')['filesMap']>

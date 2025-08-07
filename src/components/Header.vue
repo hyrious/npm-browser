@@ -3,7 +3,7 @@ import { storeToRefs } from "pinia";
 import { listen } from "@wopjs/dom";
 import { $ as querySelector } from "@hyrious/utils";
 import { default as semiver } from "semiver";
-import { files, wordwrap, format } from "../stores/code";
+import { files, wordwrap, format, diffView, diffViewLoading } from "../stores/code";
 import { is_binary } from "../helpers/is-binary";
 import { fetchRegistry } from "../helpers/fetch-mirror";
 import { events } from "../helpers/events";
@@ -288,6 +288,9 @@ function diff(ev: MouseEvent) {
     if (el.dataset.github) {
       const url = repo.value && github_compare(repo.value, from, to)
       url && window.open(url, "_blank");
+    } else if (path.value) {
+      diffView.value = [`${name}@${from}${subpath.value}`, `${name}@${to}${subpath.value}`];
+      diffViewLoading.value = true
     } else {
       const url = (path.value ? diffOne : diffAll)([
         `${name}@${from}`,
@@ -580,9 +583,9 @@ function toggle_format() {
     <button v-show="packageName && packageVersion" title="copy command line" @click="npmInstall()">
       <i class="i-mdi-content-copy"></i>
     </button>
-    <button v-if="!customRegistry" v-show="packageName && packageVersion" :class="{ active: showDiff }"
+    <button v-if="!customRegistry || path" v-show="packageName && packageVersion" :class="{ active: showDiff }"
       title="diff with other version" @click="showDiff = !showDiff">
-      <i class="i-mdi-file-compare"></i>
+      <i :class="diffViewLoading ? 'i-mdi-loading' : 'i-mdi-file-compare'"></i>
     </button>
     <aside v-if="showDiff" class="diff-versions" :style="{ transform: `translateX(${packageName.length + 1}ch)` }"
       @click="diff($event)">

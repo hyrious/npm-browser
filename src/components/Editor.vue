@@ -3,6 +3,7 @@ import prettyBytes from "pretty-bytes";
 import { disposable } from "@hyrious/utils";
 import { listen } from "@wopjs/dom";
 import { minimalSetup, EditorView } from "codemirror"
+import { unifiedMergeView } from '@codemirror/merge'
 import { lineNumbers, highlightActiveLine, highlightActiveLineGutter, keymap } from '@codemirror/view'
 import { type Extension, EditorState, StateEffect, EditorSelection } from "@codemirror/state"
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
@@ -23,6 +24,7 @@ import { linkPlugin, path_resolve } from "../helpers/navigate";
 import { events } from "../helpers/events";
 import { gzipSize as gzipSizeFn } from "../helpers/gzip-size"
 import { format as prettier_format, cancel as prettier_cancel } from '../helpers/prettier'
+import { unpkg } from "../helpers/unpkg";
 
 const decoder = new TextDecoder()
 
@@ -45,6 +47,53 @@ const code = computed(() => {
     return ""
   }
 })
+
+const original = ref<string | null>(null)
+watch(code, () => { diffView.value = false })
+
+let currentTask: Promise<unknown> | null = null;
+watch(diffView, (data) => {
+  if (data) {
+    const a = data[0] // pkg@old_ver/dist/index.js
+    const self = currentTask = unpkg(a)
+    self.then(code => {
+      if (currentTask === self) {
+        original.value = code
+      }
+    })
+  } else {
+    original.value = null
+  }
+})
+
+function format_diffView([a, b]: readonly [string, string]) {
+  const prefix: string[] = [], suffix: string[] = [];
+  const olds = a.split('/'), news = b.split('/');
+  let i = 0, j = olds.length - 1, k = news.length - 1;
+  while (i < j && i < k) {
+    if (olds[i] === news[i]) {
+      prefix.push(olds[i]);
+      i++;
+    } else break;
+  }
+  while (j > i && k > i) {
+    if (olds[j] === news[k]) {
+      suffix.unshift(olds[j]);
+      j--; k--;
+    } else break;
+  }
+  const f = olds.slice(i, j + 1).join('/');
+  const t = news.slice(i, k + 1).join('/');
+  if (prefix.length && suffix.length) {
+    return `${prefix.join('/')}/{${f} → ${t}}/${suffix.join('/')}`;
+  } else if (prefix.length) {
+    return `${prefix.join('/')}/{${f} → ${t}}`;
+  } else if (suffix.length) {
+    return `{${f} → ${t}}/${suffix.join('/')}`;
+  } else {
+    return `${a} → ${b}`;
+  }
+}
 
 const formatted = ref("")
 watch([code, format], ([code, format]) => {
@@ -181,11 +230,18 @@ const extensions = computed(() =>
       '.cm-panels': { backgroundColor: 'var(--bg)', color: 'var(--fg)' },
       '.cm-panels.cm-panels-bottom': { borderTop: '1px solid var(--border)' },
       '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--fg-on)' },
+      '&.cm-merge-b .cm-changedText': { backgroundImage: 'none' },
+      '&.cm-merge-b .cm-deletedText': { backgroundImage: 'none' },
     }),
     dark.value ? githubDark : githubLight,
     wordwrap.value && EditorView.lineWrapping,
     EditorState.readOnly.of(true),
     language_of(lang.value),
+    original.value ? unifiedMergeView({
+      original: original.value,
+      allowInlineDiffs: true, mergeControls: false, gutter: true,
+      collapseUnchanged: { margin: 3, minSize: 4 }
+    }) : null,
   ].filter(Boolean) as Extension[]
 )
 
@@ -235,11 +291,11 @@ onMounted(() => {
   nextTick(jumpToLine)
   push(() => view.value.destroy())
 
-  push(watch(formatted, code => {
+  push(watch([formatted, original], ([formatted, original]) => {
     if (view.value.composing) return
     if (view.value) { view.value.destroy() }
     view.value = new EditorView({
-      doc: code,
+      doc: original ? code.value : formatted,
       parent: editor.value,
       extensions: extensions.value,
     })
@@ -297,7 +353,7 @@ onMounted(() => {
   <div class="editor-container">
     <header>
       <h1>
-        <span class="path">{{ strip_root(app.path) }}</span>
+        <span class="path">{{ diffView ? format_diffView(diffView) : strip_root(app.path) }}</span>
         <button v-show="isMarkdown" class="markdown-btn" :class="{ active: showMarkdown }" title="render it"
           @click="showMarkdown = !showMarkdown">
           <i class="i-mdi-language-markdown"></i>
