@@ -10,7 +10,7 @@ import { events } from "../helpers/events";
 import { format_date, github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
 import { is_maybe_minified } from "../helpers/is-maybe-minified";
-const { packageName, packageVersion, path, line, lineTo } = storeToRefs(useApplicationStore());
+const { packageName, packageVersion, path, line, lineTo, diffVersion } = storeToRefs(useApplicationStore());
 
 let lastPackageName = packageName.value;
 let lastPackageVersion = packageVersion.value;
@@ -454,6 +454,30 @@ async function fullTextSearch(search?: string) {
 function stopFullTextSearch() {
   signalStopSerach = true;
 }
+
+function setupDiffView() {
+  if (diffVersion.value && packageName.value && packageVersion.value && subpath.value) {
+    const name = packageName.value;
+    diffView.value = [
+      `${name}@${diffVersion.value}${subpath.value}`,
+      `${name}@${packageVersion.value}${subpath.value}`
+    ]
+    diffViewLoading.value = true
+  } else if (diffVersion.value) {
+    diffVersion.value = ''
+  }
+
+  watch([diffView, subpath], ([data, path]) => {
+    if (data && path) {
+      diffVersion.value = data[0].slice(1).split('@')[1].replace(/\/.*$/, '')
+    } else {
+      diffVersion.value = ''
+    }
+  })
+
+  events.off('ready', setupDiffView)
+}
+events.on('ready', setupDiffView)
 
 async function jump(location: { path: string; line: number }) {
   const next_path = "/" + root_folder.value + "/" + location.path

@@ -9,6 +9,7 @@ export const useApplicationStore = defineStore('app', () => {
   const path = ref('')
   const line = ref(0)
   const lineTo = ref(-1)
+  const diffVersion = ref('')
 
   const fromQuery = () => {
     const search = new URL(location.href).searchParams
@@ -19,6 +20,10 @@ export const useApplicationStore = defineStore('app', () => {
       path.value = query.path
       line.value = query.line
       lineTo.value = query.lineTo
+    }
+    const diff = search.get('diff')
+    if (diff) {
+      diffVersion.value = diff
     }
     return search
   }
@@ -31,6 +36,7 @@ export const useApplicationStore = defineStore('app', () => {
     path: path.value,
     line: line.value,
     lineTo: lineTo.value,
+    diff: diffVersion.value,
   })
 
   watchEffect(() => {
@@ -43,8 +49,10 @@ export const useApplicationStore = defineStore('app', () => {
         if (lineTo.value > 0 && lineTo.value !== line.value) query += `-${lineTo.value}`
       }
     }
-    if (query && search.get('q') !== query) {
+    let diff = diffVersion.value
+    if (query && (search.get('q') !== query || search.get('diff') !== diff)) {
       search.set('q', query)
+      diff ? search.set('diff', diff) : search.delete('diff')
       // decode here to preserve '@', '/' symbols, hopefully it should not cause any issues
       const url = '?' + decodeURIComponent(search.toString())
       history.replaceState(snapshot(), '', url)
@@ -52,13 +60,14 @@ export const useApplicationStore = defineStore('app', () => {
   })
 
   watch(
-    [packageName, packageVersion, path],
-    ([name, version, path]) => {
+    [packageName, packageVersion, path, diffVersion],
+    ([name, version, path, diff]) => {
+      const suffix = version ? (diff ? `{${diff} → ${version}}` : version) : ''
       const normal_path = path.replace(/^\/\w+\//, '')
       if (path && name && version) {
-        document.title = `${normal_path} · ${name}@${version}`
+        document.title = `${normal_path} · ${name}@${suffix}`
       } else if (name) {
-        document.title = version ? `${name}@${version}` : name
+        document.title = version ? `${name}@${suffix}` : name
       } else {
         document.title = 'NPM Browser'
       }
@@ -72,6 +81,7 @@ export const useApplicationStore = defineStore('app', () => {
     path,
     line,
     lineTo,
+    diffVersion,
   }
 })
 

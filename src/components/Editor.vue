@@ -239,7 +239,7 @@ const extensions = computed(() =>
     language_of(lang.value),
     original.value ? unifiedMergeView({
       original: original.value,
-      allowInlineDiffs: true, mergeControls: false, gutter: true,
+      mergeControls: false, gutter: true,
       collapseUnchanged: { margin: 3, minSize: 4 }
     }) : null,
   ].filter(Boolean) as Extension[]

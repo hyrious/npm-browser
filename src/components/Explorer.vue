@@ -87,6 +87,7 @@ async function fetchPackage(name: string, version: string) {
     if (!nodes.some((e) => e.name === selected)) {
       path.value = "";
     }
+    setTimeout(() => events.emit('ready'));
   } catch (e) {
     fetching.value = false;
     if (e.name === "AbortError") return;

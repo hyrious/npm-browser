@@ -15,17 +15,17 @@
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",
-    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-html": "^6.4.10",
     "@codemirror/lang-javascript": "^6.2.4",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-markdown": "^6.3.4",
-    "@codemirror/language": "^6.11.2",
+    "@codemirror/language": "^6.11.3",
     "@codemirror/legacy-modes": "^6.5.1",
     "@codemirror/merge": "^6.10.2",
     "@codemirror/search": "^6.5.11",
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.1",
-    "@ddietr/codemirror-themes": "^1.5.1",
+    "@codemirror/view": "^6.38.2",
+    "@ddietr/codemirror-themes": "^1.5.2",
     "@highlightjs/cdn-assets": "^11.11.1",
     "@hyrious/fuzzy-match": "^0.1.1",
     "@hyrious/github-markdown-css": "^0.2.4",
@@ -36,7 +36,7 @@
     "js-untar": "^2.0.0",
     "katex": "^0.16.22",
     "markdown-it-emoji": "^3.0.0",
-    "marked": "^16.1.2",
+    "marked": "^16.3.0",
     "marked-alert": "^2.1.2",
     "marked-footnote": "^1.4.0",
     "marked-gfm-heading-id": "^4.1.2",
@@ -45,11 +45,11 @@
     "pako": "^2.1.0",
     "pinia": "^3.0.3",
     "prettier": "^3.6.2",
-    "pretty-bytes": "^7.0.0",
+    "pretty-bytes": "^7.0.1",
     "repo-url-from-package": "^1.0.0",
     "sanitize.css": "^13.0.0",
     "semiver": "^1.1.0",
-    "vue": "^3.5.18"
+    "vue": "^3.5.21"
   },
   "devDependencies": {
     "@hyrious/configs": "^0.1.4",
@@ -57,16 +57,16 @@
     "@hyrious/utils": "^0.0.6",
     "@iconify-json/mdi": "^1.2.3",
     "@types/katex": "^0.16.7",
-    "@types/node": "^24.2.0",
-    "@types/pako": "^2.0.3",
+    "@types/node": "^24.5.1",
+    "@types/pako": "^2.0.4",
     "@vitejs/plugin-vue": "^6.0.1",
     "highlight.js": "^11.11.1",
     "https-proxy-agent": "^7.0.6",
-    "sass": "^1.90.0",
-    "unocss": "^66.4.1",
-    "unplugin-auto-import": "^20.0.0",
+    "sass": "^1.92.1",
+    "unocss": "^66.5.1",
+    "unplugin-auto-import": "^20.1.0",
     "unplugin-vue-components": "^29.0.0",
-    "vite": "^7.0.6"
+    "vite": "^7.1.5"
   },
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.16.1"
 }
