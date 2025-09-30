@@ -52,10 +52,12 @@ const fix_relative_url = (html: string, index: number) => {
   return html.slice(0, index) + full_url + html.slice(end)
 }
 const fix_redirect = (url: string) => {
-  if (url.includes('/blob/HEAD/') && is_image(url)) {
+  if (url.includes('/blob/HEAD/')) {
     url = url.replace(/^https:\/\/github\.com\/https:\/\/github\.com/, 'https://github.com')
-    url = url.replace(/^https:\/\/github\.com/, 'https://cdn.jsdelivr.net/gh')
-    url = url.replace('/blob/HEAD/', '/')
+    if (is_image(url)) {
+      url = url.replace(/^https:\/\/github\.com/, 'https://cdn.jsdelivr.net/gh')
+      url = url.replace('/blob/HEAD/', '/')
+    }
   }
   return url
 }
