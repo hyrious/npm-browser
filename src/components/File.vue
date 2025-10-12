@@ -20,9 +20,20 @@ const folder = computed(() => props.node.children);
 const selected = computed(() => props.node.path === app.path);
 const collapsed = computed(() => props.node.collapsed);
 
+function sum(children: FileEntry[] | undefined): number {
+  if (!children) return 0;
+  return children.reduce((acc, child) => {
+    if (child.children) {
+      return acc + sum(child.children);
+    } else {
+      return acc + (filesMap.value.get(child.path.slice(1))?.buffer.byteLength || 0);
+    }
+  }, 0);
+}
+
 const size = computed(() => {
   if (folder.value) {
-    return props.node.children?.reduce((acc, child) => acc + (filesMap.value.get(child.path.slice(1))?.buffer.byteLength || 0), 0);
+    return sum(props.node.children);
   } else {
     return filesMap.value.get(path.value.slice(1))?.buffer.byteLength;
   }
@@ -47,7 +58,7 @@ function select(ev: MouseEvent) {
 
 <template>
   <li :class="{ folder, file: !folder, collapsed }">
-    <div @click="select($event)" :class="{ selected }">
+    <div :title="name" @click="select($event)" :class="{ selected }">
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
