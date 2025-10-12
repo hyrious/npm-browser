@@ -8,7 +8,7 @@ import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
 import { get_git_repo } from "../helpers/utils";
 import { fetchRegistry } from "../helpers/fetch-mirror";
-import { extractPackage } from "../helpers/untar";
+import { extractPackage, type File } from "../helpers/untar";
 
 const { packageName, packageVersion, path } = storeToRefs(useApplicationStore());
 const root = ref<FileEntry | null>(null);
@@ -72,11 +72,14 @@ async function fetchPackage(name: string, version: string) {
 
   try {
     let totalSize = 0;
-    const nodes = await extractPackage(buffer, (file) => {
+    let nodes = await extractPackage(buffer, (file) => {
       statusMessage("Extracting " + file.name);
       totalSize += file.buffer.byteLength;
     });
     size.value = totalSize;
+    if (customRegistry === 'jsr') {
+      nodes = clean_jsr_files(nodes)
+    }
     files.value = nodes;
     statusMessage("");
     root.value = (construct(
@@ -97,6 +100,22 @@ async function fetchPackage(name: string, version: string) {
 
   fetching.value = false;
   focus_in_sidebar();
+}
+
+function clean_jsr_files(files: File[]): File[] {
+  const fileNames = new Set(files.map(f => f.name));
+  return files.filter(f => {
+    if (f.name.endsWith('.js')) {
+      return !fileNames.has(f.name.slice(0, -3) + '.ts');
+    }
+    if (f.name.endsWith('.js.map')) {
+      return !fileNames.has(f.name.slice(0, -7) + '.ts');
+    }
+    if (f.name.startsWith('package/_dist/')) {
+      return false;
+    }
+    return true;
+  });
 }
 
 async function focus_in_sidebar() {

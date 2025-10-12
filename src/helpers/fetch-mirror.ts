@@ -23,15 +23,9 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
         let headers = new Headers(init?.headers)
         headers.set('Authorization', `Bearer ${token}`)
         init = { ...init, headers }
-        // The tarball URL is different from the official one.
-        let path = end
-        if (path.endsWith('.tgz')) {
-          let version = extractTgzVersion(path)
-          let meta = await fetchRegistry(url.slice(0, url.indexOf('/-/'))).then((r) => r.json())
-          p = fetch(`https://netlify.hyrious.me/proxy/${meta.versions[version].dist.tarball}`, init)
-        } else {
-          p = fetch(`https://netlify.hyrious.me/proxy/${prefix}/${end}`, init)
-        }
+        p = fetchProxy(prefix, url, end, init)
+      } else if (prefix === 'https://npm.jsr.io') {
+        p = fetchJSR(prefix, url, end, init)
       } else {
         p = fetch(`${prefix}/${end}`, init)
       }
@@ -43,6 +37,31 @@ export async function fetchRegistry(input: RequestInfo | URL, init?: RequestInit
   }
 
   return fetch(input, init)
+}
+
+async function fetchProxy(prefix: string, url: string, path: string, init: RequestInit | undefined) {
+  if (path.endsWith('.tgz')) {
+    let version = extractTgzVersion(path)
+    let meta = await fetchRegistry(url.slice(0, url.indexOf('/-/'))).then((r) => r.json())
+    return fetch(`https://netlify.hyrious.me/proxy/${meta.versions[version].dist.tarball}`, init)
+  } else {
+    return fetch(`https://netlify.hyrious.me/proxy/${prefix}/${path}`, init)
+  }
+}
+
+async function fetchJSR(prefix: string, url: string, path: string, init: RequestInit | undefined) {
+  if (path.endsWith('.tgz')) {
+    let version = extractTgzVersion(path)
+    let meta = await fetchRegistry(url.slice(0, url.indexOf('/-/'))).then((r) => r.json())
+    return fetch(meta.versions[version].dist.tarball, init)
+  } else {
+    if (path[0] === '@') {
+      path = path.slice(1)
+      let sep = path.indexOf('/')
+      path = `@jsr/${path.slice(0, sep)}__${path.slice(sep + 1)}`
+    }
+    return fetch(`${prefix}/${path}`, init)
+  }
 }
 
 // path = '@foo/bar/-/bar-1.0.0.tgz'.
@@ -165,6 +184,7 @@ function normalize(url: string | null): string {
   if (!url) return 'https://registry.npmjs.org'
   if (url === 'npmmirror') return 'https://registry.npmmirror.com'
   if (url === 'github') return 'https://npm.pkg.github.com'
+  if (url === 'jsr') return 'https://npm.jsr.io'
   if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url
   if (url.endsWith('/')) url = url.slice(0, -1)
   return url

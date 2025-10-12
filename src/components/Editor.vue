@@ -324,7 +324,7 @@ onMounted(() => {
           if (filesMap_.has(key)) {
             const resolved = '/' + base + ext
             if (ctrl) {
-              open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved, '_blank')
+              open(location.origin + location.pathname + '?q=' + app.packageName + '@' + app.packageVersion + resolved + _and_registry, '_blank')
             } else {
               app.path = resolved;
               [app.line, app.lineTo] = lineCache.get(app.packageName + resolved) || [0, -1]
@@ -338,9 +338,9 @@ onMounted(() => {
     // maybe package name
     else {
       if (ctrl) {
-        open(location.origin + location.pathname + `?q=${specifier}`, '_blank')
+        open(location.origin + location.pathname + `?q=${specifier}` + _and_registry, '_blank')
       } else {
-        location.search = `?q=${specifier}`;
+        location.search = `?q=${specifier}` + _and_registry;
       }
     }
   }))
