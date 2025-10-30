@@ -56,7 +56,7 @@ const fix_redirect = (url: string) => {
     url = url.replace(/^https:\/\/github\.com\/https:\/\/github\.com/, 'https://github.com')
     if (is_image(url)) {
       url = url.replace(/^https:\/\/github\.com/, 'https://cdn.jsdelivr.net/gh')
-      url = url.replace('/blob/HEAD/', '/')
+      url = url.replace('/blob/HEAD/', '@HEAD/')
     }
   }
   return url
@@ -156,6 +156,9 @@ marked.use(
           text = fix_relative_url(text, i + 10)
         }
         if ((i = text.indexOf('<a href="')) !== -1) {
+          text = fix_relative_url(text, i + 9)
+        }
+        if ((i = text.indexOf(' srcset="')) !== -1) {
           text = fix_relative_url(text, i + 9)
         }
         return text

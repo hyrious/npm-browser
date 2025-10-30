@@ -286,7 +286,7 @@ function diff(ev: MouseEvent) {
     const to = packageVersion.value;
     showDiff.value = false;
     if (el.dataset.github) {
-      const url = repo.value && github_compare(repo.value, from, to)
+      const url = repo.value && github_compare(pkg.value, from, to)
       url && window.open(url, "_blank");
     } else if (path.value && !(ev.metaKey || ev.ctrlKey || ev.altKey)) {
       diffView.value = [`${name}@${from}${subpath.value}`, `${name}@${to}${subpath.value}`];
@@ -939,6 +939,10 @@ aside {
 }
 
 .full-text-search {
+  overflow: hidden;
+  display: flex;
+  flex-flow: column nowrap;
+
   .row {
     display: flex;
     align-items: center;
@@ -1000,6 +1004,7 @@ aside {
   output {
     display: block;
     font-size: 14px;
+    overflow: auto;
 
     h4 {
       position: sticky;

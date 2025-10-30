@@ -308,6 +308,7 @@ onMounted(() => {
   }))
 
   push(events.on('jump', (path) => {
+    showMarkdown.value = false
     nextTick(jumpToLineWithCenterCursor)
   }))
 

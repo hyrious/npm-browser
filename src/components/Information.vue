@@ -13,7 +13,7 @@ const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.v
 </script>
 
 <template v-if="packageName && packageVersion">
-  <p v-if="desc" class="desc">{{ desc }}</p>
+  <p class="desc">{{ desc }}</p>
   <a :href="'https://www.npmjs.com/package/' + packageName" target="_blank" rel="noopener noreferrer">
     <img loading="lazy" :src="weeklyDownloads" alt="" />
   </a>
@@ -34,5 +34,10 @@ const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.v
   font-family: var(--sans);
   flex-basis: 100%;
   user-select: text;
+
+  &:empty::after {
+    content: "No description.";
+    font-style: italic;
+  }
 }
 </style>
