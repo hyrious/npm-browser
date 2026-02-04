@@ -33,6 +33,26 @@ const file = computed(() => files.value.find(e => e.name === app.path.slice(1)))
 const isMarkdown = computed(() => file.value?.name.endsWith('.md'))
 const showMarkdown = ref(true);
 const buffer = computed(() => file.value?.buffer)
+function download() {
+  if (file.value) {
+    const name = file.value.name.split('/').pop()
+    const buffer = file.value.buffer
+    if (name && buffer) {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = name
+      document.body.appendChild(a)
+      a.click()
+      setTimeout(() => {
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }, 2000)
+    }
+  }
+}
+
 const failed = ref<"" | "binary">("")
 const code = computed(() => {
   if (buffer.value) {
@@ -359,6 +379,9 @@ onMounted(() => {
           @click="showMarkdown = !showMarkdown">
           <i class="i-mdi-language-markdown"></i>
         </button>
+        <button v-show="buffer" class="markdown-btn" title="download this file" @click="download">
+          <i class="i-mdi-download"></i>
+        </button>
       </h1>
       <span v-if="buffer" class="size">{{ prettyBytes(buffer.byteLength, { binary: true }) }}</span>
       <span v-if="gzipSize" class="size">{{ `(gzip: ${prettyBytes(gzipSize, { binary: true })})` }}</span>
@@ -396,7 +419,6 @@ h1 {
 
 .markdown-btn {
   width: 20px;
-  height: 20px;
   padding: 0;
   border: 0;
   position: relative;
