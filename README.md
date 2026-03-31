@@ -30,6 +30,15 @@ https://hyrious.me/npm-browser/?q={name}@{version}/{path}:{line}
 - Diff the viewing file with some older version of the package:\
   Click the :page_facing_up: icon, and choose one version to diff
 
+**Switch Registry**:
+
+- By default it looks for the fastest npm mirror registry
+- Append `&registry=<name|url>` to manually switch registry, available names:
+  - `official`: <samp>https://registry.npmjs.org</samp>
+  - `npmmirror`: <samp>https://registry.npmmirror.com</samp>
+  - `github`: <samp>https://npm.pkg.github.com</samp>
+  - `jsr`: <samp>https://npm.jsr.io</samp>
+
 ### Develop
 
 PR/issues are welcome!
