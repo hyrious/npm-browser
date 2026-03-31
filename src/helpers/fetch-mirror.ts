@@ -182,6 +182,7 @@ async function fetchSequence(
 
 function normalize(url: string | null): string {
   if (!url) return 'https://registry.npmjs.org'
+  if (url === 'official') return 'https://registry.npmjs.org'
   if (url === 'npmmirror') return 'https://registry.npmmirror.com'
   if (url === 'github') return 'https://npm.pkg.github.com'
   if (url === 'jsr') return 'https://npm.jsr.io'
