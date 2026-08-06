@@ -10,6 +10,7 @@ import { events } from "../helpers/events";
 import { format_date, github_compare } from "../helpers/utils";
 import Information from "./Information.vue";
 import { is_maybe_minified } from "../helpers/is-maybe-minified";
+import { audit, type Vulnerability } from '../helpers/audit';
 const { packageName, packageVersion, path, line, lineTo, diffVersion } = storeToRefs(useApplicationStore());
 
 let lastPackageName = packageName.value;
@@ -48,6 +49,7 @@ const searchingProgress = ref(0);
 const searchResultIndex = ref(-1);
 const information = ref(false);
 const versionsInfo = ref<NpmInstallData['versions']>({})
+const vulnerabilities = ref<Vulnerability[]>([])
 const packageVersionInfo = computed(() => {
   const info = versionsInfo.value[packageVersion.value]
   if (info && info.publish_time) {
@@ -241,6 +243,7 @@ async function loadVersions(name: string, setVersion = "") {
     } else {
       lastPackageVersion = packageVersion.value = info.latest;
     }
+    vulnerabilities.value = await audit(name, lastPackageVersion)
   } catch (e) {
     no_thanks = true;
     if (e.name === "AbortError") return;
@@ -655,12 +658,12 @@ function toggle_format() {
       title="open this file in jsdelivr (press alt/option for unpkg)" @click="jsdelivr($event)">
       <i class="i-mdi-link-variant"></i>
     </button>
-    <button class="information" :class="{ active: information }" v-show="packageName && packageVersion"
-      @click="information = !information" title="info">
-      <i class="i-mdi-information-outline"></i>
+    <button class="information" :class="{ active: information, warning: vulnerabilities.length > 0 }"
+      v-show="packageName && packageVersion" @click="information = !information" title="info">
+      <i :class="vulnerabilities.length > 0 ? 'i-mdi-exclamation-thick' : 'i-mdi-information-outline'"></i>
     </button>
     <div class="information-panel" v-show="information">
-      <Information />
+      <Information :vulnerabilities="vulnerabilities" />
     </div>
     <button v-if="!customRegistry" class="install" v-show="packageName && packageVersion" @click="install_console()"
       title="import this module in console">
@@ -739,10 +742,20 @@ header {
     padding: 4px 4px 4px 12px;
     cursor: pointer;
 
+    &.warning {
+      color: var(--error);
+
+      &:hover,
+      &.active {
+        color: var(--error-on);
+      }
+    }
+
     &:hover,
     &.active {
       color: var(--fg-on);
     }
+
 
     &:disabled {
       cursor: wait;

@@ -1,22 +1,8 @@
-import type { Data } from 'pako'
-
-declare class CompressionStream {
-  constructor(format: 'gzip' | 'deflate' | 'deflate-raw')
-  writable: WritableStream
-  readable: ReadableStream
-}
-
-declare class DecompressionStream {
-  constructor(format: 'gzip' | 'deflate' | 'deflate-raw')
-  writable: WritableStream
-  readable: ReadableStream
-}
-
 function arrayBufferToUint8Array(buffer: ArrayBuffer) {
   return new Uint8Array(buffer)
 }
 
-export function inflate(data: Data) {
+export function inflate(data: ArrayBuffer) {
   if (typeof DecompressionStream !== 'undefined') {
     const ds = new DecompressionStream('gzip')
     const writer = ds.writable.getWriter()
@@ -28,7 +14,7 @@ export function inflate(data: Data) {
   }
 }
 
-export function gzip(data: Data) {
+export function gzip(data: ArrayBuffer) {
   if (typeof CompressionStream !== 'undefined') {
     const cs = new CompressionStream('gzip')
     const writer = cs.writable.getWriter()

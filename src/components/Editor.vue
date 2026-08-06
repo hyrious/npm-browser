@@ -442,7 +442,7 @@ h1 {
 
 .markdown-body {
   position: absolute;
-  top: 30px;
+  top: 27.5px;
   left: 0;
   right: 0;
   bottom: 0;

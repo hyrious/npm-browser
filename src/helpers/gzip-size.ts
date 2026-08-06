@@ -1,6 +1,5 @@
-import type { Data } from 'pako'
 import { gzip } from './gzip'
 
-export function gzipSize(data: Data) {
+export function gzipSize(data: ArrayBuffer) {
   return gzip(data).then((arr) => arr.byteLength)
 }

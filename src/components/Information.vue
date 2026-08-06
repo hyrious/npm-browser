@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { desc, repo } from "../stores/repo"
+import type { Vulnerability } from '../helpers/audit';
+import Audit from './Audit.vue';
 const { packageName, packageVersion } = storeToRefs(useApplicationStore());
+const { vulnerabilities } = defineProps<{ vulnerabilities: Vulnerability[] }>();
 
 const weeklyDownloads = computed(() => `https://img.shields.io/npm/dw/${packageName.value}`);
 const bundlephobia = computed(
@@ -13,6 +16,7 @@ const stars = computed(() => `https://img.shields.io/github/stars/${short_repo.v
 </script>
 
 <template v-if="packageName && packageVersion">
+  <Audit :vulnerabilities="vulnerabilities" />
   <p class="desc">{{ desc }}</p>
   <a :href="'https://www.npmjs.com/package/' + packageName" target="_blank" rel="noopener noreferrer">
     <img loading="lazy" :src="weeklyDownloads" alt="" />
