@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import prettyBytes from "pretty-bytes";
-import { listen, querySelector } from "@wopjs/dom";
-import { disposable, wait } from "@hyrious/utils";
+import { listen } from "@wopjs/dom";
+import { disposable } from "@hyrious/utils";
 import { construct, type FileEntry } from "../helpers/construct";
 import { get, set, cached, remove, removeAll } from "../helpers/idb";
 import { events } from "../helpers/events";
@@ -15,6 +15,44 @@ const root = ref<FileEntry | null>(null);
 const history = ref<string[]>([]);
 const fetching = ref(false);
 
+interface VisibleFile {
+  node: FileEntry;
+  depth: number;
+}
+
+const treeEl = ref<HTMLElement>();
+const scrollTop = ref(0);
+const viewportHeight = ref(0);
+const narrowScreen = ref(false);
+const rowHeight = computed(() => narrowScreen.value ? 32 : 25);
+const overscan = 10;
+
+const visibleFiles = computed(() => {
+  const result: VisibleFile[] = [];
+  function append(nodes: FileEntry[] | undefined, depth: number) {
+    if (!nodes) return;
+    for (const node of nodes) {
+      result.push({ node, depth });
+      if (node.children && !node.collapsed) append(node.children, depth + 1);
+    }
+  }
+  append(root.value?.children, 0);
+  return result;
+});
+
+const visibleRange = computed(() => {
+  const height = rowHeight.value;
+  const start = Math.max(0, Math.floor(scrollTop.value / height) - overscan);
+  const end = Math.min(visibleFiles.value.length, Math.ceil((scrollTop.value + viewportHeight.value) / height) + overscan);
+  return { start, end };
+});
+
+const virtualFiles = computed(() => visibleFiles.value.slice(visibleRange.value.start, visibleRange.value.end));
+
+function updateScroll() {
+  scrollTop.value = treeEl.value?.scrollTop || 0;
+}
+
 let lastNameVersion = ""
 const nameVersion = computed(() => packageName.value && packageVersion.value && `${packageName.value}@${packageVersion.value}` || lastNameVersion);
 
@@ -22,11 +60,17 @@ const size = ref(0);
 const sizePretty = computed(() => nameVersion.value && prettyBytes(size.value));
 const packedSize = ref(0);
 const packedSizePretty = computed(() => nameVersion.value && prettyBytes(packedSize.value));
+const cacheUsage = ref(0);
+const cacheUsagePretty = computed(() => prettyBytes(cacheUsage.value));
+const historyTitle = computed(() => history.value.length > 0 ? `History (${cacheUsagePretty.value})` : "History");
 
-function refresh_history() {
-  cached().then((keys) => {
-    history.value = keys as string[];
-  });
+async function refresh_history() {
+  const [keys, estimate] = await Promise.all([
+    cached(),
+    navigator.storage.estimate(),
+  ]);
+  history.value = keys as string[];
+  cacheUsage.value = estimate.usage || 0;
 }
 
 onMounted(refresh_history);
@@ -119,14 +163,31 @@ function clean_jsr_files(files: File[]): File[] {
 }
 
 async function focus_in_sidebar() {
-  // wait until sidebar refresh
-  await wait(100);
-  const el = querySelector(".selected");
-  el && el.scrollIntoView({ block: "center" });
+  await nextTick();
+  const el = treeEl.value;
+  if (!el) return;
+  const index = visibleFiles.value.findIndex(({ node }) => node.path === path.value);
+  if (index < 0) return;
+  el.scrollTop = Math.max(0, index * rowHeight.value - (el.clientHeight - rowHeight.value) / 2);
+  updateScroll();
 }
 
 onMounted(() => {
   const { push, flush } = disposable();
+  const screen = matchMedia('(max-width: 720px)');
+  narrowScreen.value = screen.matches;
+  const resizeObserver = new ResizeObserver(([entry]) => {
+    viewportHeight.value = entry.contentRect.height;
+  });
+  push(watch(treeEl, (el, previous) => {
+    if (previous) resizeObserver.unobserve(previous);
+    if (el) {
+      resizeObserver.observe(el);
+      updateScroll();
+    }
+  }));
+  push(() => resizeObserver.disconnect());
+  push(listen(screen, 'change', (event) => { narrowScreen.value = event.matches; }));
   push(
     listen(document.body, "keydown", (e) => {
       if ((e.target as HTMLElement).tagName !== "INPUT" && e.key === ".") {
@@ -186,10 +247,15 @@ function choose(nameVersion: string) {
   location.search = `?q=${name}@${version}`;
 }
 
-function confirm_delete_all() {
+async function remove_cached(key: string) {
+  await remove(key);
+  await refresh_history();
+}
+
+async function confirm_delete_all() {
   if (confirm("Are you sure you want to delete all cached packages?")) {
-    removeAll();
-    refresh_history();
+    await removeAll();
+    await refresh_history();
   }
 }
 
@@ -212,8 +278,16 @@ function fold_all() {
       </button>
     </h3>
   </header>
-  <ul v-if="root?.children">
-    <File v-for="file in root.children" :node="file" />
+  <ul v-if="root?.children" ref="treeEl" @scroll="updateScroll">
+    <li class="virtual-space" :style="{ height: `${visibleFiles.length * rowHeight}px` }">
+      <File
+        v-for="(file, index) in virtualFiles"
+        :key="file.node.path"
+        :node="file.node"
+        :depth="file.depth"
+        :style="{ transform: `translateY(${(visibleRange.start + index) * rowHeight}px)` }"
+      />
+    </li>
   </ul>
   <div v-else-if="fetching" class="loading">
     <i class="i-mdi-loading"></i>
@@ -221,7 +295,7 @@ function fold_all() {
   </div>
   <template v-else-if="!nameVersion">
     <h3 class="history-title">
-      <span>History</span>
+      <span>{{ historyTitle }}</span>
       <button v-if="history.length > 0" @click="confirm_delete_all()" class="history-delete-all">
         <span>Delete All</span>
         <i class="i-mdi-trash-can-outline"></i>
@@ -231,7 +305,7 @@ function fold_all() {
       <TransitionGroup name="list" tag="ul" class="cached" v-if="history.length > 0">
         <li v-for="item in history" :key="item" class="history-item">
           <button class="package" :title="item" @click="choose(item)">{{ item }}</button>
-          <button title="delete" class="history-delete-btn" @click="remove(item), refresh_history()">
+          <button title="delete" class="history-delete-btn" @click="remove_cached(item)">
             <i class="i-mdi-close"></i>
           </button>
         </li>
@@ -262,9 +336,11 @@ ul {
   overflow-y: auto;
   height: 100%;
 
-  >li {
-    padding-right: 8px;
-  }
+}
+
+.virtual-space {
+  position: relative;
+  width: 100%;
 }
 
 .size {

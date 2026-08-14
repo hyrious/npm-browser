@@ -8,6 +8,7 @@ export interface FileEntry {
 // construct(["a/b", "a/b/c"]) => { name: a, children: [{ name: b, children: [{ name: c }] }] }
 export function construct(array: string[], focus = '') {
   const root: FileEntry = { name: '', path: '', collapsed: false }
+  const childMaps = new WeakMap<FileEntry, Map<string, FileEntry>>()
   const openFolders = new Set()
   if (focus) {
     let path = ''
@@ -28,9 +29,15 @@ export function construct(array: string[], focus = '') {
     for (let part of parts) {
       path += '/' + part
       const children = (current.children ||= [])
-      let child = children.find((e) => e.name === part)
+      let childMap = childMaps.get(current)
+      if (!childMap) {
+        childMap = new Map()
+        childMaps.set(current, childMap)
+      }
+      let child = childMap.get(part)
       if (!child) {
         children.push((child = { name: part, path, collapsed: !openFolders.has(path) }))
+        childMap.set(part, child)
       }
       current = child
     }

@@ -6,10 +6,12 @@ import FileIcon from "./FileIcon.vue";
 
 export interface Props {
   node: FileEntry;
+  depth?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   node: () => ({ name: "", path: "", collapsed: false }),
+  depth: 0,
 });
 
 const app = useApplicationStore();
@@ -57,25 +59,26 @@ function select(ev: MouseEvent) {
 </script>
 
 <template>
-  <li :class="{ folder, file: !folder, collapsed }">
+  <li :class="{ folder, file: !folder, collapsed }" :style="{ paddingLeft: `${12 + props.depth * 8}px` }">
     <div :title="name" @click="select($event)" :class="{ selected }">
       <i v-if="folder" :class="collapsed ? 'i-mdi-chevron-right' : 'i-mdi-chevron-down'"></i>
       <FileIcon v-if="!folder" :name="name" :folder="folder" />
       <label>{{ name }}</label>
       <small v-if="typeof size === 'number'">{{ prettyBytes(size, { binary: true }) }}</small>
     </div>
-    <ul v-if="!collapsed && props.node.children">
-      <File v-for="child in props.node.children" :node="child" />
-    </ul>
   </li>
 </template>
 
 <style lang="scss" scoped>
 li {
-  position: relative;
-  padding: 0 0 0 12px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 25px;
+  padding-right: 8px;
   line-height: 25px;
-  content-visibility: auto;
+  box-sizing: border-box;
+  will-change: transform;
 }
 
 div {
@@ -124,14 +127,9 @@ i {
   flex-shrink: 0;
 }
 
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0 0 0 8px;
-}
-
 @media (max-width: 720px) {
   li {
+    height: 32px;
     line-height: 32px;
   }
 }
