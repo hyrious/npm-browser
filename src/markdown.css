@@ -37,6 +37,15 @@
   background-color: var(--bg);
 }
 
+.markdown-body .front-matter th {
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body .front-matter td > :last-child {
+  margin-bottom: 0;
+}
+
 .markdown-body .highlight pre,
 .markdown-body pre {
   background-color: var(--pre-bg);

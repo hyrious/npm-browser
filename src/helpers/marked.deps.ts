@@ -7,6 +7,7 @@ import markedFootnote from 'marked-footnote'
 import markedAlert from 'marked-alert'
 import renderMathInElement from 'katex/contrib/auto-render'
 import { highlight } from './hljs'
+import { parseFrontMatter } from './front-matter'
 
 let base_url = ''
 export function set_base_url(url: string) {
@@ -19,7 +20,15 @@ export async function update(source: string, to: HTMLElement, base_url: string) 
   set_base_url(base_url)
 
   try {
-    const html = await marked.parse(source, { async: true })
+    const frontMatter = parseFrontMatter(source)
+    let metadata = ''
+    if (frontMatter) {
+      for (const { key, value } of frontMatter.entries) {
+        metadata += `<tr><th scope="row">${escapeHTML(key)}</th><td>${await marked.parse(value, { async: true })}</td></tr>`
+      }
+      metadata = `<table class="front-matter"><tbody>${metadata}</tbody></table>\n`
+    }
+    const html = metadata + (await marked.parse(frontMatter?.body ?? source, { async: true }))
 
     to.innerHTML = html
 

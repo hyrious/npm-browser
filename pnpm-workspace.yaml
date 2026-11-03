@@ -2,10 +2,18 @@ allowBuilds:
   '@parcel/watcher': false
   'esbuild': true
 
-configDependencies:
-  '@pnpm/plugin-better-defaults': 0.3.0
-  '@pnpm/plugin-trusted-deps': 0.3.0-2
+blockExoticSubdeps: true
+enableGlobalVirtualStore: true
+enablePrePostScripts: false
+hoistPattern: []
+minimumReleaseAge: 1440
+optimisticRepeatInstall: true
+resolutionMode: lowest-direct
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
+verifyDepsBeforeRun: install
 
-minimumReleaseAgeExclude:
-  - '@vue/*'
-  - 'vue'
+packageExtensions:
+  '@unocss/autocomplete@66.12.0':
+    dependencies:
+      '@unocss/core': 66.12.0
